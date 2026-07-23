@@ -50,7 +50,7 @@ jobs:
         run: npm run build --if-present
 
       - name: Build Docker Image (smoke test)
-        run: docker build -t jipter_api:ci-test .
+        run: docker build -t jipter_copy_api:ci-test .
 
   # ─────────────────────────────────────────────
   # CD: Deploy to VPS via SSH

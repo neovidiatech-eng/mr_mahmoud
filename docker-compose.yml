@@ -1,7 +1,7 @@
-name: jipter_v
+name: jipter_copy
 services:
   postgres:
-    container_name: jipter_postgres
+    container_name: jipter_copy_postgres
     image: postgres:16-alpine
     restart: unless-stopped
     ports:
@@ -11,14 +11,14 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
     volumes:
-      - jipter_postgres_data:/var/lib/postgresql/data
+      - jipter_copy_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
       interval: 10s
       timeout: 5s
       retries: 5
     networks:
-      - jipter_network
+      - jipter_copy_network
     deploy:
       resources:
         limits:
@@ -26,7 +26,7 @@ services:
           memory: "512M"
 
   pgadmin:
-    container_name: jipter_pgadmin
+    container_name: jipter_copy_pgadmin
     image: dpage/pgadmin4:latest
     restart: unless-stopped
     ports:
@@ -35,12 +35,12 @@ services:
       PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
       PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
     volumes:
-      - jipter_pgadmin_data:/var/lib/pgadmin
+      - jipter_copy_pgadmin_data:/var/lib/pgadmin
     depends_on:
       postgres:
         condition: service_healthy
     networks:
-      - jipter_network
+      - jipter_copy_network
     deploy:
       resources:
         limits:
@@ -48,15 +48,15 @@ services:
           memory: "256M"
 
   redis:
-    container_name: jipter_redis
+    container_name: jipter_copy_redis
     image: redis:7-alpine
     restart: unless-stopped
     ports:
       - "6393:6379"
     volumes:
-      - jipter_redis_data:/data
+      - jipter_copy_redis_data:/data
     networks:
-      - jipter_network
+      - jipter_copy_network
     deploy:
       resources:
         limits:
@@ -64,8 +64,8 @@ services:
           memory: "256M"
 
   app:
-    container_name: jipter_app
-    image: jipter_api:latest
+    container_name: jipter_copy_app
+    image: jipter_copy_api:latest
     build:
       context: .
       dockerfile: Dockerfile
@@ -98,9 +98,9 @@ services:
       redis:
         condition: service_started
     volumes:
-      - jipter_uploads:/app/src/uploads
+      - jipter_copy_uploads:/app/src/uploads
     networks:
-      - jipter_network
+      - jipter_copy_network
     deploy:
       resources:
         limits:
@@ -108,11 +108,11 @@ services:
           memory: "1G"
 
 networks:
-  jipter_network:
+  jipter_copy_network:
     driver: bridge
 
 volumes:
-  jipter_postgres_data:
-  jipter_pgadmin_data:
-  jipter_redis_data:
-  jipter_uploads:
+  jipter_copy_postgres_data:
+  jipter_copy_pgadmin_data:
+  jipter_copy_redis_data:
+  jipter_copy_uploads:
