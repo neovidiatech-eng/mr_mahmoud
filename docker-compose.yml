@@ -1,0 +1,118 @@
+name: jipter_v
+services:
+  postgres:
+    container_name: jipter_postgres
+    image: postgres:16-alpine
+    restart: unless-stopped
+    ports:
+      - "5443:5432"
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: ${POSTGRES_DB}
+    volumes:
+      - jipter_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jipter_network
+    deploy:
+      resources:
+        limits:
+          cpus: "1"
+          memory: "512M"
+
+  pgadmin:
+    container_name: jipter_pgadmin
+    image: dpage/pgadmin4:latest
+    restart: unless-stopped
+    ports:
+      - "5063:80"
+    environment:
+      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
+      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+    volumes:
+      - jipter_pgadmin_data:/var/lib/pgadmin
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - jipter_network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "256M"
+
+  redis:
+    container_name: jipter_redis
+    image: redis:7-alpine
+    restart: unless-stopped
+    ports:
+      - "6393:6379"
+    volumes:
+      - jipter_redis_data:/data
+    networks:
+      - jipter_network
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: "256M"
+
+  app:
+    container_name: jipter_app
+    image: jipter_api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - "3013:3013"
+    environment:
+      NODE_ENV: production
+      DATABASE_URL: postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres:5432/${POSTGRES_DB}
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET}
+      ENCRYPT_KEY: ${ENCRYPT_KEY}
+      SALT: ${SALT}
+      JWT_SECRET_ACCESS_ADMIN: ${JWT_SECRET_ACCESS_ADMIN}
+      JWT_SECRET_REFRESH_ADMIN: ${JWT_SECRET_REFRESH_ADMIN}
+      APP_EMAIL: ${APP_EMAIL}
+      APP_PASSWORD: ${APP_PASSWORD}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID}
+      CORS_ORIGINS: ${CORS_ORIGINS}
+      MOOD: ${MOOD}
+      PORT: "3013"
+      MAIL_HOST: ${MAIL_HOST}
+      MAIL_PORT: ${MAIL_PORT}
+      MAIL_USER: ${MAIL_USER}
+      MAIL_PASS: ${MAIL_PASS}
+      MAIL_FROM: ${MAIL_FROM}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_started
+    volumes:
+      - jipter_uploads:/app/src/uploads
+    networks:
+      - jipter_network
+    deploy:
+      resources:
+        limits:
+          cpus: "2"
+          memory: "1G"
+
+networks:
+  jipter_network:
+    driver: bridge
+
+volumes:
+  jipter_postgres_data:
+  jipter_pgadmin_data:
+  jipter_redis_data:
+  jipter_uploads:

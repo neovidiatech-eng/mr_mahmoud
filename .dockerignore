@@ -1,0 +1,17 @@
+node_modules
+npm-debug.log
+dist
+build
+.git
+.env
+.docker
+Dockerfile
+docker-compose.yml
+README.md
+.vscode
+.idea
+.DS_Store
+# Prisma db (local only)
+prisma/*.db
+prisma/*.db-journal
+  

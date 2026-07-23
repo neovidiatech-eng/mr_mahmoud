@@ -1,0 +1,153 @@
+import * as db from "../database/dbService.js";
+import { errorResponse } from "./Response.js";
+
+export const destructData = ({ body, allowed }) => {
+  return Object.keys(body).reduce((acc, key) => {
+    if (allowed.includes(key)) {
+      acc[key] = body[key];
+    }
+    return acc;
+  }, {});
+};
+
+export const checkExist = async ({ model, where, next, include }) => {
+  const existing = await db.findOne({
+    model,
+    where,
+    include,
+  });
+
+  if (!existing) {
+    return errorResponse({
+      next,
+      status: 404,
+      message: `${model.toUpperCase()}_NOT_FOUND`,
+    });
+  }
+
+  return existing;
+};
+
+import {
+  standardizeDate,
+  toUTC,
+  getDatesBetweenUTC,
+  combineDateAndTime,
+  getNowUTC,
+} from "./Date/time.js";
+
+export const getEndTime = (startTime, type, duration = 0) => {
+  const start = toUTC(startTime);
+  if (!start) return null;
+
+  let end;
+  if (duration > 0) {
+    end = start.add(duration, "minute");
+  } else if (type === "half") {
+    end = start.add(30, "minute");
+  } else if (type === "full") {
+    end = start.add(1, "hour");
+  } else {
+    end = start;
+  }
+
+  return end.toDate();
+};
+
+/**
+ * Normalize a date string to UTC using the provided timezone.
+ * @param {string|Date} date
+ * @param {string} tz - IANA timezone (e.g. "Africa/Cairo")
+ * @returns {Date}
+ */
+export const normalizeDate = (date, tz) => {
+  return standardizeDate(date, tz);
+};
+
+export { getDatesBetweenUTC, combineDateAndTime };
+
+export const getImageUrl = (image, req) => {
+  if (!image) return null;
+  if (image.secure_url) return image.secure_url;
+
+  // For local files, construct URL
+  if (typeof image === "string" && image.startsWith("uploads")) {
+    const protocol = req.protocol;
+    const host = req.get("host");
+    return `${protocol}://${host}/${image}`;
+  }
+
+  return image;
+};
+
+export const createError = ({ message, status, next }) => {
+  const error = new Error(message);
+  error.status = status;
+  error.isMessageKey = true;
+
+  return error;
+};
+
+/**
+ * Converts an amount from one currency to another using exchange rates relative to a common base.
+ * Formula: (amount / sourceRate) * targetRate
+ *
+ * @param {number} amount - The amount to convert.
+ * @param {number} sourceRate - The exchange rate of the source currency.
+ * @param {number} targetRate - The exchange rate of the target currency.
+ * @returns {number} The converted amount.
+ */
+export const convertAmount = (amount, sourceRate, targetRate) => {
+  if (!sourceRate || sourceRate === 0) return amount;
+  const result = (amount / sourceRate) * targetRate;
+  return Number(result.toFixed(2));
+};
+
+export const getAge = ({ birthDate }) => {
+  const today = getNowUTC();
+  const birth = toUTC(birthDate);
+
+  let age = today.year() - birth.year();
+
+  const hasNotHadBirthdayThisYear =
+    today.month() < birth.month() ||
+    (today.month() === birth.month() && today.date() < birth.date());
+
+  if (hasNotHadBirthdayThisYear) {
+    age--;
+  }
+
+  return age;
+};
+
+export const resolveStudentAge = ({ age, birthDate }) => {
+  if (age !== undefined && age !== null && age !== "") {
+    return Number(age);
+  }
+
+  if (birthDate) {
+    return getAge({ birthDate });
+  }
+
+  return null;
+};
+
+export const findRankByAge = async ({ age, dbClient = db }) => {
+  const numericAge = Number(age);
+  if (!Number.isFinite(numericAge)) return null;
+
+  const ranks = await dbClient.findMany({ model: "ranks" });
+  return ranks
+    .sort((a, b) => {
+      const aMin = Number(a.ageRange?.minAge ?? 0);
+      const bMin = Number(b.ageRange?.minAge ?? 0);
+      const aMax = Number(a.ageRange?.maxAge ?? 0);
+      const bMax = Number(b.ageRange?.maxAge ?? 0);
+      return aMin - bMin || aMax - bMax;
+    })
+    .find((rank) => {
+      const minAge = Number(rank.ageRange?.minAge);
+      const maxAge = Number(rank.ageRange?.maxAge);
+      return numericAge >= minAge && numericAge <= maxAge;
+    });
+};
