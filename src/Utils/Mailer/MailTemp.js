@@ -8,7 +8,7 @@ export const mailTemp = ({
 }) => {
   const isAr = lang === "ar";
 
-  const brandName = "JUPITER";
+  const brandName = "MR MAHMOUD";
   const primaryColor = "#1A4FC0";
   const secondaryColor = "#5B9BF8";
 
@@ -154,7 +154,7 @@ export const mailTemp = ({
                             overflow:hidden;
                           ">
                             <img
-                              src="https://jupiter-egy.com/assets/white-logo.png"
+                              src="https://mr-mahmoud.com/assets/white-logo.png"
                               alt="logo"
                               style="
                                 width:100%;
@@ -363,7 +363,7 @@ export const mailTemp = ({
             >
 
               <a
-                href="${process.env.FRONTEND_URL || "https://dashboard.jupiter-egy.com"}"
+                href="${process.env.FRONTEND_URL || "https://dashboard.mr-mahmoud.com"}"
                 style="
                   display:inline-block;
                   padding:16px 34px;
@@ -418,7 +418,7 @@ export const mailTemp = ({
                       color:#777777;
                       font-size:11px;
                     ">
-                      © 2026 Jupiter Platform
+                      © 2026 Mr Mahmoud Platform
                     </p>
 
                   </td>

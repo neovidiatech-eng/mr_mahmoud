@@ -13,7 +13,7 @@ const prisma = new PrismaClient({ adapter });
 export const studentData = [
   {
     name: "John Doe",
-    email: "john.doe@jipter.com",
+    email: "john.doe@mr-mahmoud.com",
     password: "Password@123",
     phone: "9998887776",
     code_country: "+20",
@@ -26,7 +26,7 @@ export const studentData = [
   },
   {
     name: "Jane Smith",
-    email: "jane.smith@jipter.com",
+    email: "jane.smith@mr-mahmoud.com",
     password: "Password@123",
     phone: "4443332221",
     code_country: "+20",
@@ -44,7 +44,7 @@ export async function seedStudents() {
 
   const salt = await bcrypt.genSalt(10);
   const settings = await prisma.settings.findFirst();
-  const prefix = settings?.userPrefix || "jupiter";
+  const prefix = settings?.userPrefix || "mr_mahmoud";
 
   for (const item of studentData) {
     const role = await prisma.role.findUnique({

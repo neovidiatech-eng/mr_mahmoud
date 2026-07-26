@@ -20,7 +20,7 @@ FROM node:20-alpine
 WORKDIR /app
 
 # Non-root user for security
-RUN addgroup -S nodejs && adduser -S jipter -G nodejs
+RUN addgroup -S nodejs && adduser -S mr_mahmoud -G nodejs
 # Copy only what is needed from builder
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
@@ -33,10 +33,10 @@ COPY --from=builder /app/prisma.config.ts ./
 # Install runtime dependencies and setup permissions
 RUN apk add --no-cache openssl && \
     mkdir -p /app/src/uploads && \
-    chown -R jipter:nodejs /app/src/uploads && \
-    chown -R jipter:nodejs /app/node_modules /app/prisma /app/src
+    chown -R mr_mahmoud:nodejs /app/src/uploads && \
+    chown -R mr_mahmoud:nodejs /app/node_modules /app/prisma /app/src
 
-USER jipter
+USER mr_mahmoud
 
 # Ensure production environment
 ENV NODE_ENV=production

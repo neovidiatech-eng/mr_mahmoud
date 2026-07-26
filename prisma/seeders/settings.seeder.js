@@ -17,14 +17,14 @@ export async function seedSettings() {
   if (!existingSettings) {
     await prisma.settings.create({
       data: {
-        userPrefix: "jupiter",
+        userPrefix: "mr_mahmoud",
         socialLinks: {
-          facebook: "https://facebook.com/jipter",
-          twitter: "https://twitter.com/jipter",
-          instagram: "https://instagram.com/jipter",
+          facebook: "https://facebook.com/mr_mahmoud",
+          twitter: "https://twitter.com/mr_mahmoud",
+          instagram: "https://instagram.com/mr_mahmoud",
         },
         contactInfo: {
-          email: "support@jipter.com",
+          email: "support@mr-mahmoud.com",
           phone: "+20123456789",
           address: "Cairo, Egypt",
         },

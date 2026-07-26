@@ -33,12 +33,12 @@ export const categories = [
       create: [
         {
           title: "Teacher Handbook",
-          url: "https://jipter.com/handbook",
+          url: "https://mr-mahmoud.com/handbook",
           description: "Comprehensive guide for teachers on academic standards.",
         },
         {
           title: "Student FAQ",
-          url: "https://jipter.com/faq-students",
+          url: "https://mr-mahmoud.com/faq-students",
           description: "Frequently asked questions for students.",
         },
       ],
@@ -50,7 +50,7 @@ export const categories = [
       create: [
         {
           title: "Refund Policy",
-          url: "https://jipter.com/refund-policy",
+          url: "https://mr-mahmoud.com/refund-policy",
           description: "Learn about our refund rules and procedures.",
         },
       ],

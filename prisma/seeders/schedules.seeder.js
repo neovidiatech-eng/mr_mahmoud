@@ -21,11 +21,11 @@ export async function seedSchedules() {
   console.log("Start seeding schedules...");
 
   const teacher = await prisma.teacher.findFirst({
-    where: { user: { email: "ahmed.teacher@jipter.com" } },
+    where: { user: { email: "ahmed.teacher@mr-mahmoud.com" } },
   });
 
   const student = await prisma.student.findFirst({
-    where: { user: { email: "john.doe@jipter.com" } },
+    where: { user: { email: "john.doe@mr-mahmoud.com" } },
   });
   const course = await prisma.courses.findFirst({ include: { lectures: true } });
 

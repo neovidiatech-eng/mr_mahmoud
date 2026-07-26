@@ -537,7 +537,7 @@ model lectures {
 
 model settings {
   id          String   @id @default(uuid())
-  userPrefix  String   @default("jupiter")
+  userPrefix  String   @default("mr_mahmoud")
   socialLinks Json
   contactInfo Json
   createdAt   DateTime @default(now())

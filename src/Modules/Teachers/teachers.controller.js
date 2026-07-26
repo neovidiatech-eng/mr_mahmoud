@@ -102,7 +102,7 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
   const hashedPassword = encryptText({ text: password });
 
   // 🔥 كل حاجة في transaction واحدة
-  const prefix = settings?.userPrefix || "jupiter";
+  const prefix = settings?.userPrefix || "mr_mahmoud";
   const username = `${name.trim().replace(/\s+/g, "-")}${nanoid(5)}_${prefix}`;
 
   const result = await db.transaction(async (tx) => {

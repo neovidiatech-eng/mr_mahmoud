@@ -10,7 +10,7 @@ export const getSettings = asyncHandler(async (req, res, next) => {
         settings = await db.create({
             model: "settings",
             data: {
-                userPrefix: "jupiter",
+                userPrefix: "mr_mahmoud",
                 socialLinks: {},
                 contactInfo: {}
             }
@@ -37,7 +37,7 @@ export const updateSettings = asyncHandler(async (req, res, next) => {
         settings = await db.create({
             model: "settings",
             data: {
-                userPrefix: userPrefix || "jupiter",
+                userPrefix: userPrefix || "mr_mahmoud",
                 socialLinks: socialLinks || {},
                 contactInfo: contactInfo || {}
             }

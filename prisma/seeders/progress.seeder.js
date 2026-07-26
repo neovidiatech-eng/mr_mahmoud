@@ -13,11 +13,11 @@ export async function seedProgress() {
   console.log("Start seeding student progress...");
 
   const user = await prisma.user.findUnique({
-    where: { email: "john.doe@jipter.com" },
+    where: { email: "john.doe@mr-mahmoud.com" },
   });
 
   if (!user) {
-    console.warn("User john.doe@jipter.com not found, skipping progress seeding");
+    console.warn("User john.doe@mr-mahmoud.com not found, skipping progress seeding");
     return;
   }
 

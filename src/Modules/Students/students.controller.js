@@ -228,7 +228,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
 
   await db.transaction(async (tx) => {
     // 1. Create user
-    const prefix = settings?.userPrefix || "jupiter";
+    const prefix = settings?.userPrefix || "mr_mahmoud";
     const username = `${name.trim().replace(/\s+/g, "-")}_${nanoid(3)}_${prefix}`;
 
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;

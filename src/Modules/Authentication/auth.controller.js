@@ -102,7 +102,7 @@ export const register = asyncHandler(async (req, res, next) => {
   // 5. Transactional Database Operations
   await db.transaction(async (tx) => {
     // Create User record
-    const prefix = settings?.userPrefix || "jupiter";
+    const prefix = settings?.userPrefix || "mr_mahmoud";
     const username = `${name.trim().replace(/\s+/g, "-")}${nanoid(5)}_${prefix}`;
     const user = await tx.create({
       model: "user",
@@ -508,7 +508,7 @@ export const refresh = asyncHandler(async (req, res, next) => {
 
 //   if (!user) {
 //     const settings = await db.findFirst({ model: "settings" });
-//     const prefix = settings?.userPrefix || "jupiter";
+//     const prefix = settings?.userPrefix || "mr_mahmoud";
 //     const fullName = `${verify.given_name} ${verify.family_name}`;
 //     const username = `${fullName.trim().replace(/\s+/g, "-")}${nanoid(5)}_${prefix}`;
 //     console.log(username);

@@ -33,10 +33,10 @@ export const sendEmail = async ({
     actionText,
   });
 
-  const senderEmail = process.env.MAIL_FROM || process.env.MAIL_USER || "no-reply@jupiter-egy.com";
+  const senderEmail = process.env.MAIL_FROM || process.env.MAIL_USER || "no-reply@mr-mahmoud.com";
   
   const mailOptions = {
-    from: `"Jupiter Academy" <${senderEmail}>`,
+    from: `"Mr Mahmoud Academy" <${senderEmail}>`,
     replyTo: senderEmail,
     to: email,
     subject: emailSubject,

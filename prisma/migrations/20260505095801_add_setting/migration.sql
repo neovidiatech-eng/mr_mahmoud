@@ -19,7 +19,7 @@ CREATE TABLE "curriculum" (
 -- CreateTable
 CREATE TABLE "settings" (
     "id" TEXT NOT NULL,
-    "userPrefix" TEXT NOT NULL DEFAULT 'jupiter',
+    "userPrefix" TEXT NOT NULL DEFAULT 'mr_mahmoud',
     "socialLinks" JSONB NOT NULL,
     "contactInfo" JSONB NOT NULL,
     "createdAt" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP,

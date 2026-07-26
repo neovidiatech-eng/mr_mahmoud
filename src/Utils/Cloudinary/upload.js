@@ -12,7 +12,7 @@ export const uploadToCloudinary = async (file, folder = "general") => {
         if (!file) return null;
 
         const result = await cloudinary.uploader.upload(file.path, {
-            folder: `jipter/${folder}`,
+            folder: `mr_mahmoud/${folder}`,
             resource_type: "auto"
         });
 

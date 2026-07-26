@@ -13,7 +13,7 @@ export async function seedSubscriptions() {
   console.log("Start seeding subscriptions...");
 
   const student = await prisma.student.findFirst({
-    where: { user: { email: "john.doe@jipter.com" } },
+    where: { user: { email: "john.doe@mr-mahmoud.com" } },
     include: { user: true },
   });
 
