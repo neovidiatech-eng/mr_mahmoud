@@ -1,5 +1,8 @@
+
+
 import multer from "multer";
-import { Prisma } from "@prisma/client";
+import pkg from "@prisma/client";
+const { Prisma } = pkg;
 import { getMessage, getDir } from "./i18n.js";
 import fs from "node:fs";
 import path from "node:path";
