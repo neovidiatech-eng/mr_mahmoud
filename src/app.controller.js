@@ -38,25 +38,37 @@ const bootstrap = async () => {
   ]);
   console.log("All jobs:", allJobs);  */
 
+  const defaultOrigins = [
+    "http://localhost:3000",
+    "http://localhost:5173",
+    "http://localhost:5500",
+    "http://127.0.0.1:5500",
+    "https://dashboard.mr-mahmoud.com",
+    "https://mr-mahmoud.vercel.app",
+  ];
+
   const allowedOrigins = process.env.CORS_ORIGINS
-    ? process.env.CORS_ORIGINS.split(",").map((o) => o.trim())
-    : [
-        "http://localhost:3000",
-        "http://localhost:5173",
-        "http://localhost:5500",
-        "http://127.0.0.1:5500",
-        "https://dashboard.mr-mahmoud.com",
-      ];
+    ? process.env.CORS_ORIGINS.split(",")
+        .map((o) => o.trim().replace(/\/+$/, ""))
+        .filter(Boolean)
+    : defaultOrigins.map((o) => o.replace(/\/+$/, ""));
 
   app.use(
     cors({
       origin: (origin, callback) => {
         // Allow requests with no origin (mobile apps, curl, Postman)
         if (!origin) return callback(null, true);
-        if (allowedOrigins.includes(origin)) return callback(null, true);
-        return callback(new Error(`CORS: origin ${origin} not allowed`));
+
+        const normalizedOrigin = origin.replace(/\/+$/, "");
+        if (allowedOrigins.includes(normalizedOrigin)) {
+          return callback(null, true);
+        }
+
+        // Return false to reject CORS gracefully without throwing Express 500 error
+        return callback(null, false);
       },
       credentials: true,
+      optionsSuccessStatus: 200,
     }),
   );
   app.use(morgan("dev"));
