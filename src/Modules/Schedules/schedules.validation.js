@@ -12,7 +12,10 @@ export const createSchedule = {
           "any.required": "STUDENT_ID_REQUIRED",
           "string.pattern.base": "STUDENT_ID_INVALID",
         })
-        .required(),
+        .optional(),
+      studentIds: Joi.array().items(generalFields.id).optional().default([]),
+      isGroup: Joi.boolean().optional().default(false),
+      maxStudents: Joi.string().optional().default("1"),
       platform: generalFields.platform.required(),
       teacherId: generalFields.id
         .messages({
@@ -81,7 +84,10 @@ export const createSchedule = {
 export const createRecurringSchedule = {
   body: Joi.object()
     .keys({
-      studentId: generalFields.id.required(),
+      studentId: generalFields.id.optional(),
+      studentIds: Joi.array().items(generalFields.id).optional().default([]),
+      isGroup: Joi.boolean().optional().default(false),
+      maxStudents: Joi.string().optional().default("1"),
       teacherId: generalFields.id.required(),
       courseId: generalFields.id.required(),
       title: generalFields.name,

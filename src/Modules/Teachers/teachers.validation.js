@@ -28,6 +28,7 @@ export const createTeacherSchema = {
       gender: generalFields.gender.required(),
       age: generalFields.number.required(),
       hour_price: generalFields.price.required(),
+      group_hour_price: joi.number().min(0).optional().default(0),
       active: generalFields.active.required(),
     })
     .required(),
@@ -63,6 +64,7 @@ export const updateTeacherSchema = {
       gender: generalFields.gender,
       age: generalFields.number,
       hour_price: generalFields.price.optional(),
+      group_hour_price: joi.number().min(0).optional(),
       active: generalFields.active.optional(),
     })
     .required(),

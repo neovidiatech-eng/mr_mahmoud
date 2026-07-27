@@ -95,6 +95,23 @@ export const getAllSchedules = asyncHandler(async (req, res, next) => {
             },
           },
         },
+        groupStudents: {
+          include: {
+            student: {
+              include: {
+                user: {
+                  select: {
+                    id: true,
+                    name: true,
+                    email: true,
+                    phone: true,
+                    code_country: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
   const scheduleData = await Promise.all(
@@ -194,6 +211,23 @@ export const getScheduleById = asyncHandler(async (req, res, next) => {
         },
       },
       scheduleLogs: true,
+      groupStudents: {
+        include: {
+          student: {
+            include: {
+              user: {
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  phone: true,
+                  code_country: true,
+                },
+              },
+            },
+          },
+        },
+      },
     },
   });
   if (schedule?.student?.user?.phone) {
@@ -226,6 +260,9 @@ export const getScheduleById = asyncHandler(async (req, res, next) => {
 export const createSchedule = asyncHandler(async (req, res, next) => {
   const {
     studentId,
+    studentIds = [],
+    isGroup = false,
+    maxStudents = "1",
     teacherId,
     courseId,
     title,
@@ -241,13 +278,30 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     videoUrl,
     slidesUrl,
   } = req.body;
+
+  const effectiveStudentIds = Array.from(new Set([studentId, ...(studentIds || [])].filter(Boolean)));
+  const primaryStudentId = studentId || effectiveStudentIds[0];
+  const normalizedMaxStudents = (maxStudents === "0" || maxStudents === 0 || maxStudents === "unlimited") ? "unlimited" : String(maxStudents);
+
+  if (isGroup && normalizedMaxStudents !== "unlimited") {
+    const max = parseInt(normalizedMaxStudents);
+    if (!isNaN(max) && effectiveStudentIds.length > max) {
+      return errorResponse({
+        req,
+        next,
+        status: 400,
+        message: "EXCEEDED_MAX_STUDENTS",
+      });
+    }
+  }
+
   /* check if student, teacher and course exist */
   const [student, teacher, course] = await Promise.all([
-    db.findOne({
+    primaryStudentId ? db.findOne({
       model: "student",
-      where: { id: studentId },
+      where: { id: primaryStudentId },
       include: { plan: true },
-    }),
+    }) : null,
     checkExist({ model: "teacher", where: { id: teacherId }, next }),
     checkExist({
       model: "courses",
@@ -257,7 +311,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     }),
   ]);
 
-  if (!student) {
+  if (primaryStudentId && !student) {
     return errorResponse({
       req,
       next,
@@ -284,18 +338,22 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
 
   const tz = req.timezone;
   const startTime = normalizeDate(start_time, tz);
-  const endTime = getEndTime(startTime, type, student.plan?.sessionTime);
+  const endTime = getEndTime(startTime, type, student?.plan?.sessionTime);
 
   /* check if student and teacher are available at the same time */
   const [studentSchedule, teacherSchedule] = await Promise.all([
-    db.findFirst({
+    effectiveStudentIds.length > 0 ? db.findFirst({
       model: "schedule",
       where: {
-        studentId,
+        status: { not: "cancelled" },
         start_time: { lt: endTime },
         end_time: { gt: startTime },
+        OR: [
+          { studentId: { in: effectiveStudentIds } },
+          { groupStudents: { some: { studentId: { in: effectiveStudentIds } } } },
+        ],
       },
-    }),
+    }) : null,
 
     db.findFirst({
       model: "schedule",
@@ -330,7 +388,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
 
   // Session check
   const requiredSessions = 1;
-  if (student.sessions_remaining < requiredSessions) {
+  if (student && student.sessions_remaining < requiredSessions) {
     return errorResponse({
       req,
       next,
@@ -346,7 +404,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     newSchedule = await tx.create({
       model: "schedule",
       data: {
-        studentId,
+        studentId: isGroup ? null : primaryStudentId,
         teacherId,
         title,
         platform,
@@ -362,14 +420,28 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
         language,
         videoUrl: videoUrl || course.lectures[0]?.videoUrl || null,
         slidesUrl,
+        isGroup,
+        maxStudents: isGroup ? normalizedMaxStudents : "1",
       },
     });
 
-    await tx.updateOne({
-      model: "student",
-      where: { id: studentId },
-      data: { sessions_remaining: { decrement: requiredSessions } },
-    });
+    for (const sId of effectiveStudentIds) {
+      if (isGroup) {
+        await tx.create({
+          model: "GroupScheduleStudent",
+          data: {
+            scheduleId: newSchedule.id,
+            studentId: sId,
+          },
+        });
+      }
+
+      await tx.updateOne({
+        model: "student",
+        where: { id: sId },
+        data: { sessions_remaining: { decrement: requiredSessions } },
+      });
+    }
   });
 
   let reminderTime;
@@ -419,6 +491,9 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
 export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
   const {
     studentId,
+    studentIds = [],
+    isGroup = false,
+    maxStudents = "1",
     teacherId,
     courseId,
     title,
@@ -438,13 +513,29 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
   const skipedSchedules = [];
   const perSessionUnits = 1;
 
+  const effectiveStudentIds = Array.from(new Set([studentId, ...(studentIds || [])].filter(Boolean)));
+  const primaryStudentId = studentId || effectiveStudentIds[0];
+  const normalizedMaxStudents = (maxStudents === "0" || maxStudents === 0 || maxStudents === "unlimited") ? "unlimited" : String(maxStudents);
+
+  if (isGroup && normalizedMaxStudents !== "unlimited") {
+    const max = parseInt(normalizedMaxStudents);
+    if (!isNaN(max) && effectiveStudentIds.length > max) {
+      return errorResponse({
+        req,
+        next,
+        status: 400,
+        message: "EXCEEDED_MAX_STUDENTS",
+      });
+    }
+  }
+
   /* check exist student, teacher, course */
   const [student, teacher, course] = await Promise.all([
-    db.findOne({
+    primaryStudentId ? db.findOne({
       model: "student",
-      where: { id: studentId },
+      where: { id: primaryStudentId },
       include: { plan: true },
-    }),
+    }) : null,
     checkExist({ model: "teacher", where: { id: teacherId }, next }),
     checkExist({
       model: "courses",
@@ -454,7 +545,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
     }),
   ]);
 
-  if (!student) {
+  if (primaryStudentId && !student) {
     return errorResponse({
       req,
       next,
@@ -467,7 +558,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
 
   // Session check for recurring
   const totalPotentialSessions = dates.length * perSessionUnits;
-  if (student.sessions_remaining < totalPotentialSessions) {
+  if (student && student.sessions_remaining < totalPotentialSessions) {
     return errorResponse({
       req,
       next,
@@ -493,7 +584,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
   // Determine the overall window for the batch conflict query
   const windowStart = allDatesStart[0];
   const lastDate = allDatesStart[allDatesStart.length - 1];
-  const windowEnd = getEndTime(lastDate, type, student.plan?.sessionTime);
+  const windowEnd = getEndTime(lastDate, type, student?.plan?.sessionTime);
 
   // Pre-fetch ALL conflicts in 2 queries instead of 2-per-date (N+1 fix)
   const [allTeacherConflicts, allStudentConflicts] = await Promise.all([
@@ -507,22 +598,25 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       },
       select: { id: true, start_time: true, end_time: true, title: true },
     }),
-    db.findMany({
+    effectiveStudentIds.length > 0 ? db.findMany({
       model: "schedule",
       where: {
-        studentId,
         status: { not: "cancelled" },
         start_time: { lt: windowEnd },
         end_time: { gt: windowStart },
+        OR: [
+          { studentId: { in: effectiveStudentIds } },
+          { groupStudents: { some: { studentId: { in: effectiveStudentIds } } } },
+        ],
       },
       select: { id: true, start_time: true, end_time: true, title: true },
-    }),
+    }) : [],
   ]);
 
   for (const date of dates) {
     const start_time = combineDateAndTime(date, timeStart, tz);
 
-    const end_time = getEndTime(start_time, type, student.plan?.sessionTime);
+    const end_time = getEndTime(start_time, type, student?.plan?.sessionTime);
 
     // In-memory overlap check (avoids DB query per iteration)
     const teacher_conflict = allTeacherConflicts.find(
@@ -554,7 +648,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
     const currentLecture = course.lectures[lectureIndex];
 
     schedulesToCreate.push({
-      studentId,
+      studentId: isGroup ? null : primaryStudentId,
       order: currentLecture?.order || 0,
       teacherId,
       title: currentLecture?.title || title,
@@ -567,6 +661,8 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       courseId,
       lecturesId: currentLecture?.id || null,
       is_recurring: true,
+      isGroup,
+      maxStudents: isGroup ? normalizedMaxStudents : "1",
       day_of_week: date.toLocaleDateString("en-US", { weekday: "long" }),
       parent_recurring_id: parentRecurringId,
       language,
@@ -585,6 +681,17 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
           model: "schedule",
           data: scheduleData,
         });
+        if (isGroup) {
+          for (const sId of effectiveStudentIds) {
+            await tx.create({
+              model: "GroupScheduleStudent",
+              data: {
+                scheduleId: schedule.id,
+                studentId: sId,
+              },
+            });
+          }
+        }
         createdSchedules.push({
           id: schedule.id,
           date: scheduleData.start_time.toISOString().split("T")[0],
@@ -592,15 +699,17 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
         });
       }
 
-      await tx.updateOne({
-        model: "student",
-        where: { id: studentId },
-        data: {
-          sessions_remaining: {
-            decrement: createdSchedules.length * perSessionUnits,
+      for (const sId of effectiveStudentIds) {
+        await tx.updateOne({
+          model: "student",
+          where: { id: sId },
+          data: {
+            sessions_remaining: {
+              decrement: createdSchedules.length * perSessionUnits,
+            },
           },
-        },
-      });
+        });
+      }
     });
 
     // Queue notification jobs after successful transaction

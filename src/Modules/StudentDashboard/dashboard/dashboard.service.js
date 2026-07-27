@@ -56,7 +56,12 @@ export const getDashboard = async ({ req, res, next }) => {
     model: "schedule",
     where: {
       AND: [
-        { studentId: student.id },
+        {
+          OR: [
+            { studentId: student.id },
+            { groupStudents: { some: { studentId: student.id } } },
+          ],
+        },
         { start_time: { gte: new Date().toISOString() } },
       ],
     },

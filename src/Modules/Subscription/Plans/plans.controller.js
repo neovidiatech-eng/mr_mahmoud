@@ -52,6 +52,9 @@ export const createPlan = asyncHandler(async (req, res, next) => {
     features,
     currencyId,
     type,
+    isGroup,
+    maxStudents,
+    planType,
   } = req.body;
 
   // 🔥 parallel queries
@@ -85,11 +88,13 @@ export const createPlan = asyncHandler(async (req, res, next) => {
       type,
       description,
       price: String(price),
-      // ⚠️ لو غيرت الموديل لـ Float شيل String()
       duration,
       sessionsCount: sessionsCount ?? 0,
       rescheduleCount: rescheduleCount ?? 0,
       active: active ?? false,
+      isGroup: isGroup ?? false,
+      maxStudents: maxStudents ? String(maxStudents) : "1",
+      planType: planType || (isGroup ? "group" : "individual"),
       features,
       currency: {
         connect: { id: currencyId },
@@ -121,6 +126,9 @@ export const updatePlan = asyncHandler(async (req, res, next) => {
     features,
     type,
     currencyId,
+    isGroup,
+    maxStudents,
+    planType,
   } = req.body;
 
   const plan = await db.findOne({
@@ -182,7 +190,10 @@ export const updatePlan = asyncHandler(async (req, res, next) => {
   if (rescheduleCount !== undefined) data.rescheduleCount = rescheduleCount;
   if (active !== undefined) data.active = active;
   if (features !== undefined) data.features = features;
-    if (type !== undefined) data.type = type;
+  if (type !== undefined) data.type = type;
+  if (isGroup !== undefined) data.isGroup = isGroup;
+  if (maxStudents !== undefined) data.maxStudents = String(maxStudents);
+  if (planType !== undefined) data.planType = planType;
 
   if (currencyId !== undefined) {
     data.currency = {

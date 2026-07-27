@@ -123,12 +123,14 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
       },
     });
 
+    const { group_hour_price } = req.body;
     const teacher = await tx.create({
       model: "teacher",
       data: {
         user: { connect: { id: user.id } },
         currency: { connect: { id: checkCurrency.id } },
         hour_price,
+        group_hour_price: group_hour_price ?? 0,
         active: active ?? false,
       },
       include: { user: true },
@@ -260,6 +262,7 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
     gender,
     age,
     hour_price,
+    group_hour_price,
     active,
   } = req.body;
 
@@ -319,6 +322,7 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
     data: {
       ...(currency_id && { currency: { connect: { id: currency_id } } }),
       ...(hour_price !== undefined && { hour_price }),
+      ...(group_hour_price !== undefined && { group_hour_price }),
       ...(active !== undefined && { active }),
     },
     include: {

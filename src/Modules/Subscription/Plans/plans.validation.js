@@ -13,6 +13,9 @@ export const createPlanSchema = {
     features: Joi.array().items(Joi.string()),
     currencyId: Joi.string().uuid().required(),
     type: Joi.string().valid("quarterly", "annually", "halfAnnually").required(),
+    isGroup: Joi.boolean().optional().default(false),
+    maxStudents: Joi.string().optional().default("1"),
+    planType: Joi.string().valid("individual", "group").optional().default("individual"),
   }),
 };
 
@@ -28,6 +31,9 @@ export const updatePlanSchema = {
     features: Joi.array().items(Joi.string()),
     currencyId: Joi.string().uuid(),
     type: Joi.string().valid("quarterly", "annually", "halfAnnually"),
+    isGroup: Joi.boolean().optional(),
+    maxStudents: Joi.string().optional(),
+    planType: Joi.string().valid("individual", "group").optional(),
   }),
 };
 export const deletePlanSchema = {
