@@ -12,8 +12,10 @@ const lecturesInclude = {
       slug: true,
       color: true,
       ageRange: true,
+      stageName: true,
     },
   },
+  category: true,
   lectures: {
     orderBy: { order: "asc" },
   },
@@ -23,7 +25,7 @@ const lecturesInclude = {
    CREATE COURSE
 ----------------------------- */
 export const createCourse = async ({ req, res, next }) => {
-  const { rankId, title, description } = req.body;
+  const { rankId, title, description, categoryId, price } = req.body;
 
   if (!rankId) {
     const error = createError({
@@ -79,7 +81,14 @@ export const createCourse = async ({ req, res, next }) => {
 
   const course = await db.create({
     model: "courses",
-    data: { rankId, title, description, image },
+    data: {
+      rankId,
+      title,
+      description,
+      image,
+      ...(categoryId && { categoryId }),
+      ...(price !== undefined && { price: Number(price) }),
+    },
   });
 
   return course;
@@ -92,10 +101,11 @@ export const getCourses = async (query = {}) => {
   const page = Number(query.page) || 1;
   const limit = Number(query.limit) || 10;
   const rankId = query.rankId;
+  const categoryId = query.categoryId;
   const title = query.title;
   const { sortBy = "createdAt" } = query;
   const sortDirection = query.sort || "desc";
-  
+
 
   const where = {};
 
@@ -103,9 +113,13 @@ export const getCourses = async (query = {}) => {
     where.rankId = rankId;
   }
 
+  if (categoryId) {
+    where.categoryId = categoryId;
+  }
+
   if(title){
     where.title = { contains: title, mode: "insensitive" };
-  } 
+  }
   return await db.findManyWithPaginationAndCount({
     model: "courses",
     where,
@@ -141,7 +155,7 @@ export const getCourseById = async (id) => {
    UPDATE COURSE
 ----------------------------- */
 export const updateCourse = async ({ req, res, next }) => {
-  const { title, description, rankId } = req.body;
+  const { title, description, rankId, categoryId, price } = req.body;
   const { id } = req.params;
 
   // validate title if exists
@@ -199,6 +213,8 @@ export const updateCourse = async ({ req, res, next }) => {
       ...(title !== undefined && { title }),
       ...(description !== undefined && { description }),
       ...(rankId !== undefined && { rankId }),
+      ...(categoryId !== undefined && { categoryId }),
+      ...(price !== undefined && { price: Number(price) }),
     },
   });
 };
@@ -273,6 +289,20 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     include: { plan: true },
   });
 
+  // Course-level access: matching rank subscription OR a direct course purchase.
+  // Admins/teachers always pass (this endpoint is student-focused but stays permissive for them).
+  let hasCourseAccess = true;
+  if (student) {
+    const matchesRank = student.active && student.rankId === course.rankId;
+    if (!matchesRank) {
+      const purchase = await db.findFirst({
+        model: "CoursePurchase",
+        where: { studentId: student.id, courseId: id },
+      });
+      hasCourseAccess = !!purchase;
+    }
+  }
+
   let isFreeTrial = false;
   let bookedSchedule = null;
 
@@ -300,7 +330,10 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     const userLecture = userLectures.find((ul) => ul.lectureId === lecture.id);
     let status = "Locked";
 
-    if (isFreeTrial) {
+    if (!hasCourseAccess) {
+      // No rank match and no direct purchase — the whole course stays locked
+      // regardless of per-lecture progression.
+    } else if (isFreeTrial) {
       // Free trial user logic:
       // - Must have booked a schedule in this course
       // - Only the first lecture (index 0) can be unlocked
@@ -324,6 +357,7 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     return {
       ...lecture,
       status,
+      lastPosition: userLecture?.lastPosition ?? 0,
       ...(status === "Locked" && {
         videoUrl: null,
         pdfUrl: null,
@@ -335,6 +369,7 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
 
   return {
     ...course,
+    hasCourseAccess,
     lectures: lecturesWithStatus,
   };
 };

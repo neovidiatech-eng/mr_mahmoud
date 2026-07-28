@@ -30,6 +30,7 @@ import materialsRouter from "./Modules/matrials/matrials.routes.js";
 import weeklyReportsRouter from "./Modules/WeeklyReports/weeklyReports.routes.js";
 import policiesRouter from "./Modules/Policies/policies.routes.js";
 import supportRouter from "./Modules/Support/support.routes.js";
+import coursePurchaseRequestsRouter from "./Modules/CoursePurchaseRequests/coursePurchaseRequests.routes.js";
 
 import { ROLES, ADMIN_ROLES } from "./Utils/Permissions/permissions.js";
 
@@ -67,7 +68,8 @@ rootRouter.use("/support", authentication, supportRouter);
 rootRouter.use("/withdrawals", authentication, withdrawalsRouter);
 rootRouter.use("/transactions", authentication, transactionsRouter);
 rootRouter.use("/transactions/currency", authentication, currencyRouter);
-rootRouter.use("/settings", authentication, settingsRouter);
+rootRouter.use("/settings", settingsRouter);
+rootRouter.use("/course-purchase-requests", authentication, coursePurchaseRequestsRouter);
 rootRouter.use("/subscription", subscriptionRouter);
 
 // Root health check

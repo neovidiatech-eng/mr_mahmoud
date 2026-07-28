@@ -37,7 +37,7 @@ export const getRanks = async (req, res, next) => {
    ADD RANK
 ----------------------------- */
 export const addRank = async (req, res, next) => {
-  const { name, color, ageRange } = req.body || {};
+  const { name, color, ageRange, stageName } = req.body || {};
   const slug = name
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
@@ -59,7 +59,7 @@ export const addRank = async (req, res, next) => {
 
   return await db.create({
     model: "ranks",
-    data: { name, slug, color, ageRange },
+    data: { name, slug, color, ageRange, ...(stageName !== undefined && { stageName }) },
   });
 };
 
@@ -89,7 +89,7 @@ export const getRank = async (req, res, next) => {
 ----------------------------- */
 export const updateRank = async (req, res, next) => {
   const { id } = req.params;
-  const { name, color, ageRange } = req.body;
+  const { name, color, ageRange, stageName } = req.body;
 
   const rank = await db.findFirst({
     model: "ranks",
@@ -131,6 +131,7 @@ export const updateRank = async (req, res, next) => {
   
   if (color) updateData.color = color;
   if (ageRange) updateData.ageRange = ageRange;
+  if (stageName !== undefined) updateData.stageName = stageName;
 
   return await db.updateOne({
     model: "ranks",

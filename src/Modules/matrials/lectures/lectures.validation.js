@@ -73,3 +73,13 @@ export const lectureIdSchema = {
     id: generalFields.id.required(),
   }).required(),
 };
+
+export const updateProgressSchema = {
+  params: Joi.object({
+    id: generalFields.id.required(),
+  }).required(),
+  body: Joi.object({
+    position: Joi.number().min(0).required(),
+    duration: Joi.number().min(0).optional(),
+  }).required(),
+};

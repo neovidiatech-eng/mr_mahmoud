@@ -12,7 +12,7 @@ export const getAllLectures = asyncHandler(async (req, res, next) => {
 });
 
 export const getLecture = asyncHandler(async (req, res, next) => {
-  const lecture = await lecturesService.getLectureById(req.params.id);
+  const lecture = await lecturesService.getLectureById(req.params.id, req.user);
   return successResponse({ res, req, message: "FETCH_SUCCESS", data: lecture });
 });
 
@@ -44,5 +44,10 @@ export const deleteLecture = asyncHandler(async (req, res, next) => {
 
 export const completeLecture = asyncHandler(async (req, res, next) => {
   const result = await lecturesService.completeLecture({ req, res, next });
+  return successResponse({ res, req, message: "UPDATE_SUCCESS", data: result });
+});
+
+export const updateProgress = asyncHandler(async (req, res, next) => {
+  const result = await lecturesService.updateLectureProgress({ req, res, next });
   return successResponse({ res, req, message: "UPDATE_SUCCESS", data: result });
 });

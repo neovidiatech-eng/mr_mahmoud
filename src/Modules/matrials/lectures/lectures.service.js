@@ -1,5 +1,6 @@
 import * as db from "../../../database/dbService.js";
 import { createError } from "../../../Utils/Helpers.js";
+import { isAdmin } from "../../../Utils/Permissions/permissions.js";
 
 /* -----------------------------
    CREATE LECTURE
@@ -139,10 +140,11 @@ export const getLectures = async ({ req, res, next }) => {
 /* -----------------------------
    GET LECTURE BY ID
 ----------------------------- */
-export const getLectureById = async (id) => {
+export const getLectureById = async (id, requestingUser) => {
   const lecture = await db.findFirst({
     model: "lectures",
     where: { id },
+    include: { course: { select: { id: true, rankId: true } } },
   });
 
   if (!lecture) {
@@ -151,7 +153,59 @@ export const getLectureById = async (id) => {
     throw error;
   }
 
-  return lecture;
+  const { hasAccess, myProgress } = await resolveLectureAccess(lecture, requestingUser);
+
+  if (!hasAccess) {
+    return {
+      ...lecture,
+      videoUrl: null,
+      pdfUrl: null,
+      slidesUrl: null,
+      hasAccess: false,
+    };
+  }
+
+  return { ...lecture, hasAccess: true, myProgress };
+};
+
+/**
+ * Determines whether the requesting user can access a lecture's protected
+ * content (video/pdf/slides), and returns their saved progress if so.
+ * Admins/staff/teachers always have access. Students need either an active
+ * subscription matching the course's rank, or a direct course purchase.
+ */
+const resolveLectureAccess = async (lecture, requestingUser) => {
+  if (!requestingUser) return { hasAccess: false, myProgress: null };
+
+  if (isAdmin(requestingUser) || requestingUser.teacher) {
+    return { hasAccess: true, myProgress: null };
+  }
+
+  const student = requestingUser.student;
+  if (!student) return { hasAccess: false, myProgress: null };
+
+  const userLecture = await db.findFirst({
+    model: "user_lectures",
+    where: { userId: requestingUser.id, lectureId: lecture.id },
+  });
+
+  const myProgress = userLecture
+    ? {
+        status: userLecture.status,
+        progress: userLecture.progress,
+        lastPosition: userLecture.lastPosition,
+      }
+    : null;
+
+  const matchesRank = student.active && student.rankId === lecture.course?.rankId;
+  if (matchesRank) return { hasAccess: true, myProgress };
+
+  const purchase = await db.findFirst({
+    model: "CoursePurchase",
+    where: { studentId: student.id, courseId: lecture.course?.id },
+  });
+
+  return { hasAccess: !!purchase, myProgress };
 };
 
 /* -----------------------------
@@ -210,6 +264,44 @@ export const updateLecture = async ({ req, res, next }) => {
     where: { id },
     data: filteredData,
   });
+};
+
+/* -----------------------------
+   UPDATE WATCH PROGRESS (resume position)
+----------------------------- */
+export const updateLectureProgress = async ({ req, res, next }) => {
+  const { id } = req.params; // lectureId
+  const { position, duration } = req.body;
+  const userId = req.user.id;
+
+  const lecture = await db.findFirst({ model: "lectures", where: { id } });
+  if (!lecture) {
+    const error = createError({ message: "LECTURE_NOT_FOUND", status: 404, next });
+    throw error;
+  }
+
+  const progress = duration ? Math.min(100, (position / duration) * 100) : undefined;
+  const isCompleted = progress !== undefined && progress >= 90;
+
+  const userLecture = await db.upsertOne({
+    model: "user_lectures",
+    where: { userId_lectureId: { userId, lectureId: id } },
+    update: {
+      lastPosition: position,
+      ...(progress !== undefined && { progress }),
+      ...(isCompleted && { status: "completed", completedAt: new Date() }),
+    },
+    create: {
+      userId,
+      lectureId: id,
+      lastPosition: position,
+      progress: progress ?? 0,
+      status: isCompleted ? "completed" : "in_progress",
+      ...(isCompleted && { completedAt: new Date() }),
+    },
+  });
+
+  return userLecture;
 };
 
 /* -----------------------------

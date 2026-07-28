@@ -51,6 +51,19 @@ export const PERMISSIONS_V2 = {
     DELETE: "courses:delete",
   },
 
+  CATEGORIES: {
+    READ: "categories:read",
+    CREATE: "categories:create",
+    UPDATE: "categories:update",
+    DELETE: "categories:delete",
+  },
+
+  COURSE_PURCHASE_REQUESTS: {
+    READ: "course_purchase_requests:read",
+    CREATE: "course_purchase_requests:create",
+    UPDATE: "course_purchase_requests:update",
+  },
+
   // Lecture Management
   LECTURES: {
     READ: "lectures:read",
@@ -69,12 +82,24 @@ export const PERMISSIONS_V2 = {
     LEAVE: "sessions:leave",
   },
 
+  REVIEWS: {
+    READ: "reviews:read",
+    MODERATE: "reviews:moderate",
+  },
+
   // Homework Management
   HOMEWORK: {
     READ: "homework:read",
     CREATE: "homework:create",
     UPDATE: "homework:update",
     DELETE: "homework:delete",
+  },
+
+  SUBJECTS: {
+    READ: "subjects:read",
+    CREATE: "subjects:create",
+    UPDATE: "subjects:update",
+    DELETE: "subjects:delete",
   },
 
   // Exam Management

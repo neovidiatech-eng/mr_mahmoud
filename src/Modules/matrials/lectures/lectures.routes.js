@@ -50,4 +50,11 @@ router.post(
   lecturesController.completeLecture,
 );
 
+router.patch(
+  "/:id/progress",
+  authentication,
+  validation(lecturesValidation.updateProgressSchema),
+  lecturesController.updateProgress,
+);
+
 export default router;

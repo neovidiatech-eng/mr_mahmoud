@@ -81,6 +81,9 @@ export const seedPermissions = async () => {
         PERMISSIONS_V2.WITHDRAWALS.READ,
         PERMISSIONS_V2.WITHDRAWALS.CREATE,
         ...Object.values(PERMISSIONS_V2.RANKS),
+        PERMISSIONS_V2.SUBJECTS.READ,
+        PERMISSIONS_V2.CATEGORIES.READ,
+        PERMISSIONS_V2.REVIEWS.READ,
       ];
       const pObjs = await prisma.permission.findMany({ where: { code: { in: teacherCodes } } });
       permissionsToAssign = pObjs.map((p) => p.id);
@@ -106,6 +109,10 @@ export const seedPermissions = async () => {
         PERMISSIONS_V2.CHAT.READ,
         PERMISSIONS_V2.CHAT.CREATE,
         PERMISSIONS_V2.RANKS.READ,
+        PERMISSIONS_V2.SUBJECTS.READ,
+        PERMISSIONS_V2.CATEGORIES.READ,
+        PERMISSIONS_V2.COURSE_PURCHASE_REQUESTS.READ,
+        PERMISSIONS_V2.COURSE_PURCHASE_REQUESTS.CREATE,
       ];
       const pObjs = await prisma.permission.findMany({ where: { code: { in: studentCodes } } });
       permissionsToAssign = pObjs.map((p) => p.id);

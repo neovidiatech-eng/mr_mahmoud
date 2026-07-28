@@ -45,7 +45,7 @@ router.patch(
   "/:id",
   authentication,
   authorizeResource(examsResource),
-  validation(schema.updateHomework), // Note: reusing updateHomework schema if identical, or should be updateExam
+  validation(schema.updatecreateExam),
   examsController.updateExam,
 );
 
@@ -55,6 +55,58 @@ router.get(
   authorizeResource(examsResource),
   validation(schema.getAllExams),
   examsController.getAllExams,
+);
+
+/* ---------------------- Question bank management ---------------------- */
+
+router.post(
+  "/:id/questions",
+  authentication,
+  authorizeResource(examsResource),
+  validation(schema.addQuestion),
+  examsController.addQuestion,
+);
+
+router.get(
+  "/:id/questions",
+  authentication,
+  authorize(PERMISSIONS_V2.EXAMS.READ),
+  validation(schema.examIdParam),
+  examsController.getQuestions,
+);
+
+router.patch(
+  "/questions/:questionId",
+  authentication,
+  authorizeResource(examsResource),
+  validation(schema.updateQuestion),
+  examsController.updateQuestion,
+);
+
+router.delete(
+  "/questions/:questionId",
+  authentication,
+  authorizeResource(examsResource),
+  validation(schema.questionIdParam),
+  examsController.deleteQuestion,
+);
+
+/* -------------------------- Attempt lifecycle -------------------------- */
+
+router.post(
+  "/:id/start",
+  authentication,
+  authorize(PERMISSIONS_V2.EXAMS.READ),
+  validation(schema.examIdParam),
+  examsController.startExam,
+);
+
+router.post(
+  "/:id/submit",
+  authentication,
+  authorize(PERMISSIONS_V2.EXAMS.READ),
+  validation(schema.submitExam),
+  examsController.submitExam,
 );
 
 export default router;

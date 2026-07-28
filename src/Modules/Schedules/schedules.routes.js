@@ -13,13 +13,29 @@ const router = Router();
 const sessionsResource = "sessions";
 
 router.get(
-  "/",  
+  "/",
   authentication,
   authorizeResource(sessionsResource),
   scheduleController.getAllSchedules
 );
+
+// Registered before "/:id" — "reviews" would otherwise be swallowed as an :id param
 router.get(
-  "/:id", 
+  "/reviews",
+  authentication,
+  authorize(PERMISSIONS_V2.REVIEWS.READ),
+  scheduleController.getReviews,
+);
+
+router.patch(
+  "/reviews/:id/visibility",
+  authentication,
+  authorize(PERMISSIONS_V2.REVIEWS.MODERATE),
+  scheduleController.toggleReviewVisibility,
+);
+
+router.get(
+  "/:id",
   authentication,
   authorizeResource(sessionsResource),
   scheduleController.getScheduleById

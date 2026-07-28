@@ -14,6 +14,7 @@ import { nanoid } from "nanoid";
 import { decryptText } from "../../Utils/Security/index.js";
 
 import * as db from "../../database/dbService.js";
+import { isAdmin } from "../../Utils/Permissions/permissions.js";
 import { notificationType } from "../../Utils/Enums/sessions.js";
 import {
   addNotificationJob,
@@ -265,6 +266,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     maxStudents = "1",
     teacherId,
     courseId,
+    subjectId,
     title,
     description,
     link,
@@ -412,6 +414,7 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
         link,
         notes,
         courseId,
+        ...(subjectId && { subjectId }),
         start_time: startTime,
         lecturesId: course.lectures[0]?.id || null,
         order: course.lectures[0]?.order || 0,
@@ -496,6 +499,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
     maxStudents = "1",
     teacherId,
     courseId,
+    subjectId,
     title,
     description,
     link,
@@ -659,6 +663,7 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       start_time,
       end_time,
       courseId,
+      ...(subjectId && { subjectId }),
       lecturesId: currentLecture?.id || null,
       is_recurring: true,
       isGroup,
@@ -1487,6 +1492,67 @@ export const submitReview = asyncHandler(async (req, res, next) => {
     status: 201,
     message: "REVIEW_SUBMITTED",
     data: review,
+  });
+});
+
+export const getReviews = asyncHandler(async (req, res, next) => {
+  const { revieweeId, reviewerId, role, page, limit } = req.query;
+
+  const condition = {};
+  if (revieweeId) condition.revieweeId = revieweeId;
+  if (reviewerId) condition.reviewerId = reviewerId;
+  if (role) condition.role = role;
+
+  const isManagement = isAdmin(req.user);
+  if (!isManagement) {
+    // Non-admins can only see reviews they gave or received
+    condition.OR = [{ reviewerId: req.user.id }, { revieweeId: req.user.id }];
+  }
+
+  const { items, pagination } = await db.findManyWithPaginationAndCount({
+    model: "Review",
+    where: condition,
+    page: parseInt(page) || 1,
+    limit: parseInt(limit) || 10,
+    include: {
+      reviewer: { select: { id: true, name: true } },
+      reviewee: { select: { id: true, name: true } },
+      schedule: { select: { id: true, title: true, start_time: true } },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+
+  return successResponse({
+    res,
+    req,
+    message: "FETCH_SUCCESS",
+    data: { items, pagination },
+    status: 200,
+  });
+});
+
+export const toggleReviewVisibility = asyncHandler(async (req, res, next) => {
+  const { id } = req.params;
+
+  const review = await db.findOne({ model: "Review", where: { id } });
+  if (!review) {
+    return errorResponse({ req, next, message: "REVIEW_NOT_FOUND", status: 404 });
+  }
+
+  const updated = await db.updateOne({
+    model: "Review",
+    where: { id },
+    data: { isHidden: !review.isHidden },
+  });
+
+  await updateAverageRating(review.revieweeId);
+
+  return successResponse({
+    res,
+    req,
+    message: "UPDATE_SUCCESS",
+    data: updated,
+    status: 200,
   });
 });
 

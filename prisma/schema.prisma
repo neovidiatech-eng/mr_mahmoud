@@ -173,6 +173,7 @@ model teacher {
 
   conversations Conversation[]
   weeklyReports weekly_report[]
+  teacherSubjects TeacherSubject[]
 }
 
 model weekly_report {
@@ -221,6 +222,8 @@ model student {
   conversations      Conversation[]
   userRankHistories  user_rank_history[]
   groupSchedules     GroupScheduleStudent[]
+  coursePurchaseRequests course_purchase_request[]
+  coursePurchases    CoursePurchase[]
 }
 
 model schedule {
@@ -262,11 +265,14 @@ model schedule {
   lecturesId          String?
   order               Int?         @default(0)
   groupStudents       GroupScheduleStudent[]
+  subjectId           String?
+  subject             subject?     @relation(fields: [subjectId], references: [id])
 
   @@index([teacherId])
   @@index([studentId])
   @@index([start_time])
   @@index([end_time])
+  @@index([subjectId])
 }
 
 model GroupScheduleStudent {
@@ -347,30 +353,118 @@ model homework {
   dueDate     DateTime
   studentId   String
   teacherId   String
+  subjectId   String?
+  grade       Float?
+  feedback    String?
   attachments Json?
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
   student     student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
   teacher     teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject     subject? @relation(fields: [subjectId], references: [id])
 
   @@index([teacherId])
   @@index([studentId])
+  @@index([subjectId])
 }
 
 model exam {
-  id         String   @id @default(uuid())
-  title      String
-  grade      Float    @default(0)
-  studentId  String
-  teacherId  String
-  dueDate    DateTime
-  totalMarks Float    @default(100)
-  duration   Float
-  status     String   @default("pending")
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  student    student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  teacher    teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  id          String    @id @default(uuid())
+  title       String
+  subject     String?
+  grade       Float     @default(0)
+  studentId   String
+  teacherId   String
+  dueDate     DateTime
+  totalMarks  Float     @default(100)
+  duration    Float
+  status      String    @default("pending")
+  startedAt   DateTime?
+  submittedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  student     student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher     teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  questions exam_question[]
+  answers   exam_answer[]
+}
+
+model exam_question {
+  id        String   @id @default(uuid())
+  examId    String
+  text      String
+  type      String   @default("mcq") // mcq | true_false
+  points    Float    @default(1)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  exam    exam            @relation(fields: [examId], references: [id], onDelete: Cascade)
+  options exam_option[]
+  answers exam_answer[]
+
+  @@index([examId])
+}
+
+model exam_option {
+  id         String  @id @default(uuid())
+  questionId String
+  text       String
+  isCorrect  Boolean @default(false)
+  order      Int     @default(0)
+
+  question exam_question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers  exam_answer[]
+
+  @@index([questionId])
+}
+
+model exam_answer {
+  id               String   @id @default(uuid())
+  examId           String
+  questionId       String
+  selectedOptionId String?
+  isCorrect        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  exam           exam          @relation(fields: [examId], references: [id], onDelete: Cascade)
+  question       exam_question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption exam_option?  @relation(fields: [selectedOptionId], references: [id])
+
+  @@unique([examId, questionId])
+  @@index([examId])
+  @@index([questionId])
+}
+
+model subject {
+  id        String   @id @default(uuid())
+  name_ar   String
+  name_en   String?
+  color     String   @default("#10b981")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacherSubjects TeacherSubject[]
+  homeworks       homework[]
+  schedules       schedule[]
+}
+
+model TeacherSubject {
+  id        String   @id @default(uuid())
+  teacherId String
+  subjectId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, subjectId])
+  @@index([teacherId])
+  @@index([subjectId])
 }
 
 model Subscription {
@@ -509,6 +603,7 @@ model ranks {
   slug              String              @unique
   color             String?
   ageRange          Json
+  stageName         String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   students          student[]
@@ -518,19 +613,67 @@ model ranks {
   @@index([name])
 }
 
+model category {
+  id        String     @id @default(uuid())
+  name_ar   String
+  name_en   String?
+  color     String     @default("#6366f1")
+  active    Boolean    @default(true)
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  courses   courses[]
+}
+
 model courses {
     id          String     @id @default(uuid())
     title       String     @unique
     description String?
     rankId      String
+    categoryId  String?
+    price       Float?
     image       String     @default("default_course.jpg")
     rank        ranks      @relation(fields: [rankId], references: [id], onDelete: Cascade)
+    category    category?  @relation(fields: [categoryId], references: [id])
     lectures    lectures[]
     createdAt   DateTime   @default(now())
     updatedAt   DateTime   @updatedAt
     schedules   schedule[]
+    purchaseRequests course_purchase_request[]
+    purchases   CoursePurchase[]
 
   @@index([rankId])
+  @@index([categoryId])
+}
+
+model course_purchase_request {
+  id        String   @id @default(uuid())
+  studentId String
+  courseId  String
+  status    String   @default("pending")
+  notes     String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  student student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  courses @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([courseId])
+}
+
+model CoursePurchase {
+  id         String   @id @default(uuid())
+  studentId  String
+  courseId   String
+  purchasedAt DateTime @default(now())
+
+  student student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  courses @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
 }
 
 model lectures {
@@ -570,6 +713,7 @@ model user_lectures {
   lectureId   String
   status      String    @default("completed")
   progress    Float     @default(0)
+  lastPosition Float    @default(0)
   completedAt DateTime?
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt

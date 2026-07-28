@@ -24,6 +24,7 @@ export const createRank = {
         "string.base": "ageRange must be a string",
       })
       .required(),
+    stageName: joi.string().max(64).allow("").optional(),
   }),
 };
 
@@ -42,6 +43,7 @@ export const updateRank = {
       })
       .optional(),
     ageRange: generalFields.ageRange.optional(),
+    stageName: joi.string().max(64).allow("").optional(),
   }),
   params: joi.object({
     id: generalFields.id.required(),

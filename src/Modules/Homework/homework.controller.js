@@ -10,7 +10,7 @@ const isHomeworkManagementUser = (user) =>
   isAdmin(user) || user?.role?.name === ROLES.STAFF;
 
 export const createHomework = asyncHandler(async (req, res, next) => {
-  const { title, description, dueDate, studentId, status } = req.body;
+  const { title, description, dueDate, studentId, subjectId, status } = req.body;
 
   const teacher = req.user.teacher;
   const student = await db.findOne({
@@ -48,6 +48,7 @@ export const createHomework = asyncHandler(async (req, res, next) => {
       description,
       dueDate: new Date(dueDate),
       studentId,
+      ...(subjectId && { subjectId }),
       status: status || "pending",
       teacherId: assignedTeacherId,
     },
@@ -64,7 +65,8 @@ export const createHomework = asyncHandler(async (req, res, next) => {
 
 export const updateHomework = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { title, description, dueDate, studentId, status } = req.body;
+  const { title, description, dueDate, studentId, subjectId, grade, feedback, status } =
+    req.body;
 
   const homeworkExists = await db.findOne({
     model: "homework",
@@ -102,6 +104,10 @@ export const updateHomework = asyncHandler(async (req, res, next) => {
     finalDueDate = new Date(dueDate);
   }
 
+  // Grading a submitted homework moves it to "graded" unless the caller
+  // explicitly requests a different status.
+  const finalStatus = status || (grade !== undefined ? "graded" : undefined);
+
   const homework = await db.updateOne({
     model: "homework",
     where: { id },
@@ -110,7 +116,10 @@ export const updateHomework = asyncHandler(async (req, res, next) => {
       ...(description && { description }),
       ...(finalDueDate && { dueDate: finalDueDate }),
       ...(studentId && { studentId }),
-      ...(status && { status }),
+      ...(subjectId && { subjectId }),
+      ...(grade !== undefined && { grade }),
+      ...(feedback !== undefined && { feedback }),
+      ...(finalStatus && { status: finalStatus }),
     },
   });
 
@@ -295,6 +304,7 @@ export const getAllHomework = asyncHandler(async (req, res, next) => {
   });
 });
 export const getTeacherHomeworks = asyncHandler(async (req, res, next) => {
+  const { studentId, page, limit } = req.query;
   const teacher = req.user.teacher.id;
   if (!teacher) {
     return errorResponse({

@@ -12,9 +12,12 @@ import {
   deleteTeacherSchema,
 } from "./teachers.validation.js";
 import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
+import subjectsRouter from "./Subjects/subjects.routes.js";
 
 const router = Router();
 const teacherResource = "users"; // Teachers are users
+
+router.use("/subjects", subjectsRouter);
 
 router.get(
   "/",

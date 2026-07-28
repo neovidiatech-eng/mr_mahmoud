@@ -31,6 +31,7 @@ export const createSchedule = {
           "string.pattern.base": "COURSE_ID_INVALID",
         })
         .required(),
+      subjectId: generalFields.id.optional(),
       title: generalFields.name
         .messages({
           "string.empty": "TITLE_REQUIRED",
@@ -90,6 +91,7 @@ export const createRecurringSchedule = {
       maxStudents: Joi.string().optional().default("1"),
       teacherId: generalFields.id.required(),
       courseId: generalFields.id.required(),
+      subjectId: generalFields.id.optional(),
       title: generalFields.name,
       description: Joi.string().max(1000).allow("", null),
       link: generalFields.url.required(),
@@ -147,6 +149,7 @@ export const updateSchedule = {
     .keys({
       title: generalFields.name,
       description: Joi.string().max(1000).allow("", null),
+      subjectId: generalFields.id.optional(),
       link: generalFields.url,
       notes: Joi.string().max(1000).allow("", null),
       status: Joi.string().valid("planned", "completed", "missed", "cancelled"),
@@ -176,6 +179,7 @@ export const updateRecurringGroup = {
     .keys({
       title: generalFields.name,
       description: Joi.string().max(1000).allow("", null),
+      subjectId: generalFields.id.optional(),
       link: generalFields.url,
       notes: Joi.string().max(1000).allow("", null),
       status: Joi.string().valid("planned", "completed", "missed", "cancelled"),
