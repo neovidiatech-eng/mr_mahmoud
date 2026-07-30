@@ -34,7 +34,7 @@ export const swaggerSpec = {
       description: "Local Development Server"
     },
     {
-      url: "https://dashboard.mr-mahmoud.com",
+      url: "https://copy.agro-plus.net",
       description: "Production Server"
     }
   ],
