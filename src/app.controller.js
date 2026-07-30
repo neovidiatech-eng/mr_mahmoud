@@ -17,6 +17,7 @@ import { init_io } from "./Utils/Socket/index.js";
 import { socketAuthentication } from "./Middlewares/SocketAuth.js";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { initGeoIP } from "./Utils/GeoIP.js";
+import { swaggerSpec } from "./Utils/Swagger/swagger.js";
 
 const bootstrap = async () => {
   const app = express();
@@ -77,6 +78,10 @@ const bootstrap = async () => {
   app.use(langMiddleware); // Detect language for all requests
   await redisConnection();
   app.use("/uploads", express.static(path.resolve("./src/uploads")));
+
+  // Swagger Documentation UI
+  app.get("/docs/swagger.json", (req, res) => res.json(swaggerSpec));
+  app.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
   // Root Router
   app.use(rootRouter);

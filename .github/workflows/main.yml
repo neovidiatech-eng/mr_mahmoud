@@ -63,13 +63,13 @@ jobs:
       - uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.SERVER_IP }}
-          username: root
+          username: admin
           key: ${{ secrets.SSH_PRIVATE_KEY }}
 
           script: |
             set -e
 
-            cd /backend/jupiter-copy
+            cd /backend/mr_mahmoud
             
 
             # ── Step 1: Pull latest code ──────────────────────────────────────

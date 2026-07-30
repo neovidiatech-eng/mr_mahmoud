@@ -19,7 +19,13 @@ import { seedSettings } from "./seeders/settings.seeder.js";
 import { seedPolicies } from "./seeders/policies.seeder.js";
 import { seedProgress } from "./seeders/progress.seeder.js";
 import { seedSupport } from "./seeders/support.seeder.js";
-
+import { seedHomework } from "./seeders/homework.seeder.js";
+import { seedExams } from "./seeders/exams.seeder.js";
+import { seedChat } from "./seeders/chat.seeder.js";
+import { seedWeeklyReports } from "./seeders/weeklyReports.seeder.js";
+import { seedWithdrawals } from "./seeders/withdrawals.seeder.js";
+import { seedCoursePurchaseRequests } from "./seeders/coursePurchaseRequests.seeder.js";
+import { seedTransactions } from "./seeders/transactions.seeder.js";
 
 dotenv.config();
 
@@ -28,7 +34,7 @@ const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
 async function main() {
-  console.log("--- Starting Global Seeding ---");
+  console.log("--- Starting Global Module Seeding ---");
 
   await seedCurrencies();
   await seedSettings();
@@ -38,6 +44,7 @@ async function main() {
   await seedStuff();
   await seedTeachers();
   await seedStudents();
+  await seedSubscriptions();
   await seedSubscriptionRequests();
   await seedSchedules();
   await seedExpenses();
@@ -46,8 +53,15 @@ async function main() {
   await seedPolicies();
   await seedProgress();
   await seedSupport();
+  await seedHomework();
+  await seedExams();
+  await seedChat();
+  await seedWeeklyReports();
+  await seedWithdrawals();
+  await seedCoursePurchaseRequests();
+  await seedTransactions();
 
-  console.log("--- Seeding Finished Successfully ---");
+  console.log("--- All Modules Seeded Finished Successfully ---");
 }
 
 main()
