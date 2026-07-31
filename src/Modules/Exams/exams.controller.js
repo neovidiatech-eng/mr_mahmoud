@@ -6,9 +6,10 @@ import {
 import * as db from "../../database/dbService.js";
 import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 import { isAdmin } from "../../Utils/Permissions/permissions.js";
+import { localize, localizeMany } from "../../Utils/Localize/index.js";
 
 export const createExam = asyncHandler(async (req, res, next) => {
-  const { title, subject, totalMarks, studentId, status, dueDate, duration } =
+  const { title_ar, title_en, subject, totalMarks, studentId, status, dueDate, duration } =
     req.body;
   
   // Dynamic RBAC: Check if user has permission to create exams
@@ -40,7 +41,8 @@ export const createExam = asyncHandler(async (req, res, next) => {
   const exam = await db.create({
     model: "exam",
     data: {
-      title,
+      title_ar,
+      ...(title_en !== undefined && { title_en }),
       ...(subject !== undefined && { subject }),
       totalMarks,
       studentId,
@@ -64,7 +66,7 @@ export const createExam = asyncHandler(async (req, res, next) => {
 
 export const updateExam = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { title, subject, totalMarks, dueDate, studentId, teacherId, status, duration } =
+  const { title_ar, title_en, subject, totalMarks, dueDate, studentId, teacherId, status, duration } =
     req.body;
 
   const examExists = await db.findOne({
@@ -92,7 +94,8 @@ export const updateExam = asyncHandler(async (req, res, next) => {
     model: "exam",
     where: { id },
     data: {
-      ...(title && { title }),
+      ...(title_ar && { title_ar }),
+      ...(title_en !== undefined && { title_en }),
       ...(subject !== undefined && { subject }),
       ...(totalMarks !== undefined && { totalMarks }),
       ...(dueDate && { dueDate: new Date(dueDate) }),
@@ -159,7 +162,15 @@ export const getExam = asyncHandler(async (req, res, next) => {
     return errorResponse({ req, next, message: "EXAM_NOT_FOUND", status: 404 });
   }
 
-  return successResponse({ res, req, message: "FETCH_SUCCESS", data: exam, status: 200 });
+  const isManagement = isAdmin(req.user);
+  const isOwnerTeacher = !!req.user.teacher && exam.teacherId === req.user.teacher.id;
+  const isOwnerStudent = !!req.user.student && exam.studentId === req.user.student.id;
+
+  if (!isManagement && !isOwnerTeacher && !isOwnerStudent) {
+    return errorResponse({ req, next, message: "UNAUTHORIZED_ACCESS", status: 403 });
+  }
+
+  return successResponse({ res, req, message: "FETCH_SUCCESS", data: localize(exam, ["title"], req.lang), status: 200 });
 });
 
 export const getStudentExams = asyncHandler(async (req, res, next) => {
@@ -188,7 +199,7 @@ export const getStudentExams = asyncHandler(async (req, res, next) => {
     return errorResponse({ req, next, message: "EXAM_NOT_FOUND", status: 404 });
   }
 
-  return successResponse({ res, req, message: "FETCH_SUCCESS", data: exams, status: 200 });
+  return successResponse({ res, req, message: "FETCH_SUCCESS", data: localizeMany(exams, ["title"], req.lang), status: 200 });
 });
 
 export const getAllExams = asyncHandler(async (req, res, next) => {
@@ -227,7 +238,7 @@ export const getAllExams = asyncHandler(async (req, res, next) => {
     res,
     req,
     message: "FETCH_SUCCESS",
-    data: { items, pagination },
+    data: { items: localizeMany(items, ["title"], req.lang), pagination },
     status: 200,
   });
 });
@@ -242,9 +253,32 @@ const canManageExam = (req, exam) => {
   return !!req.user.teacher && exam.teacherId === req.user.teacher.id;
 };
 
+// Deterministic per-exam shuffle: same student sees the same order across
+// requests/reloads of the same attempt, but the order itself is randomized
+// relative to the teacher-authored `order` field.
+const seededShuffle = (array, seed) => {
+  let hash = 0;
+  for (let i = 0; i < seed.length; i++) {
+    hash = (hash << 5) - hash + seed.charCodeAt(i);
+    hash |= 0;
+  }
+  let state = hash >>> 0;
+  const random = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 4294967296;
+  };
+
+  const result = [...array];
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
+  }
+  return result;
+};
+
 export const addQuestion = asyncHandler(async (req, res, next) => {
   const { id } = req.params; // examId
-  const { text, type, points, order, options } = req.body;
+  const { text_ar, text_en, type, points, order, options } = req.body;
 
   const exam = await db.findOne({ model: "exam", where: { id } });
   if (!exam) {
@@ -274,13 +308,15 @@ export const addQuestion = asyncHandler(async (req, res, next) => {
     model: "exam_question",
     data: {
       examId: id,
-      text,
+      text_ar,
+      ...(text_en !== undefined && { text_en }),
       type,
       points,
       order: questionOrder,
       options: {
         create: options.map((o, i) => ({
-          text: o.text,
+          text_ar: o.text_ar,
+          ...(o.text_en !== undefined && { text_en: o.text_en }),
           isCorrect: !!o.isCorrect,
           order: i,
         })),
@@ -294,7 +330,7 @@ export const addQuestion = asyncHandler(async (req, res, next) => {
 
 export const updateQuestion = asyncHandler(async (req, res, next) => {
   const { questionId } = req.params;
-  const { text, type, points, order, options } = req.body;
+  const { text_ar, text_en, type, points, order, options } = req.body;
 
   const question = await db.findOne({
     model: "exam_question",
@@ -322,7 +358,8 @@ export const updateQuestion = asyncHandler(async (req, res, next) => {
       model: "exam_question",
       where: { id: questionId },
       data: {
-        ...(text !== undefined && { text }),
+        ...(text_ar !== undefined && { text_ar }),
+        ...(text_en !== undefined && { text_en }),
         ...(type !== undefined && { type }),
         ...(points !== undefined && { points }),
         ...(order !== undefined && { order }),
@@ -334,7 +371,7 @@ export const updateQuestion = asyncHandler(async (req, res, next) => {
       for (const [i, o] of options.entries()) {
         await tx.create({
           model: "exam_option",
-          data: { questionId, text: o.text, isCorrect: !!o.isCorrect, order: i },
+          data: { questionId, text_ar: o.text_ar, text_en: o.text_en, isCorrect: !!o.isCorrect, order: i },
         });
       }
     }
@@ -390,22 +427,31 @@ export const getQuestions = asyncHandler(async (req, res, next) => {
   // Students may only reveal correct answers after they've submitted the exam.
   const revealAnswers = isManagement || isOwnerTeacher || ["submitted", "graded"].includes(exam.status);
 
+  const isStudentView = isOwnerStudent && !isManagement && !isOwnerTeacher;
+
   const questions = await db.findMany({
     model: "exam_question",
     where: { examId: id },
     orderBy: { order: "asc" },
     include: {
       options: true,
-      ...(isOwnerStudent && !isManagement && !isOwnerTeacher
-        ? { answers: { where: { examId: id } } }
-        : {}),
+      ...(isStudentView ? { answers: { where: { examId: id } } } : {}),
     },
   });
 
-  const sanitized = questions.map((q) => ({
-    ...q,
-    options: revealAnswers ? q.options : q.options.map(({ isCorrect, ...rest }) => rest),
-  }));
+  // Students get a randomized (but per-exam-consistent) question order and
+  // per-question option order; teachers/admins always see the authored order.
+  const ordered = isStudentView ? seededShuffle(questions, `q-${id}`) : questions;
+
+  const sanitized = ordered.map((q) => {
+    const localizedQuestion = localize(q, ["text"], req.lang);
+    const localizedOptions = localizeMany(localizedQuestion.options, ["text"], req.lang);
+    const options = revealAnswers ? localizedOptions : localizedOptions.map(({ isCorrect, ...rest }) => rest);
+    return {
+      ...localizedQuestion,
+      options: isStudentView ? seededShuffle(options, `o-${id}-${q.id}`) : options,
+    };
+  });
 
   return successResponse({ res, req, message: "FETCH_SUCCESS", data: sanitized, status: 200 });
 });

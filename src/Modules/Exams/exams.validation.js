@@ -4,10 +4,11 @@ import { generalFields } from "../../Utils/GeneralFields/index.js";
 export const createExam = {
   body: joi
     .object({
-      title: generalFields.name.messages({
+      title_ar: generalFields.name.messages({
         "string.empty": "TITLE_REQUIRED",
         "any.required": "TITLE_REQUIRED",
       }),
+      title_en: generalFields.name.optional().allow(""),
       subject: joi.string().max(64).allow("").optional(),
       dueDate: generalFields.date.messages({
         "string.empty": "DUE_DATE_REQUIRED",
@@ -21,7 +22,7 @@ export const createExam = {
       teacherId: generalFields.id.optional(),
       status: joi
         .string()
-        .valid("pending", "submitted", "completed")
+        .valid("pending", "in_progress", "submitted", "graded")
         .optional(),
       totalMarks: joi
         .number()
@@ -33,12 +34,14 @@ export const createExam = {
         .optional(),
       duration: joi
         .number()
+        .positive()
         .messages({
           "number.base": "DURATION_NUMBER",
+          "number.positive": "DURATION_MUST_BE_POSITIVE",
           "number.empty": "DURATION_REQUIRED",
           "any.required": "DURATION_REQUIRED",
         })
-        .optional(),
+        .required(),
     })
     .required(),
 };
@@ -51,8 +54,8 @@ export const updatecreateExam = {
     .required(),
   body: joi
     .object({
-      title: joi.string().optional(),
-      description: joi.string().optional(),
+      title_ar: joi.string().optional(),
+      title_en: joi.string().allow("").optional(),
       subject: joi.string().max(64).allow("").optional(),
       dueDate: joi.date().optional(),
       studentId: generalFields.id.optional(),
@@ -61,7 +64,7 @@ export const updatecreateExam = {
       duration: joi.number().optional(),
       status: joi
         .string()
-        .valid("pending", "in_progress", "submitted", "graded", "completed")
+        .valid("pending", "in_progress", "submitted", "graded")
         .optional(),
     })
     .required(),
@@ -94,7 +97,8 @@ export const getAllExams = {
 };
 
 const optionSchema = joi.object({
-  text: joi.string().min(1).max(500).required(),
+  text_ar: joi.string().min(1).max(500).required(),
+  text_en: joi.string().min(1).max(500).allow("").optional(),
   isCorrect: joi.boolean().default(false),
 });
 
@@ -102,7 +106,8 @@ export const addQuestion = {
   params: joi.object({ id: generalFields.id.required() }).required(),
   body: joi
     .object({
-      text: joi.string().min(1).max(1000).required(),
+      text_ar: joi.string().min(1).max(1000).required(),
+      text_en: joi.string().min(1).max(1000).allow("").optional(),
       type: joi.string().valid("mcq", "true_false").default("mcq"),
       points: joi.number().min(0).default(1),
       order: joi.number().integer().min(0).optional(),
@@ -117,7 +122,8 @@ export const updateQuestion = {
   params: joi.object({ questionId: generalFields.id.required() }).required(),
   body: joi
     .object({
-      text: joi.string().min(1).max(1000).optional(),
+      text_ar: joi.string().min(1).max(1000).optional(),
+      text_en: joi.string().min(1).max(1000).allow("").optional(),
       type: joi.string().valid("mcq", "true_false").optional(),
       points: joi.number().min(0).optional(),
       order: joi.number().integer().min(0).optional(),

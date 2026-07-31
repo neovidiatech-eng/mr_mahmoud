@@ -98,12 +98,14 @@ export async function seedMatrials() {
     const seededRank = await prisma.ranks.upsert({
       where: { slug: rank.slug },
       update: {
-        name: rank.name,
+        name_ar: rank.name,
+        name_en: rank.name,
         color: rank.color,
         ageRange: rank.ageRange,
       },
       create: {
-        name: rank.name,
+        name_ar: rank.name,
+        name_en: rank.name,
         slug: rank.slug,
         color: rank.color,
         ageRange: rank.ageRange,
@@ -112,21 +114,26 @@ export async function seedMatrials() {
 
     for (const courseData of courses) {
       const { lectures, ...course } = courseData;
-      
+
       const seededCourse = await prisma.courses.upsert({
-        where: { title: course.title },
+        where: { title_ar: course.title },
         update: {
-          description: course.description,
+          title_en: course.title,
+          description_ar: course.description,
+          description_en: course.description,
           rankId: seededRank.id,
         },
         create: {
-          title: course.title,
-          description: course.description,
+          title_ar: course.title,
+          title_en: course.title,
+          description_ar: course.description,
+          description_en: course.description,
           rankId: seededRank.id,
         },
       });
 
       for (const lecture of lectures) {
+        const { title, content, ...rest } = lecture;
         await prisma.lectures.upsert({
           where: {
             courseId_order: {
@@ -135,15 +142,21 @@ export async function seedMatrials() {
             },
           },
           update: {
-            title: lecture.title,
-            content: lecture.content,
+            title_ar: title,
+            title_en: title,
+            content_ar: content,
+            content_en: content,
             videoUrl: lecture.videoUrl,
             pdfUrl: lecture.pdfUrl,
             duration: lecture.duration,
             date: lecture.date,
           },
           create: {
-            ...lecture,
+            ...rest,
+            title_ar: title,
+            title_en: title,
+            content_ar: content,
+            content_en: content,
             courseId: seededCourse.id,
           },
         });

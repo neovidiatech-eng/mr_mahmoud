@@ -4,8 +4,10 @@ import { generalFields } from "../../Utils/GeneralFields/index.js";
 export const createHomework = {
   body: joi
     .object({
-      title: joi.string().required(),
-      description: joi.string().required(),
+      title_ar: joi.string().required().messages({ "any.required": "TITLE_REQUIRED" }),
+      title_en: joi.string().allow("").optional(),
+      description_ar: joi.string().required().messages({ "any.required": "DESCRIPTION_REQUIRED" }),
+      description_en: joi.string().allow("").optional(),
       dueDate: joi.date().required(),
       studentId: generalFields.id.required(),
       subjectId: generalFields.id.optional(),
@@ -26,8 +28,10 @@ export const updateHomework = {
     .required(),
   body: joi
     .object({
-      title: joi.string().optional(),
-      description: joi.string().optional(),
+      title_ar: joi.string().optional(),
+      title_en: joi.string().allow("").optional(),
+      description_ar: joi.string().optional(),
+      description_en: joi.string().allow("").optional(),
       dueDate: joi.date().optional(),
       studentId: generalFields.id.optional(),
       subjectId: generalFields.id.optional(),

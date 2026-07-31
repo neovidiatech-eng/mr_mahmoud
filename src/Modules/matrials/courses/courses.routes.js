@@ -40,7 +40,7 @@ router.post(
   authorizeResource(coursesResource),
   localMulterUpload({
     customPath: (req) =>
-      `courses/${req.body.title.toLowerCase().split(" ").join("_")}`,
+      `courses/${(req.body.title_ar || "course").toLowerCase().split(" ").join("_")}`,
     validation: fileValidation.image,
   }).single("image"),
   validation(coursesValidation.createCourseSchema),

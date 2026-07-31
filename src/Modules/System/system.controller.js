@@ -393,7 +393,7 @@ export const getDashboard = asyncHandler(async (req, res, next) => {
       upcomingSessions: upcomingSessions.map(s => ({
         id: s.id,
         title: s.title,
-        course: s.course.title,
+        course: req.lang === "ar" ? (s.course.title_ar ?? s.course.title_en) : (s.course.title_en ?? s.course.title_ar),
         time: s.start_time,
         teacher: s.teacher.user.name,
         student: s.student.user.name

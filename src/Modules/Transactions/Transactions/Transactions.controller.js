@@ -121,12 +121,18 @@ export const getTransactionStats = asyncHandler(async (req, res) => {
     }
   }
 
-  // 3. Aggregate sums by type and status
-  const stats = await db.groupBy({
+  // 3. Fetch transactions with their wallet's currency, since amount is stored
+  //    in the wallet's own currency and wallets can differ in currency —
+  //    raw amounts cannot be summed across wallets before normalizing.
+  const transactions = await db.findMany({
     model: "transaction",
-    by: ["type", "status"],
-    _sum: { amount: true },
-    _count: { id: true },
+    where: { status: { in: ["completed", "pending"] } },
+    select: {
+      amount: true,
+      type: true,
+      status: true,
+      wallet: { select: { currency: { select: { exchangeRate: true } } } },
+    },
   });
 
   let totalRevenue = 0;
@@ -134,19 +140,24 @@ export const getTransactionStats = asyncHandler(async (req, res) => {
   let completedCount = 0;
   let pendingCount = 0;
 
-  stats.forEach((s) => {
-    if (s.status === "completed") {
-      completedCount += s._count.id;
+  transactions.forEach((t) => {
+    if (t.status === "completed") {
+      completedCount += 1;
+      // Normalize this transaction's amount into the default currency
+      // before adding it to the running totals.
+      const walletRate = t.wallet?.currency?.exchangeRate || defaultCurrency.exchangeRate;
+      const normalizedAmount = (t.amount / walletRate) * defaultCurrency.exchangeRate;
+
       // Revenue types
-      if (["subscription", "credit"].includes(s.type)) {
-        totalRevenue += s._sum.amount || 0;
-      } 
-      // Expense types
-      else if (["expense", "debit", "withdrawal"].includes(s.type)) {
-        totalExpenses += s._sum.amount || 0;
+      if (["subscription", "credit"].includes(t.type)) {
+        totalRevenue += normalizedAmount;
       }
-    } else if (s.status === "pending") {
-      pendingCount += s._count.id;
+      // Expense types
+      else if (["expense", "debit", "withdrawal"].includes(t.type)) {
+        totalExpenses += normalizedAmount;
+      }
+    } else if (t.status === "pending") {
+      pendingCount += 1;
     }
   });
 

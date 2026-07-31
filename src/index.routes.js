@@ -31,6 +31,7 @@ import weeklyReportsRouter from "./Modules/WeeklyReports/weeklyReports.routes.js
 import policiesRouter from "./Modules/Policies/policies.routes.js";
 import supportRouter from "./Modules/Support/support.routes.js";
 import coursePurchaseRequestsRouter from "./Modules/CoursePurchaseRequests/coursePurchaseRequests.routes.js";
+import postsRouter from "./Modules/Posts/posts.routes.js";
 
 import { ROLES, ADMIN_ROLES } from "./Utils/Permissions/permissions.js";
 
@@ -42,6 +43,9 @@ rootRouter.use(timezoneMiddleware);
 // ─── 1. Public Routes ────────────────────────────────────────────────────────
 rootRouter.use("/auth", authRouter);
 rootRouter.use("/uploads", express.static(path.resolve("./src/uploads")));
+// Posts (blog/news) mixes public read routes with admin-only management
+// routes internally, so it isn't wrapped in a blanket `authentication` here.
+rootRouter.use("/posts", postsRouter);
 
 // ─── 2. Actor Dashboards (Prefix Protected) ──────────────────────────────────
 rootRouter.use("/student", authentication, authorization({ roles: [ROLES.STUDENT] }), studentDashboardRouter);

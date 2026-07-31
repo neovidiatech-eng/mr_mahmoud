@@ -55,7 +55,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
           email: student.user.email,
           phone: `${student.user.code_country}${await decryptText({ text: student.user.phone })}`,
           course: {
-            title: item.course.title,
+            title: req.lang === "ar" ? (item.course.title_ar ?? item.course.title_en) : (item.course.title_en ?? item.course.title_ar),
             id: item.course.id,
           },
           sessions: `${student.sessions_attended}/${student.sessions}`,
@@ -93,7 +93,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
       link: s.link,
       notes: s.notes,
       course: {
-        title: s.course.title,
+        title: req.lang === "ar" ? (s.course.title_ar ?? s.course.title_en) : (s.course.title_en ?? s.course.title_ar),
         id: s.course.id,
       },
       student: {

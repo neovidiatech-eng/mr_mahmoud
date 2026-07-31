@@ -1,0 +1,435 @@
+{
+  "info": {
+    "name": "mr_mahmoud - Full Session Changes",
+    "description": "Every endpoint touched or added during this work session: i18n (Accept-Language + bilingual _ar/_en content fields), courses search, exams security/shuffle fixes, ranks delete protection, withdrawals race-fix, transaction stats currency fix, and the new Blog/News (Posts) module. All requests send Accept-Language so you can flip {{lang}} between ar/en and see translated messages AND translated content fields (same JSON keys either way).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:3013", "type": "string" },
+    { "key": "lang", "value": "en", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "courseId", "value": "", "type": "string" },
+    { "key": "lectureId", "value": "", "type": "string" },
+    { "key": "categoryId", "value": "", "type": "string" },
+    { "key": "rankId", "value": "", "type": "string" },
+    { "key": "examId", "value": "", "type": "string" },
+    { "key": "questionId", "value": "", "type": "string" },
+    { "key": "homeworkId", "value": "", "type": "string" },
+    { "key": "policyId", "value": "", "type": "string" },
+    { "key": "supportId", "value": "", "type": "string" },
+    { "key": "supportCategoryId", "value": "", "type": "string" },
+    { "key": "withdrawalRequestId", "value": "", "type": "string" },
+    { "key": "postId", "value": "", "type": "string" },
+    { "key": "postSlug", "value": "", "type": "string" }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [{ "key": "token", "value": "{{token}}", "type": "string" }]
+  },
+  "item": [
+    {
+      "name": "0. i18n — Accept-Language demo",
+      "item": [
+        {
+          "name": "Any endpoint in Arabic (Accept-Language: ar)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "ar" }],
+            "url": { "raw": "{{baseUrl}}/materials/courses", "host": ["{{baseUrl}}"], "path": ["materials", "courses"] }
+          }
+        },
+        {
+          "name": "Same endpoint in English (Accept-Language: en, or omit header entirely = default)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "en" }],
+            "url": { "raw": "{{baseUrl}}/materials/courses", "host": ["{{baseUrl}}"], "path": ["materials", "courses"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "1. Courses (bilingual + search)",
+      "item": [
+        {
+          "name": "Search courses (name + description + keywords + category, both languages)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/materials/courses?search=رياضيات&page=1&limit=10",
+              "host": ["{{baseUrl}}"], "path": ["materials", "courses"],
+              "query": [{ "key": "search", "value": "رياضيات" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }]
+            }
+          }
+        },
+        {
+          "name": "List courses (localized: title/description flattened per Accept-Language)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/courses?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["materials", "courses"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Get course by id",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/courses/{{courseId}}", "host": ["{{baseUrl}}"], "path": ["materials", "courses", "{{courseId}}"] }
+          }
+        },
+        {
+          "name": "Create course (bilingual fields, multipart for image)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title_ar", "value": "مقدمة في الجبر", "type": "text" },
+                { "key": "title_en", "value": "Introduction to Algebra", "type": "text" },
+                { "key": "description_ar", "value": "كورس تمهيدي في مادة الجبر للمرحلة المتوسطة", "type": "text" },
+                { "key": "description_en", "value": "Intro algebra course for intermediate learners", "type": "text" },
+                { "key": "rankId", "value": "{{rankId}}", "type": "text" },
+                { "key": "categoryId", "value": "{{categoryId}}", "type": "text" },
+                { "key": "price", "value": "100", "type": "text" },
+                { "key": "keywords", "value": "[\"رياضيات\",\"algebra\",\"متوسط\"]", "type": "text" },
+                { "key": "image", "type": "file", "src": [] }
+              ]
+            },
+            "url": { "raw": "{{baseUrl}}/materials/courses", "host": ["{{baseUrl}}"], "path": ["materials", "courses"] }
+          }
+        },
+        {
+          "name": "Update course (bilingual fields + keywords)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title_en\": \"Intro to Algebra (updated)\",\n  \"keywords\": [\"رياضيات\", \"algebra\", \"جبر\"]\n}" },
+            "url": { "raw": "{{baseUrl}}/materials/courses/{{courseId}}", "host": ["{{baseUrl}}"], "path": ["materials", "courses", "{{courseId}}"] }
+          }
+        },
+        {
+          "name": "Delete course",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/courses/{{courseId}}", "host": ["{{baseUrl}}"], "path": ["materials", "courses", "{{courseId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Lectures (bilingual)",
+      "item": [
+        {
+          "name": "Create lecture (title_ar/en, content_ar/en)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"courseId\": \"{{courseId}}\",\n  \"title_ar\": \"الدرس الأول\",\n  \"title_en\": \"Lesson One\",\n  \"content_ar\": \"محتوى الدرس بالعربي\",\n  \"content_en\": \"Lesson content in English\",\n  \"videoUrl\": \"https://youtube.com/watch?v=xxxx\",\n  \"pdfUrl\": \"https://example.com/lesson1.pdf\",\n  \"slidesUrl\": \"https://example.com/lesson1.pptx\",\n  \"order\": 1\n}" },
+            "url": { "raw": "{{baseUrl}}/materials/lectures", "host": ["{{baseUrl}}"], "path": ["materials", "lectures"] }
+          }
+        },
+        {
+          "name": "Get lecture by id (localized)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/lectures/{{lectureId}}", "host": ["{{baseUrl}}"], "path": ["materials", "lectures", "{{lectureId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Ranks (bilingual + delete protection)",
+      "item": [
+        {
+          "name": "Create rank (name_ar/en, stageName_ar/en)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"name_ar\": \"الفئة الفضية\",\n  \"name_en\": \"Silver Tier\",\n  \"color\": \"#C0C0C0\",\n  \"ageRange\": { \"minAge\": 5, \"maxAge\": 10 },\n  \"stageName_ar\": \"ابتدائي\",\n  \"stageName_en\": \"Primary\"\n}" },
+            "url": { "raw": "{{baseUrl}}/materials/ranks", "host": ["{{baseUrl}}"], "path": ["materials", "ranks"] }
+          }
+        },
+        {
+          "name": "List ranks (localized, with nested courses/lectures)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/ranks", "host": ["{{baseUrl}}"], "path": ["materials", "ranks"] }
+          }
+        },
+        {
+          "name": "Delete rank (fails with RANK_IN_USE if linked to courses/students)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/materials/ranks/{{rankId}}", "host": ["{{baseUrl}}"], "path": ["materials", "ranks", "{{rankId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Exams (bilingual + IDOR fix + shuffle)",
+      "item": [
+        {
+          "name": "Create exam (title_ar/en, duration required)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title_ar\": \"اختبار الوحدة الأولى\",\n  \"title_en\": \"Unit One Exam\",\n  \"studentId\": \"REPLACE_WITH_STUDENT_ID\",\n  \"totalMarks\": 100,\n  \"duration\": 45,\n  \"dueDate\": \"2026-08-10T12:00:00.000Z\"\n}" },
+            "url": { "raw": "{{baseUrl}}/exams", "host": ["{{baseUrl}}"], "path": ["exams"] }
+          }
+        },
+        {
+          "name": "Add question (text_ar/en + options text_ar/en)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"text_ar\": \"ما ناتج 12 × 12؟\",\n  \"text_en\": \"What is 12 x 12?\",\n  \"type\": \"mcq\",\n  \"points\": 50,\n  \"options\": [\n    { \"text_ar\": \"124\", \"text_en\": \"124\", \"isCorrect\": false },\n    { \"text_ar\": \"144\", \"text_en\": \"144\", \"isCorrect\": true }\n  ]\n}" },
+            "url": { "raw": "{{baseUrl}}/exams/{{examId}}/questions", "host": ["{{baseUrl}}"], "path": ["exams", "{{examId}}", "questions"] }
+          }
+        },
+        {
+          "name": "Get exam by id (ownership-checked, was IDOR)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/exams/exam/{{examId}}", "host": ["{{baseUrl}}"], "path": ["exams", "exam", "{{examId}}"] }
+          }
+        },
+        {
+          "name": "Get exam questions (shuffled per student, localized text)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/exams/{{examId}}/questions", "host": ["{{baseUrl}}"], "path": ["exams", "{{examId}}", "questions"] }
+          }
+        },
+        {
+          "name": "Start exam",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/exams/{{examId}}/start", "host": ["{{baseUrl}}"], "path": ["exams", "{{examId}}", "start"] }
+          }
+        },
+        {
+          "name": "Submit exam",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"answers\": [\n    { \"questionId\": \"{{questionId}}\", \"selectedOptionId\": \"REPLACE_WITH_OPTION_ID\" }\n  ]\n}" },
+            "url": { "raw": "{{baseUrl}}/exams/{{examId}}/submit", "host": ["{{baseUrl}}"], "path": ["exams", "{{examId}}", "submit"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Homework (bilingual)",
+      "item": [
+        {
+          "name": "Create homework (title_ar/en, description_ar/en)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title_ar\": \"واجب الجبر 1\",\n  \"title_en\": \"Algebra Assignment 1\",\n  \"description_ar\": \"حل المعادلات الخطية والتربيعية\",\n  \"description_en\": \"Solve linear equations and quadratic formulas\",\n  \"dueDate\": \"2026-08-15T12:00:00.000Z\",\n  \"studentId\": \"REPLACE_WITH_STUDENT_ID\"\n}" },
+            "url": { "raw": "{{baseUrl}}/homework", "host": ["{{baseUrl}}"], "path": ["homework"] }
+          }
+        },
+        {
+          "name": "Get homework by id (localized)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/homework/student/{{homeworkId}}", "host": ["{{baseUrl}}"], "path": ["homework", "student", "{{homeworkId}}"] }
+          }
+        },
+        {
+          "name": "List all homework (localized)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/homework?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["homework"], "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Policies (bilingual)",
+      "item": [
+        {
+          "name": "Get all policies (public to authenticated users, localized)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/policies", "host": ["{{baseUrl}}"], "path": ["policies"] }
+          }
+        },
+        {
+          "name": "Get active notice (localized)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/policies/notice", "host": ["{{baseUrl}}"], "path": ["policies", "notice"] }
+          }
+        },
+        {
+          "name": "Create policy (admin, title_ar/en + description_ar/en)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title_ar\": \"معايير التدريس\",\n  \"title_en\": \"Teaching Standards\",\n  \"description_ar\": \"إرشادات للحفاظ على جودة التدريس والسلوك المهني\",\n  \"description_en\": \"Guidelines for maintaining high-quality teaching and professional conduct\",\n  \"icon\": \"Shield\",\n  \"color\": \"blue\"\n}" },
+            "url": { "raw": "{{baseUrl}}/policies", "host": ["{{baseUrl}}"], "path": ["policies"] }
+          }
+        },
+        {
+          "name": "Upsert notice (admin, title_ar/en + content_ar/en)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title_ar\": \"تنبيه هام\",\n  \"title_en\": \"Important Notice\",\n  \"content_ar\": \"يرجى مراجعة السياسات المحدّثة\",\n  \"content_en\": \"Please review the updated policies\",\n  \"active\": true\n}" },
+            "url": { "raw": "{{baseUrl}}/policies/notice", "host": ["{{baseUrl}}"], "path": ["policies", "notice"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Support (bilingual: articles + categories)",
+      "item": [
+        {
+          "name": "List support articles (localized)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/support", "host": ["{{baseUrl}}"], "path": ["support"] }
+          }
+        },
+        {
+          "name": "List support categories (localized, with nested articles)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/support/categories", "host": ["{{baseUrl}}"], "path": ["support", "categories"] }
+          }
+        },
+        {
+          "name": "Create support category (title_ar/en)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title_ar\": \"الدعم الفني\",\n  \"title_en\": \"Technical Support\"\n}" },
+            "url": { "raw": "{{baseUrl}}/support/categories", "host": ["{{baseUrl}}"], "path": ["support", "categories"] }
+          }
+        },
+        {
+          "name": "Create support article (title_ar/en + description_ar/en)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"title_ar\": \"دعم واتساب\",\n  \"title_en\": \"WhatsApp Support\",\n  \"url\": \"https://wa.me/1234567890\",\n  \"description_ar\": \"تواصل مع فريق الدعم الفني للمساعدة الفورية\",\n  \"description_en\": \"Chat with our technical team for immediate assistance\",\n  \"categoryId\": \"{{supportCategoryId}}\"\n}" },
+            "url": { "raw": "{{baseUrl}}/support", "host": ["{{baseUrl}}"], "path": ["support"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Withdrawals (race condition fix)",
+      "item": [
+        {
+          "name": "Request withdrawal (reserves pending amounts)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"amount\": 200\n}" },
+            "url": { "raw": "{{baseUrl}}/withdrawals/request", "host": ["{{baseUrl}}"], "path": ["withdrawals", "request"] }
+          }
+        },
+        {
+          "name": "Approve withdrawal (atomic, race-safe)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"adminNotes\": \"تمت المراجعة والموافقة\"\n}" },
+            "url": { "raw": "{{baseUrl}}/withdrawals/{{withdrawalRequestId}}/approve", "host": ["{{baseUrl}}"], "path": ["withdrawals", "{{withdrawalRequestId}}", "approve"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Transactions (currency mixing fix)",
+      "item": [
+        {
+          "name": "Get transaction stats (normalized per-wallet currency)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/transactions/stats", "host": ["{{baseUrl}}"], "path": ["transactions", "stats"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "10. Posts / Blog & News (new module, bilingual, admin-only writes)",
+      "item": [
+        {
+          "name": "List posts (public, no auth, localized)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": {
+              "raw": "{{baseUrl}}/posts?type=blog&published=true&page=1&limit=10",
+              "host": ["{{baseUrl}}"], "path": ["posts"],
+              "query": [{ "key": "type", "value": "blog" }, { "key": "published", "value": "true" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }]
+            }
+          }
+        },
+        {
+          "name": "Get post by slug (public, no auth, localized)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/posts/slug/{{postSlug}}", "host": ["{{baseUrl}}"], "path": ["posts", "slug", "{{postSlug}}"] }
+          }
+        },
+        {
+          "name": "Get post by id (admin only, includes drafts)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/posts/{{postId}}", "host": ["{{baseUrl}}"], "path": ["posts", "{{postId}}"] }
+          }
+        },
+        {
+          "name": "Create post (admin only, title_ar/en + excerpt_ar/en + content_ar/en)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"type\": \"news\",\n  \"title_ar\": \"بدء التسجيل في الفصل الدراسي الجديد\",\n  \"title_en\": \"New Semester Registration Is Open\",\n  \"excerpt_ar\": \"التفاصيل الكاملة عن مواعيد التسجيل\",\n  \"excerpt_en\": \"Full details on registration dates\",\n  \"content_ar\": \"<p>محتوى الخبر بالكامل هنا...</p>\",\n  \"content_en\": \"<p>Full news content here...</p>\",\n  \"coverImage\": \"https://example.com/image.jpg\",\n  \"published\": true\n}" },
+            "url": { "raw": "{{baseUrl}}/posts", "host": ["{{baseUrl}}"], "path": ["posts"] }
+          }
+        },
+        {
+          "name": "Update post (admin only)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"published\": false\n}" },
+            "url": { "raw": "{{baseUrl}}/posts/{{postId}}", "host": ["{{baseUrl}}"], "path": ["posts", "{{postId}}"] }
+          }
+        },
+        {
+          "name": "Delete post (admin only)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Accept-Language", "value": "{{lang}}" }],
+            "url": { "raw": "{{baseUrl}}/posts/{{postId}}", "host": ["{{baseUrl}}"], "path": ["posts", "{{postId}}"] }
+          }
+        }
+      ]
+    }
+  ]
+}

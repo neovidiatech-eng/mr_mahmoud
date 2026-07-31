@@ -21,13 +21,14 @@ export async function seedExams() {
   }
 
   const existingExam = await prisma.exam.findFirst({
-    where: { title: "Midterm Mathematics Exam" },
+    where: { title_ar: "Midterm Mathematics Exam" },
   });
 
   if (!existingExam) {
     const exam = await prisma.exam.create({
       data: {
-        title: "Midterm Mathematics Exam",
+        title_ar: "Midterm Mathematics Exam",
+        title_en: "Midterm Mathematics Exam",
         subject: "Mathematics",
         grade: 0,
         studentId: student.id,
@@ -39,27 +40,29 @@ export async function seedExams() {
         questions: {
           create: [
             {
-              text: "What is 12 x 12?",
+              text_ar: "What is 12 x 12?",
+              text_en: "What is 12 x 12?",
               type: "mcq",
               points: 50,
               order: 1,
               options: {
                 create: [
-                  { text: "124", isCorrect: false, order: 1 },
-                  { text: "144", isCorrect: true, order: 2 },
-                  { text: "164", isCorrect: false, order: 3 },
+                  { text_ar: "124", text_en: "124", isCorrect: false, order: 1 },
+                  { text_ar: "144", text_en: "144", isCorrect: true, order: 2 },
+                  { text_ar: "164", text_en: "164", isCorrect: false, order: 3 },
                 ],
               },
             },
             {
-              text: "The square root of 81 is 9.",
+              text_ar: "The square root of 81 is 9.",
+              text_en: "The square root of 81 is 9.",
               type: "true_false",
               points: 50,
               order: 2,
               options: {
                 create: [
-                  { text: "True", isCorrect: true, order: 1 },
-                  { text: "False", isCorrect: false, order: 2 },
+                  { text_ar: "True", text_en: "True", isCorrect: true, order: 1 },
+                  { text_ar: "False", text_en: "False", isCorrect: false, order: 2 },
                 ],
               },
             },

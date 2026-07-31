@@ -3,46 +3,48 @@ import { generalFields } from "../../../Utils/GeneralFields/index.js";
 
 export const createLectureSchema = {
   body: Joi.object({
-    title: generalFields.name
+    title_ar: generalFields.name
       .messages({
-        "string.base": "title must be a string",
-        "string.empty": "title cannot be empty",
-        "any.required": "title is required",
+        "string.base": "TITLE_INVALID",
+        "string.empty": "TITLE_INVALID",
+        "any.required": "TITLE_REQUIRED",
       })
       .required(),
-    content: generalFields.description
+    title_en: generalFields.name.optional().allow(""),
+    content_ar: generalFields.description
       .messages({
-        "string.base": "content must be a string",
-        "string.empty": "content cannot be empty",
-        "any.required": "content is required",
+        "string.base": "DESCRIPTION_INVALID",
+        "string.empty": "DESCRIPTION_INVALID",
+        "any.required": "DESCRIPTION_REQUIRED",
       })
       .required(),
+    content_en: generalFields.description.optional().allow(""),
     videoUrl: generalFields.url
       .messages({
-        "string.base": "videoUrl must be a string",
-        "string.empty": "videoUrl cannot be empty",
-        "any.required": "videoUrl is required",
+        "string.base": "LINK_INVALID",
+        "string.empty": "LINK_INVALID",
+        "any.required": "LINK_REQUIRED",
       })
       .required(),
     slidesUrl: generalFields.url
       .messages({
-        "string.base": "slidesUrl must be a string",
-        "string.empty": "slidesUrl cannot be empty",
-        "any.required": "slidesUrl is required",
+        "string.base": "LINK_INVALID",
+        "string.empty": "LINK_INVALID",
+        "any.required": "LINK_REQUIRED",
       })
       .required(),
     pdfUrl: generalFields.url
       .messages({
-        "string.base": "pdfUrl must be a string",
-        "string.empty": "pdfUrl cannot be empty",
-        "any.required": "pdfUrl is required",
+        "string.base": "LINK_INVALID",
+        "string.empty": "LINK_INVALID",
+        "any.required": "LINK_REQUIRED",
       })
       .required(),
     order: generalFields.number
       .messages({
-        "number.base": "order must be a number",
-        "number.empty": "order cannot be empty",
-        "any.required": "order is required",
+        "number.base": "ORDER_INVALID",
+        "number.empty": "ORDER_REQUIRED",
+        "any.required": "ORDER_REQUIRED",
       })
       .required(),
     courseId: generalFields.id.required(),
@@ -53,8 +55,10 @@ export const createLectureSchema = {
 
 export const updateLectureSchema = {
   body: Joi.object({
-    title: generalFields.name,
-    content: generalFields.description,
+    title_ar: generalFields.name,
+    title_en: generalFields.name.optional().allow(""),
+    content_ar: generalFields.description,
+    content_en: generalFields.description.optional().allow(""),
     videoUrl: generalFields.url,
     order: generalFields.number,
     courseId: generalFields.id,

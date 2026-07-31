@@ -13,6 +13,11 @@ export const PERMISSIONS_V2 = {
     MANAGE: "policies:manage",
   },
 
+  BLOG: {
+    READ: "blog:read",
+    MANAGE: "blog:manage",
+  },
+
   SETTINGS: {
     READ: "settings:read",
     UPDATE: "settings:update",

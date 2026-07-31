@@ -20,7 +20,10 @@ export const getRanks = async (req, res, next) => {
   const { name, page, limit } = req.query || {};
   const where = {};
   if (name) {
-    where.name = { contains: name, mode: "insensitive" };
+    where.OR = [
+      { name_ar: { contains: name, mode: "insensitive" } },
+      { name_en: { contains: name, mode: "insensitive" } },
+    ];
   }
 
   return await db.findManyWithPaginationAndCount({
@@ -28,7 +31,7 @@ export const getRanks = async (req, res, next) => {
     where,
     limit: Number(limit) || 10,
     page: Number(page) || 1,
-    orderBy: { name: "asc" },
+    orderBy: { name_ar: "asc" },
     include: nestedInclude
   });
 };
@@ -37,8 +40,8 @@ export const getRanks = async (req, res, next) => {
    ADD RANK
 ----------------------------- */
 export const addRank = async (req, res, next) => {
-  const { name, color, ageRange, stageName } = req.body || {};
-  const slug = name
+  const { name_ar, name_en, color, ageRange, stageName_ar, stageName_en } = req.body || {};
+  const slug = name_ar
     .toLowerCase()
     .replace(/[^a-z0-9]+/g, "-")
     .replace(/(^-|-$)/g, "");
@@ -46,7 +49,7 @@ export const addRank = async (req, res, next) => {
   const check = await db.findFirst({
     model: "ranks",
     where: {
-      OR: [{ name }, { slug }]
+      OR: [{ name_ar }, { slug }]
     },
   });
 
@@ -59,7 +62,15 @@ export const addRank = async (req, res, next) => {
 
   return await db.create({
     model: "ranks",
-    data: { name, slug, color, ageRange, ...(stageName !== undefined && { stageName }) },
+    data: {
+      name_ar,
+      ...(name_en !== undefined && { name_en }),
+      slug,
+      color,
+      ageRange,
+      ...(stageName_ar !== undefined && { stageName_ar }),
+      ...(stageName_en !== undefined && { stageName_en }),
+    },
   });
 };
 
@@ -89,7 +100,7 @@ export const getRank = async (req, res, next) => {
 ----------------------------- */
 export const updateRank = async (req, res, next) => {
   const { id } = req.params;
-  const { name, color, ageRange, stageName } = req.body;
+  const { name_ar, name_en, color, ageRange, stageName_ar, stageName_en } = req.body;
 
   const rank = await db.findFirst({
     model: "ranks",
@@ -104,8 +115,8 @@ export const updateRank = async (req, res, next) => {
   }
 
   const updateData = {};
-  if (name) {
-    const slug = name
+  if (name_ar) {
+    const slug = name_ar
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, "-")
       .replace(/(^-|-$)/g, "");
@@ -114,7 +125,7 @@ export const updateRank = async (req, res, next) => {
       model: "ranks",
       where: {
         id: { not: id },
-        OR: [{ name }, { slug }]
+        OR: [{ name_ar }, { slug }]
       },
     });
 
@@ -125,13 +136,15 @@ export const updateRank = async (req, res, next) => {
       throw error;
     }
 
-    updateData.name = name;
+    updateData.name_ar = name_ar;
     updateData.slug = slug;
   }
-  
+  if (name_en !== undefined) updateData.name_en = name_en;
+
   if (color) updateData.color = color;
   if (ageRange) updateData.ageRange = ageRange;
-  if (stageName !== undefined) updateData.stageName = stageName;
+  if (stageName_ar !== undefined) updateData.stageName_ar = stageName_ar;
+  if (stageName_en !== undefined) updateData.stageName_en = stageName_en;
 
   return await db.updateOne({
     model: "ranks",
@@ -154,6 +167,18 @@ export const deleteRank = async (req, res, next) => {
   if (!rank) {
     const error = new Error("RANK_NOT_FOUND");
     error.status = 404;
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  const [coursesCount, studentsCount] = await Promise.all([
+    db.count({ model: "courses", where: { rankId: id } }),
+    db.count({ model: "student", where: { rankId: id } }),
+  ]);
+
+  if (coursesCount > 0 || studentsCount > 0) {
+    const error = new Error("RANK_IN_USE");
+    error.status = 409;
     error.isMessageKey = true;
     throw error;
   }

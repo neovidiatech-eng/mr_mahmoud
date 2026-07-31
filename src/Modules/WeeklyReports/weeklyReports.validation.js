@@ -32,11 +32,11 @@ export const updateReportSchema = {
   params: Joi.object({
     id: generalFields.id
       .messages({
-        "string.base": "ID must be a string",
-        "string.hex": "ID must be a hexadecimal string",
-        "string.length": "ID must be 36 characters long",
-        "any.required": "ID is required",
-        "string.pattern.base": "ID must be a valid UUID",
+        "string.base": "ID_STRING",
+        "string.hex": "ID_INVALID",
+        "string.length": "ID_INVALID",
+        "any.required": "ID_REQUIRED",
+        "string.pattern.base": "ID_INVALID",
       })
       .required(),
   }).required(),
@@ -45,11 +45,11 @@ export const reportIdSchema = {
   params: Joi.object({
     id: generalFields.id
       .messages({
-        "string.base": "ID must be a string",
-        "string.hex": "ID must be a hexadecimal string",
-        "string.length": "ID must be 36 characters long",
-        "any.required": "ID is required",
-        "string.pattern.base": "ID must be a valid UUID",
+        "string.base": "ID_STRING",
+        "string.hex": "ID_INVALID",
+        "string.length": "ID_INVALID",
+        "any.required": "ID_REQUIRED",
+        "string.pattern.base": "ID_INVALID",
       })
       .required(),
   }).required(),

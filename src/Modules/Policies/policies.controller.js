@@ -4,6 +4,7 @@ import {
   successResponse,
   errorResponse,
 } from "../../Utils/Response.js";
+import { localize, localizeMany } from "../../Utils/Localize/index.js";
 
 // --- Policies ---
 
@@ -15,7 +16,7 @@ export const getAllPolicies = asyncHandler(async (req, res, next) => {
     orderBy: { createdAt: "asc" },
   });
 
-  return successResponse({ res, req, data: policies });
+  return successResponse({ res, req, data: localizeMany(policies, ["title", "description"], req.lang) });
 });
 
 // 2. Create Policy (Admin)
@@ -40,7 +41,7 @@ export const createPolicy = asyncHandler(async (req, res, next) => {
 // 3. Update Policy (Admin)
 export const updatePolicy = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  
+
   const existing = await db.findOne({
     model: "policy",
     where: { id },
@@ -84,29 +85,31 @@ export const getActiveNotice = asyncHandler(async (req, res, next) => {
     orderBy: { createdAt: "desc" },
   });
 
-  return successResponse({ res, req, data: notice });
+  return successResponse({ res, req, data: localize(notice, ["title", "content"], req.lang) });
 });
 
 // 6. Create/Update Notice (Admin)
 export const upsertNotice = asyncHandler(async (req, res, next) => {
-  const { title, content, active } = req.body;
-  
+  const { title_ar, title_en, content_ar, content_en, active } = req.body;
+
   // We'll keep it simple: if there's an active one, update it, else create
   const existing = await db.findFirst({
     model: "policy_notice",
   });
+
+  const data = { title_ar, title_en, content_ar, content_en, active };
 
   let notice;
   if (existing) {
     notice = await db.updateOne({
       model: "policy_notice",
       where: { id: existing.id },
-      data: { title, content, active },
+      data,
     });
   } else {
     notice = await db.create({
       model: "policy_notice",
-      data: { title, content, active },
+      data,
     });
   }
 

@@ -12,41 +12,51 @@ export const requestWithdrawal = asyncHandler(async (req, res, next) => {
   const { amount } = req.body;
   const teacherId = req.user.id;
 
-  // 1. Get teacher wallet
-  const wallet = await db.findFirst({
-    model: "Wallet",
-    where: { userId: teacherId, type: "teacher" },
-  });
-
-  if (!wallet) {
-    return errorResponse({
-      req,
-      next,
-      status: 404,
-      message: "WALLET_NOT_FOUND",
+  // Run the balance check and request creation inside a single transaction so
+  // two concurrent requests can't both read the same "available" balance and
+  // both pass the check before either commits.
+  const request = await db.transaction(async (tx) => {
+    // 1. Get teacher wallet
+    const wallet = await tx.findFirst({
+      model: "Wallet",
+      where: { userId: teacherId, type: "teacher" },
     });
-  }
 
-  // 2. Check current balance
-  if (wallet.balance < amount) {
-    return errorResponse({
-      req,
-      next,
-      status: 400,
-      message: "INSUFFICIENT_BALANCE",
-      messageParams: { available: wallet.balance, required: amount },
+    if (!wallet) {
+      const error = new Error("WALLET_NOT_FOUND");
+      error.status = 404;
+      error.isMessageKey = true;
+      throw error;
+    }
+
+    // 2. Balance still locked in other pending requests must be reserved too,
+    //    otherwise a teacher can open several pending requests that
+    //    individually look affordable but together exceed the real balance.
+    const pendingRequests = await tx.findMany({
+      model: "WithdrawalRequest",
+      where: { teacherId, status: "pending" },
     });
-  }
+    const pendingAmount = pendingRequests.reduce((sum, r) => sum + r.amount, 0);
+    const available = wallet.balance - pendingAmount;
 
-  // 3. Create request
-  const request = await db.create({
-    model: "WithdrawalRequest",
-    data: {
-      teacherId,
-      amount,
-      currencyId: wallet.currencyId,
-      status: "pending",
-    },
+    if (available < amount) {
+      const error = new Error("INSUFFICIENT_BALANCE");
+      error.status = 400;
+      error.isMessageKey = true;
+      error.messageParams = { available, required: amount };
+      throw error;
+    }
+
+    // 3. Create request
+    return tx.create({
+      model: "WithdrawalRequest",
+      data: {
+        teacherId,
+        amount,
+        currencyId: wallet.currencyId,
+        status: "pending",
+      },
+    });
   });
 
   return successResponse({
@@ -138,7 +148,22 @@ export const approveWithdrawal = asyncHandler(async (req, res, next) => {
 
   // 2. Atomic Transaction for Safety
   const result = await db.transaction(async (tx) => {
-    // 2.a Re-check balance (Double check for race conditions)
+    // 2.a Claim the request atomically: only one of two concurrent approve
+    // calls for the same request can flip it out of "pending" here, closing
+    // the double-approval race before any money moves.
+    const { count: claimed } = await tx.updateMany({
+      model: "WithdrawalRequest",
+      where: { id: request.id, status: "pending" },
+      data: { status: "approved", adminNotes },
+    });
+
+    if (claimed === 0) {
+      const error = new Error("REQUEST_ALREADY_PROCESSED");
+      error.isMessageKey = true;
+      throw error;
+    }
+
+    // 2.b Re-check balance (Double check for race conditions)
     const wallet = await tx.findFirst({
       model: "Wallet",
       where: { userId: request.teacherId, type: "teacher" },
@@ -150,12 +175,20 @@ export const approveWithdrawal = asyncHandler(async (req, res, next) => {
       throw error;
     }
 
-    // 2.b Deduct Balance
-    await tx.updateOne({
+    // 2.b Deduct Balance atomically: the WHERE clause re-verifies the
+    // balance at the moment the row is actually locked/written, so two
+    // concurrent approvals can't both decrement from the same stale read.
+    const { count } = await tx.updateMany({
       model: "Wallet",
-      where: { id: wallet.id },
+      where: { id: wallet.id, balance: { gte: request.amount } },
       data: { balance: { decrement: request.amount } },
     });
+
+    if (count === 0) {
+      const error = new Error("INSUFFICIENT_BALANCE");
+      error.isMessageKey = true;
+      throw error;
+    }
 
     // 2.c Create Payout Transaction (Ledger)
     const transaction = await tx.create({
@@ -170,17 +203,10 @@ export const approveWithdrawal = asyncHandler(async (req, res, next) => {
       },
     });
 
-    // 2.d Update Request Status
-    const updatedRequest = await tx.updateOne({
+    return tx.findFirst({
       model: "WithdrawalRequest",
       where: { id: request.id },
-      data: {
-        status: "approved",
-        adminNotes,
-      },
     });
-
-    return updatedRequest;
   });
 
   return successResponse({

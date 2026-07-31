@@ -5,12 +5,13 @@ import {
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
 import { isAdmin, ROLES } from "../../Utils/Permissions/permissions.js";
+import { localize, localizeMany } from "../../Utils/Localize/index.js";
 
 const isHomeworkManagementUser = (user) =>
   isAdmin(user) || user?.role?.name === ROLES.STAFF;
 
 export const createHomework = asyncHandler(async (req, res, next) => {
-  const { title, description, dueDate, studentId, subjectId, status } = req.body;
+  const { title_ar, title_en, description_ar, description_en, dueDate, studentId, subjectId, status } = req.body;
 
   const teacher = req.user.teacher;
   const student = await db.findOne({
@@ -44,8 +45,10 @@ export const createHomework = asyncHandler(async (req, res, next) => {
   const homework = await db.create({
     model: "homework",
     data: {
-      title,
-      description,
+      title_ar,
+      ...(title_en !== undefined && { title_en }),
+      description_ar,
+      ...(description_en !== undefined && { description_en }),
       dueDate: new Date(dueDate),
       studentId,
       ...(subjectId && { subjectId }),
@@ -65,7 +68,7 @@ export const createHomework = asyncHandler(async (req, res, next) => {
 
 export const updateHomework = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { title, description, dueDate, studentId, subjectId, grade, feedback, status } =
+  const { title_ar, title_en, description_ar, description_en, dueDate, studentId, subjectId, grade, feedback, status } =
     req.body;
 
   const homeworkExists = await db.findOne({
@@ -112,8 +115,10 @@ export const updateHomework = asyncHandler(async (req, res, next) => {
     model: "homework",
     where: { id },
     data: {
-      ...(title && { title }),
-      ...(description && { description }),
+      ...(title_ar && { title_ar }),
+      ...(title_en !== undefined && { title_en }),
+      ...(description_ar && { description_ar }),
+      ...(description_en !== undefined && { description_en }),
       ...(finalDueDate && { dueDate: finalDueDate }),
       ...(studentId && { studentId }),
       ...(subjectId && { subjectId }),
@@ -221,7 +226,7 @@ export const getHomework = asyncHandler(async (req, res, next) => {
     res,
     req,
     message: "FETCH_SUCCESS",
-    data: homework,
+    data: localize(homework, ["title", "description"], req.lang),
     status: 200,
   });
 });
@@ -259,7 +264,7 @@ export const getStudentHomework = asyncHandler(async (req, res, next) => {
     res,
     req,
     message: "FETCH_SUCCESS",
-    data: homework,
+    data: localizeMany(homework, ["title", "description"], req.lang),
     status: 200,
   });
 });
@@ -299,7 +304,7 @@ export const getAllHomework = asyncHandler(async (req, res, next) => {
     res,
     req,
     message: "FETCH_SUCCESS",
-    data: { items, pagination },
+    data: { items: localizeMany(items, ["title", "description"], req.lang), pagination },
     status: 200,
   });
 });
@@ -336,7 +341,7 @@ export const getTeacherHomeworks = asyncHandler(async (req, res, next) => {
     res,
     req,
     message: "FETCH_SUCCESS",
-    data: { items, pagination },
+    data: { items: localizeMany(items, ["title", "description"], req.lang), pagination },
     status: 200,
   });
 });

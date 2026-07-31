@@ -40,6 +40,7 @@ model user {
   conversations        Conversation[]          @relation("TeacherConversations")
   conversationsStudent Conversation[]          @relation("StudentConversations")
   userLectures         user_lectures[]
+  posts                post[]
 
   @@index([email])
   @@index([username])
@@ -346,9 +347,11 @@ model expenses {
 }
 
 model homework {
-  id          String   @id @default(uuid())
-  title       String
-  description String
+  id             String   @id @default(uuid())
+  title_ar       String
+  title_en       String?
+  description_ar String
+  description_en String?
   status      String   @default("pending")
   dueDate     DateTime
   studentId   String
@@ -370,7 +373,8 @@ model homework {
 
 model exam {
   id          String    @id @default(uuid())
-  title       String
+  title_ar    String
+  title_en    String?
   subject     String?
   grade       Float     @default(0)
   studentId   String
@@ -393,7 +397,8 @@ model exam {
 model exam_question {
   id        String   @id @default(uuid())
   examId    String
-  text      String
+  text_ar   String
+  text_en   String?
   type      String   @default("mcq") // mcq | true_false
   points    Float    @default(1)
   order     Int      @default(0)
@@ -410,7 +415,8 @@ model exam_question {
 model exam_option {
   id         String  @id @default(uuid())
   questionId String
-  text       String
+  text_ar    String
+  text_en    String?
   isCorrect  Boolean @default(false)
   order      Int     @default(0)
 
@@ -599,18 +605,20 @@ model Message {
 
 model ranks {
   id                String              @id @default(uuid())
-  name              String              @unique
+  name_ar           String              @unique
+  name_en           String?
   slug              String              @unique
   color             String?
   ageRange          Json
-  stageName         String?
+  stageName_ar      String?
+  stageName_en      String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   students          student[]
   courses           courses[]
   userRankHistories user_rank_history[]
 
-  @@index([name])
+  @@index([name_ar])
 }
 
 model category {
@@ -625,10 +633,37 @@ model category {
   courses   courses[]
 }
 
+model post {
+  id           String    @id @default(uuid())
+  type         String    // "blog" | "news"
+  title_ar     String
+  title_en     String?
+  slug         String    @unique
+  excerpt_ar   String?
+  excerpt_en   String?
+  content_ar   String
+  content_en   String?
+  coverImage   String?
+  authorId     String?
+  author       user?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  published    Boolean   @default(false)
+  publishedAt  DateTime?
+  readingCount Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([type])
+  @@index([published])
+  @@index([slug])
+}
+
 model courses {
-    id          String     @id @default(uuid())
-    title       String     @unique
-    description String?
+    id             String     @id @default(uuid())
+    title_ar       String     @unique
+    title_en       String?
+    description_ar String?
+    description_en String?
+    keywords    String[]   @default([])
     rankId      String
     categoryId  String?
     price       Float?
@@ -644,6 +679,7 @@ model courses {
 
   @@index([rankId])
   @@index([categoryId])
+  @@index([title_ar])
 }
 
 model course_purchase_request {
@@ -677,9 +713,11 @@ model CoursePurchase {
 }
 
 model lectures {
-  id        String    @id @default(uuid())
-  title     String
-  content   String?
+  id         String    @id @default(uuid())
+  title_ar   String
+  title_en   String?
+  content_ar String?
+  content_en String?
   videoUrl  String?
   pdfUrl    String?
   slidesUrl String?
@@ -740,9 +778,11 @@ model user_rank_history {
 }
 
 model policy {
-  id          String   @id @default(uuid())
-  title       String
-  description String
+  id             String   @id @default(uuid())
+  title_ar       String
+  title_en       String?
+  description_ar String
+  description_en String?
   icon        String? // e.g., "Shield", "Clock", "FileText", "AlertCircle"
   color       String? // e.g., "blue", "green", "purple", "orange"
   lastUpdated DateTime @default(now())
@@ -754,9 +794,11 @@ model policy {
 }
 
 model policy_notice {
-  id        String   @id @default(uuid())
-  title     String   @default("Important Notice")
-  content   String
+  id         String   @id @default(uuid())
+  title_ar   String   @default("تنبيه هام")
+  title_en   String?  @default("Important Notice")
+  content_ar String
+  content_en String?
   active    Boolean  @default(true)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -765,10 +807,12 @@ model policy_notice {
 }
 
 model support {
-  id           String           @id @default(uuid())
-  title        String
+  id              String           @id @default(uuid())
+  title_ar        String
+  title_en        String?
   url          String
-  description  String
+  description_ar String
+  description_en String?
   category     support_category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
   categoryId   String
   readingCount Int              @default(0)
@@ -780,8 +824,9 @@ model support {
 }
 
 model support_category {
-  id        String    @id @default(uuid())
-  title     String
+  id         String    @id @default(uuid())
+  title_ar   String
+  title_en   String?
   active    Boolean   @default(true)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt

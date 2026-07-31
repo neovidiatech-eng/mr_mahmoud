@@ -3,47 +3,49 @@ import { generalFields } from "../../../Utils/GeneralFields/index.js";
 
 export const createRank = {
   body: joi.object({
-    name: generalFields.name
+    name_ar: generalFields.name
       .messages({
-        "any.required": "Rank name is required",
-        "string.empty": "Rank name cannot be empty",
-        "string.base": "Rank name must be a string",
+        "any.required": "MISSING_NAME",
+        "string.empty": "NAME_EMPTY",
+        "string.base": "NAME_STRING",
       })
       .required(),
+    name_en: generalFields.name.optional().allow(""),
     color: generalFields.color
       .messages({
-        "any.required": "color is required",
-        "string.empty": "color cannot be empty",
-        "string.base": "color must be a string",
+        "any.required": "COLOR_REQUIRED",
+        "string.empty": "COLOR_EMPTY",
+        "string.base": "COLOR_STRING",
       })
       .required(),
     ageRange: generalFields.ageRange
       .messages({
-        "any.required": "ageRange is required",
-        "string.empty": "ageRange cannot be empty",
-        "string.base": "ageRange must be a string",
+        "any.required": "AGE_RANGE_REQUIRED",
       })
       .required(),
-    stageName: joi.string().max(64).allow("").optional(),
+    stageName_ar: joi.string().max(64).allow("").optional(),
+    stageName_en: joi.string().max(64).allow("").optional(),
   }),
 };
 
 export const updateRank = {
   body: joi.object({
-    name: generalFields.name
+    name_ar: generalFields.name
       .messages({
-        "string.empty": "Rank name cannot be empty",
-        "string.base": "Rank name must be a string",
+        "string.empty": "NAME_EMPTY",
+        "string.base": "NAME_STRING",
       })
       .optional(),
+    name_en: generalFields.name.optional().allow(""),
     color: generalFields.color
       .messages({
-        "string.empty": "color cannot be empty",
-        "string.base": "color must be a string",
+        "string.empty": "COLOR_EMPTY",
+        "string.base": "COLOR_STRING",
       })
       .optional(),
     ageRange: generalFields.ageRange.optional(),
-    stageName: joi.string().max(64).allow("").optional(),
+    stageName_ar: joi.string().max(64).allow("").optional(),
+    stageName_en: joi.string().max(64).allow("").optional(),
   }),
   params: joi.object({
     id: generalFields.id.required(),

@@ -8,11 +8,13 @@ const lecturesInclude = {
   rank: {
     select: {
       id: true,
-      name: true,
+      name_ar: true,
+      name_en: true,
       slug: true,
       color: true,
       ageRange: true,
-      stageName: true,
+      stageName_ar: true,
+      stageName_en: true,
     },
   },
   category: true,
@@ -25,7 +27,7 @@ const lecturesInclude = {
    CREATE COURSE
 ----------------------------- */
 export const createCourse = async ({ req, res, next }) => {
-  const { rankId, title, description, categoryId, price } = req.body;
+  const { rankId, title_ar, title_en, description_ar, description_en, categoryId, price, keywords } = req.body;
 
   if (!rankId) {
     const error = createError({
@@ -36,7 +38,7 @@ export const createCourse = async ({ req, res, next }) => {
     throw error;
   }
 
-  if (!title) {
+  if (!title_ar) {
     const error = createError({
       message: "TITLE_REQUIRED",
       status: 400,
@@ -63,7 +65,7 @@ export const createCourse = async ({ req, res, next }) => {
   // check title exists
   const courseTitle = await db.findFirst({
     model: "courses",
-    where: { title },
+    where: { title_ar },
   });
 
   if (courseTitle) {
@@ -83,11 +85,14 @@ export const createCourse = async ({ req, res, next }) => {
     model: "courses",
     data: {
       rankId,
-      title,
-      description,
+      title_ar,
+      ...(title_en !== undefined && { title_en }),
+      description_ar,
+      ...(description_en !== undefined && { description_en }),
       image,
       ...(categoryId && { categoryId }),
       ...(price !== undefined && { price: Number(price) }),
+      ...(keywords !== undefined && { keywords }),
     },
   });
 
@@ -103,6 +108,7 @@ export const getCourses = async (query = {}) => {
   const rankId = query.rankId;
   const categoryId = query.categoryId;
   const title = query.title;
+  const search = query.search;
   const { sortBy = "createdAt" } = query;
   const sortDirection = query.sort || "desc";
 
@@ -117,9 +123,27 @@ export const getCourses = async (query = {}) => {
     where.categoryId = categoryId;
   }
 
-  if(title){
-    where.title = { contains: title, mode: "insensitive" };
+  if (title) {
+    where.OR = [
+      { title_ar: { contains: title, mode: "insensitive" } },
+      { title_en: { contains: title, mode: "insensitive" } },
+    ];
   }
+
+  // Unified search across name (both languages), description (both languages),
+  // keywords, and category name.
+  if (search) {
+    where.OR = [
+      { title_ar: { contains: search, mode: "insensitive" } },
+      { title_en: { contains: search, mode: "insensitive" } },
+      { description_ar: { contains: search, mode: "insensitive" } },
+      { description_en: { contains: search, mode: "insensitive" } },
+      { keywords: { has: search } },
+      { category: { name_ar: { contains: search, mode: "insensitive" } } },
+      { category: { name_en: { contains: search, mode: "insensitive" } } },
+    ];
+  }
+
   return await db.findManyWithPaginationAndCount({
     model: "courses",
     where,
@@ -155,14 +179,14 @@ export const getCourseById = async (id) => {
    UPDATE COURSE
 ----------------------------- */
 export const updateCourse = async ({ req, res, next }) => {
-  const { title, description, rankId, categoryId, price } = req.body;
+  const { title_ar, title_en, description_ar, description_en, rankId, categoryId, price, keywords } = req.body;
   const { id } = req.params;
 
   // validate title if exists
-  if (title) {
+  if (title_ar) {
     const courseTitle = await db.findFirst({
       model: "courses",
-      where: { title, id: { not: id } },
+      where: { title_ar, id: { not: id } },
     });
 
     if (courseTitle) {
@@ -210,11 +234,14 @@ export const updateCourse = async ({ req, res, next }) => {
     model: "courses",
     where: { id },
     data: {
-      ...(title !== undefined && { title }),
-      ...(description !== undefined && { description }),
+      ...(title_ar !== undefined && { title_ar }),
+      ...(title_en !== undefined && { title_en }),
+      ...(description_ar !== undefined && { description_ar }),
+      ...(description_en !== undefined && { description_en }),
       ...(rankId !== undefined && { rankId }),
       ...(categoryId !== undefined && { categoryId }),
       ...(price !== undefined && { price: Number(price) }),
+      ...(keywords !== undefined && { keywords }),
     },
   });
 };
@@ -307,8 +334,8 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
   let bookedSchedule = null;
 
   if (student) {
-    isFreeTrial = student.sessions === 1 || 
-                  student.plan?.price === "0" || 
+    isFreeTrial = student.sessions === 1 ||
+                  student.plan?.price === "0" ||
                   student.plan?.name?.toLowerCase().includes("free") ||
                   student.plan?.name?.toLowerCase().includes("trial") ||
                   student.plan?.sessionsCount === 1;
@@ -362,7 +389,8 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
         videoUrl: null,
         pdfUrl: null,
         slidesUrl: null,
-        content: null,
+        content_ar: null,
+        content_en: null,
       }),
     };
   });

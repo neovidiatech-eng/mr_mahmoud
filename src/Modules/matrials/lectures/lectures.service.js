@@ -6,7 +6,7 @@ import { isAdmin } from "../../../Utils/Permissions/permissions.js";
    CREATE LECTURE
 ----------------------------- */
 export const createLecture = async ({ req, res, next }) => {
-  const { courseId, title, content, videoUrl, pdfUrl, slidesUrl, duration, date } = req.body;
+  const { courseId, title_ar, title_en, content_ar, content_en, videoUrl, pdfUrl, slidesUrl, duration, date } = req.body;
   let { order } = req.body;
 
   if (!courseId) {
@@ -19,7 +19,7 @@ export const createLecture = async ({ req, res, next }) => {
     throw error;
   }
 
-  if (!title) {
+  if (!title_ar) {
     const error = createError({
       message: "TITLE_REQUIRED",
       status: 400,
@@ -28,7 +28,7 @@ export const createLecture = async ({ req, res, next }) => {
     throw error;
   }
 
-  if (!content) {
+  if (!content_ar) {
     const error = createError({
       message: "DESCRIPTION_REQUIRED",
       status: 400,
@@ -84,8 +84,10 @@ export const createLecture = async ({ req, res, next }) => {
     model: "lectures",
     data: {
       courseId,
-      title,
-      content,
+      title_ar,
+      ...(title_en !== undefined && { title_en }),
+      content_ar,
+      ...(content_en !== undefined && { content_en }),
       videoUrl,
       order: parseInt(order),
       pdfUrl,
@@ -96,7 +98,8 @@ export const createLecture = async ({ req, res, next }) => {
     include: {
       course: {
         select: {
-          title: true,
+          title_ar: true,
+          title_en: true,
         },
       },
     },
@@ -213,15 +216,17 @@ const resolveLectureAccess = async (lecture, requestingUser) => {
 ----------------------------- */
 export const updateLecture = async ({ req, res, next }) => {
   const { id } = req.params;
-  const { courseId, title, content, videoUrl, order, pdfUrl, slidesUrl, duration, date } = req.body;
+  const { courseId, title_ar, title_en, content_ar, content_en, videoUrl, order, pdfUrl, slidesUrl, duration, date } = req.body;
   const lecture = await db.findFirst({
     model: "lectures",
     where: { id },
   });
   const data = {
     courseId,
-    title,
-    content,
+    title_ar,
+    title_en,
+    content_ar,
+    content_en,
     videoUrl,
     order,
     pdfUrl,

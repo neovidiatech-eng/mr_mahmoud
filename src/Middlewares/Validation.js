@@ -13,8 +13,8 @@ export const validation = (schema) => {
         validationErrors.push(validationResult.error);
       }
     }
-    const errors = validationErrors.flatMap((error) => 
-      error.details.map((detail) => req.t(detail.message))
+    const errors = validationErrors.flatMap((error) =>
+      error.details.map((detail) => req.t(detail.message, detail.context))
     );
 
     if (validationErrors.length > 0) {

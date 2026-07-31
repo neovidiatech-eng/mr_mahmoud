@@ -23,8 +23,10 @@ export async function seedHomework() {
 
   const sampleHomeworks = [
     {
-      title: "Algebra Assignment 1",
-      description: "Solve linear equations and quadratic formulas.",
+      title_ar: "Algebra Assignment 1",
+      title_en: "Algebra Assignment 1",
+      description_ar: "Solve linear equations and quadratic formulas.",
+      description_en: "Solve linear equations and quadratic formulas.",
       status: "pending",
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       studentId: student.id,
@@ -32,8 +34,10 @@ export async function seedHomework() {
       subjectId: subject?.id || null,
     },
     {
-      title: "Physics Newton Laws",
-      description: "Complete exercises on Newton's First and Second laws of motion.",
+      title_ar: "Physics Newton Laws",
+      title_en: "Physics Newton Laws",
+      description_ar: "Complete exercises on Newton's First and Second laws of motion.",
+      description_en: "Complete exercises on Newton's First and Second laws of motion.",
       status: "graded",
       dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       studentId: student.id,
@@ -46,7 +50,7 @@ export async function seedHomework() {
 
   for (const hw of sampleHomeworks) {
     const existing = await prisma.homework.findFirst({
-      where: { title: hw.title, studentId: hw.studentId },
+      where: { title_ar: hw.title_ar, studentId: hw.studentId },
     });
 
     if (!existing) {

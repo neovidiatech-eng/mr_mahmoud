@@ -39,11 +39,11 @@ const checkSupportExists = async (id) => {
   return support;
 };
 
-const checkDuplicateSupportTitle = async (title, id = null) => {
-  if (!title) return;
+const checkDuplicateSupportTitle = async (title_ar, id = null) => {
+  if (!title_ar) return;
 
   const where = {
-    title,
+    title_ar,
   };
 
   if (id) {
@@ -75,11 +75,11 @@ const checkCategoryExistsById = async (id) => {
   return category;
 };
 
-const checkDuplicateCategoryTitle = async (title, id = null) => {
-  if (!title) return;
+const checkDuplicateCategoryTitle = async (title_ar, id = null) => {
+  if (!title_ar) return;
 
   const where = {
-    title,
+    title_ar,
   };
 
   if (id) {
@@ -117,18 +117,10 @@ export const getSupport = async ({ req }) => {
 
   if (search) {
     where.OR = [
-      {
-        title: {
-          contains: search,
-          mode: "insensitive",
-        },
-      },
-      {
-        description: {
-          contains: search,
-          mode: "insensitive",
-        },
-      },
+      { title_ar: { contains: search, mode: "insensitive" } },
+      { title_en: { contains: search, mode: "insensitive" } },
+      { description_ar: { contains: search, mode: "insensitive" } },
+      { description_en: { contains: search, mode: "insensitive" } },
     ];
   }
 
@@ -159,18 +151,10 @@ export const getTeacherSupport = async ({ req }) => {
 
   if (search) {
     where.OR = [
-      {
-        title: {
-          contains: search,
-          mode: "insensitive",
-        },
-      },
-      {
-        description: {
-          contains: search,
-          mode: "insensitive",
-        },
-      },
+      { title_ar: { contains: search, mode: "insensitive" } },
+      { title_en: { contains: search, mode: "insensitive" } },
+      { description_ar: { contains: search, mode: "insensitive" } },
+      { description_en: { contains: search, mode: "insensitive" } },
     ];
   }
 
@@ -247,17 +231,19 @@ export const getSupportById = async ({ req }) => {
 };
 
 export const createSupport = async ({ req }) => {
-  const { title, url, description, categoryId, active = true } = req.body;
+  const { title_ar, title_en, url, description_ar, description_en, categoryId, active = true } = req.body;
 
-  await checkDuplicateSupportTitle(title);
+  await checkDuplicateSupportTitle(title_ar);
   await checkCategoryExists(categoryId);
 
   return await db.create({
     model: "support",
     data: {
-      title,
+      title_ar,
+      title_en,
       url,
-      description,
+      description_ar,
+      description_en,
       categoryId,
       active,
     },
@@ -269,8 +255,8 @@ export const updateSupport = async ({ req }) => {
 
   await checkSupportExists(id);
 
-  if (req.body.title) {
-    await checkDuplicateSupportTitle(req.body.title, id);
+  if (req.body.title_ar) {
+    await checkDuplicateSupportTitle(req.body.title_ar, id);
   }
 
   if (req.body.categoryId) {
@@ -309,10 +295,10 @@ export const getCategories = async ({ req }) => {
   }
 
   if (search) {
-    where.title = {
-      contains: search,
-      mode: "insensitive",
-    };
+    where.OR = [
+      { title_ar: { contains: search, mode: "insensitive" } },
+      { title_en: { contains: search, mode: "insensitive" } },
+    ];
   }
 
   return await db.findMany({
@@ -328,14 +314,15 @@ export const getCategories = async ({ req }) => {
 };
 
 export const createCategory = async ({ req }) => {
-  const { title, active = true } = req.body;
+  const { title_ar, title_en, active = true } = req.body;
 
-  await checkDuplicateCategoryTitle(title);
+  await checkDuplicateCategoryTitle(title_ar);
 
   return await db.create({
     model: "support_category",
     data: {
-      title,
+      title_ar,
+      title_en,
       active,
     },
   });
@@ -346,8 +333,8 @@ export const updateCategory = async ({ req }) => {
 
   await checkCategoryExistsById(id);
 
-  if (req.body.title) {
-    await checkDuplicateCategoryTitle(req.body.title, id);
+  if (req.body.title_ar) {
+    await checkDuplicateCategoryTitle(req.body.title_ar, id);
   }
 
   return await db.updateOne({
