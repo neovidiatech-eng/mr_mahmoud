@@ -446,7 +446,7 @@ model exam_answer {
 
 model subject {
   id        String   @id @default(uuid())
-  name_ar   String
+  name_ar   String   @default("")
   name_en   String?
   color     String   @default("#10b981")
   active    Boolean  @default(true)
@@ -623,7 +623,7 @@ model ranks {
 
 model category {
   id        String     @id @default(uuid())
-  name_ar   String
+  name_ar   String     @default("")
   name_en   String?
   color     String     @default("#6366f1")
   active    Boolean    @default(true)
