@@ -22,7 +22,7 @@ export async function seedProgress() {
   }
 
   const course = await prisma.courses.findUnique({
-    where: { title: "Data Structures" },
+    where: { title_ar: "Data Structures" },
     include: { lectures: { orderBy: { order: "asc" } } },
   });
 

@@ -198,11 +198,14 @@ export const getScheduleById = asyncHandler(async (req, res, next) => {
       course: {
         select: {
           id: true,
-          title: true,
+          title_ar: true,
+          title_en: true,
           lectures: {
             select: {
-              title: true,
-              content: true,
+              title_ar: true,
+              title_en: true,
+              content_ar: true,
+              content_en: true,
               videoUrl: true,
               pdfUrl: true,
               date: true,

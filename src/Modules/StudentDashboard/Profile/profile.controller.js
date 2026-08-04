@@ -58,7 +58,8 @@ export const getProfile = asyncHandler(async (req, res, next) => {
           course: {
             select: {
               id: true,
-              title: true,
+              title_ar: true,
+              title_en: true,
             },
           },
         },

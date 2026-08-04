@@ -109,7 +109,8 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
         rank: {
           select: {
             id: true,
-            name: true,
+            name_ar: true,
+            name_en: true,
           },
         },
       },

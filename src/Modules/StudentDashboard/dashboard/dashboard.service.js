@@ -21,7 +21,8 @@ export const getDashboard = async ({ req, res, next }) => {
       rank: {
         select: {
           id: true,
-          name: true,
+          name_ar: true,
+          name_en: true,
           courses: true,
         },
       },
@@ -98,7 +99,8 @@ export const getDashboard = async ({ req, res, next }) => {
       course: {
         select: {
           id: true,
-          title: true,
+          title_ar: true,
+          title_en: true,
         },
       },
     },

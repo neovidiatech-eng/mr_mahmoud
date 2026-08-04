@@ -14,6 +14,7 @@ export const getAllPlans = asyncHandler(async (req, res, next) => {
       currency: {
         select: {
           id: true,
+          name_ar: true,
           name_en: true,
           symbol: true,
           code: true,
