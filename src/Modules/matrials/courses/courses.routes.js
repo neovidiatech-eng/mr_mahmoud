@@ -1,7 +1,6 @@
 import { Router } from "express";
 import * as coursesController from "./courses.controller.js";
 import { validation } from "../../../Middlewares/Validation.js";
-import authentication from "../../../Middlewares/Authentication.js";
 import { authorizeResource } from "../../../Middlewares/AuthorizeResource.js";
 import * as coursesValidation from "./courses.validation.js";
 import {
@@ -14,7 +13,6 @@ const coursesResource = "courses";
 
 router.get(
   "/",
-  authorizeResource(coursesResource),
   validation(coursesValidation.getCoursesSchema),
   coursesController.getAllCourses,
 );
