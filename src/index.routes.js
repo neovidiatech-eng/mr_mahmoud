@@ -65,7 +65,7 @@ rootRouter.use("/system", authentication, systemRouter);
 rootRouter.use("/students", authentication, studentRouter);
 rootRouter.use("/teachers", authentication, teacherRouter);
 rootRouter.use("/finances", authentication, financesRouter);
-rootRouter.use("/materials", authentication, materialsRouter);
+rootRouter.use("/materials", materialsRouter);
 rootRouter.use("/weekly-reports", authentication, weeklyReportsRouter);
 rootRouter.use("/policies", authentication, policiesRouter);
 rootRouter.use("/support", authentication, supportRouter);
