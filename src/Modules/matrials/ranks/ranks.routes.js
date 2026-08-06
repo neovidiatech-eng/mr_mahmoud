@@ -13,14 +13,13 @@ const ranksResource = "ranks";
 router.get(
   "/",
   
-  authorizeResource(ranksResource),
   controller.getRanks,
 );
 
 router.get(
   "/:id",
   
-  authorizeResource(ranksResource),
+
   validation(schema.getRank),
   controller.getRank,
 );

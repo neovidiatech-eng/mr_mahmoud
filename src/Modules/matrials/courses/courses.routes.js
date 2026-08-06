@@ -21,7 +21,6 @@ router.get(
 
 router.get(
   "/:id",
-  authorizeResource(coursesResource),
   validation(coursesValidation.courseIdSchema),
   coursesController.getCourse,
 );
