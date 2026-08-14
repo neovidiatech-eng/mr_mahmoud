@@ -24,6 +24,7 @@ export const createStudentSchema = {
     rankId: generalFields.id,
     startingCourseId: generalFields.id,
     startingLectureId: generalFields.id,
+    type: generalFields.studentType.required(),
     timezone: generalFields.timezone, // optional — fallback to default
   })
     .and("startingCourseId", "startingLectureId")
@@ -50,6 +51,9 @@ export const updateStudentSchema = {
       active: generalFields.active,
       rankId: generalFields.id,
       timezone: generalFields.timezone,
+      type: generalFields.studentType,
+      regenerateQr: Joi.boolean(),
+      qrActive: Joi.boolean(),
     })
     .min(1)
     .messages({ "object.min": "VALIDATION_MIN_ONE_FIELD" }),

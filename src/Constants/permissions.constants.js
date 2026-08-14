@@ -189,4 +189,12 @@ export const PERMISSIONS_V2 = {
     UPDATE: "ranks:update",
     DELETE: "ranks:delete",
   },
+
+  // Attendance Management
+  ATTENDANCE: {
+    READ: "attendance:read",
+    CREATE: "attendance:create",
+    UPDATE: "attendance:update",
+    DELETE: "attendance:delete",
+  },
 };

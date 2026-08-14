@@ -14,6 +14,7 @@ import {
   findRankByAge,
   resolveStudentAge,
 } from "../../../Utils/Helpers.js";
+import { studentTypes } from "../../../Utils/Enums/index.js";
 
 export const getProfile = asyncHandler(async (req, res, next) => {
   const user = await db.findOne({
@@ -107,6 +108,72 @@ export const getProfile = asyncHandler(async (req, res, next) => {
     res,
     req,
     data: userDecrypted,
+    status: 200,
+    message: "FETCH_SUCCESS",
+  });
+});
+
+export const getProfileQr = asyncHandler(async (req, res, next) => {
+  const { token } = req.query;
+
+  if (!token) {
+    const error = createError({
+      message: "INVALID_TOKEN",
+      status: 400,
+      next,
+    });
+    throw error;
+  }
+
+  console.log({
+    hasToken: Boolean(token),
+    tokenLength: token?.length,
+  });
+
+  const student = await db.findFirst({
+    model: "student",
+    where: {
+      qrToken: token,
+      qrActive: true,
+      type: studentTypes.ONSITE,
+    },
+    include: {
+      user: {
+        select: {
+          id: true,
+          email: true,
+          username: true,
+          name: true,
+          phone: true,
+          provider: true,
+          googleId: true,
+          createdAt: true,
+          code_country: true,
+          status: true,
+          gender: true,
+          age: true,
+          timezone: true,
+        },
+      },
+      exams: true,
+      homeworks: true,
+      attendances: true,
+    },
+  });
+
+  if (!student) {
+    const error = createError({
+      message: "STUDENT_NOT_FOUND",
+      status: 404,
+      next,
+    });
+    throw error;
+  }
+
+  return successResponse({
+    res,
+    req,
+    data: student,
     status: 200,
     message: "FETCH_SUCCESS",
   });

@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import CryptoJS from "crypto-js";
+
 export const hash = async ({ password }) => {
   return encryptText({ text: password });
 };
@@ -31,22 +32,18 @@ export const decryptText = async ({ text }) => {
   try {
     if (!text) return null;
 
-    const bytes = CryptoJS.AES.decrypt(text, process.env.ENCRYPT_KEY);
+    // Handle Express/URL query params replacing '+' with spaces
+    const sanitizedText = text.includes(" ") ? text.replace(/ /g, "+") : text;
+
+    const bytes = CryptoJS.AES.decrypt(sanitizedText, process.env.ENCRYPT_KEY);
     const decrypted = bytes.toString(CryptoJS.enc.Utf8);
 
-    // If decryption results in an empty string but original text wasn't empty,
-    // it's likely the text was not encrypted or the key is wrong.
     if (!decrypted && text) {
       return text;
     }
 
     return decrypted;
   } catch (err) {
-    // If it's a malformed UTF-8 error, return the original text (it might not be encrypted)
-    if (err.message.includes("Malformed UTF-8 data")) {
-      return text;
-    }
-    console.error("Decrypt error:", err);
-    return null;
+    return text;
   }
 };

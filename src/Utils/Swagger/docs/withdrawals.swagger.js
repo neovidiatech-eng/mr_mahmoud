@@ -26,10 +26,9 @@ export const withdrawalsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["amount", "payoutDetails"],
+              required: ["amount"],
               properties: {
-                amount: { type: "number", example: 500.00 },
-                payoutDetails: { type: "string", example: "Vodafone Cash: 01000000000" }
+                amount: { type: "number", example: 500.00 }
               }
             }
           }
@@ -46,6 +45,19 @@ export const withdrawalsPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                adminNotes: { type: "string", example: "Approved and sent via Vodafone Cash" }
+              }
+            }
+          }
+        }
+      },
       responses: { 200: { description: "Withdrawal approved." } }
     }
   },
@@ -58,12 +70,13 @@ export const withdrawalsPaths = {
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
       requestBody: {
+        required: true,
         content: {
           "application/json": {
             schema: {
               type: "object",
               properties: {
-                rejectionReason: { type: "string" }
+                adminNotes: { type: "string", example: "Insufficient balance" }
               }
             }
           }

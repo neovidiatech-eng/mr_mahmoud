@@ -1,5 +1,6 @@
 import Joi from "joi";
 import { VALID_TIMEZONE_VALUES } from "../Date/timezones.js";
+import { studentTypes } from "../Enums/studentTypes.js";
 
 const globalPhonePattern = /^(?:\+[1-9]\d{5,14}|0?\d{5,14})$/;
 const countryCallingCodePattern = /^\+[1-9]\d{0,3}$/;
@@ -270,6 +271,12 @@ export const generalFields = {
     "string.empty": "TYPE_EMPTY",
     "any.required": "TYPE_REQUIRED",
     "any.only": "TYPE_INVALID",
+  }),
+  studentType: Joi.string().valid(...Object.values(studentTypes)).messages({
+    "string.base": "STUDENT_TYPE_STRING",
+    "string.empty": "STUDENT_TYPE_EMPTY",
+    "any.required": "STUDENT_TYPE_REQUIRED",
+    "any.only": "STUDENT_TYPE_INVALID",
   }),
   features: Joi.object().messages({
     "object.base": "FEATURES_OBJECT",

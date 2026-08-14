@@ -7,7 +7,7 @@ export const requestsPaths = {
       parameters: [
         { name: "page", in: "query", schema: { type: "integer", default: 1 } },
         { name: "limit", in: "query", schema: { type: "integer", default: 10 } },
-        { name: "status", in: "query", schema: { type: "string", enum: ["PENDING", "APPROVED", "REJECTED"] } }
+        { name: "status", in: "query", schema: { type: "string", enum: ["pending", "approved", "rejected"] } }
       ],
       responses: {
         200: { description: "All requests retrieved successfully." }
@@ -23,11 +23,41 @@ export const requestsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["type", "description"],
+              required: ["type", "reason"],
               properties: {
-                type: { type: "string", example: "COURSE_ACCESS" },
-                description: { type: "string", example: "Requesting access to Advanced Physics Course" },
-                targetId: { type: "string" }
+                type: {
+                  type: "string",
+                  enum: [
+                    "reschedule",
+                    "cancel",
+                    "absence_correction",
+                    "new_session",
+                    "vacation",
+                    "sick_leave",
+                    "excuse",
+                    "emergency",
+                    "resign",
+                    "technical_issue"
+                  ],
+                  example: "reschedule"
+                },
+                reason: { type: "string", example: "Need to reschedule session due to medical appointment" },
+                sessionId: { type: "string" },
+                priority: { type: "string", enum: ["low", "medium", "high"], default: "medium" },
+                title: { type: "string" },
+                requestedData: {
+                  type: "object",
+                  properties: {
+                    new_start_time: { type: "string", format: "date-time" },
+                    new_end_time: { type: "string", format: "date-time" },
+                    new_status: { type: "string", enum: ["completed", "missed"] },
+                    suggested_notes: { type: "string" },
+                    studentId: { type: "string" },
+                    teacherId: { type: "string" },
+                    courseId: { type: "string" },
+                    title: { type: "string" }
+                  }
+                }
               }
             }
           }
@@ -56,6 +86,19 @@ export const requestsPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                adminNotes: { type: "string", example: "Approved by admin" }
+              }
+            }
+          }
+        }
+      },
       responses: {
         200: { description: "Request approved." }
       }
@@ -69,6 +112,19 @@ export const requestsPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                adminNotes: { type: "string", example: "Rejected due to policy" }
+              }
+            }
+          }
+        }
+      },
       responses: {
         200: { description: "Request rejected." }
       }

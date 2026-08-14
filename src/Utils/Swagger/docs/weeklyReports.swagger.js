@@ -8,7 +8,7 @@ export const weeklyReportsPaths = {
     },
     post: {
       tags: ["Weekly Reports"],
-      summary: "Create weekly report for student",
+      summary: "Create weekly report for teacher",
       security: [{ bearerAuth: [] }],
       requestBody: {
         required: true,
@@ -16,12 +16,18 @@ export const weeklyReportsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["studentId", "summary"],
+              required: ["weekStarting", "weekEnding", "totalClasses", "studentsTaught", "avgSessionDuration", "materialsUploaded"],
               properties: {
-                studentId: { type: "string" },
-                summary: { type: "string" },
-                performanceGrade: { type: "string" },
-                teacherNotes: { type: "string" }
+                weekStarting: { type: "string", format: "date-time" },
+                weekEnding: { type: "string", format: "date-time" },
+                totalClasses: { type: "integer", example: 10 },
+                studentsTaught: { type: "integer", example: 25 },
+                avgSessionDuration: { type: "number", example: 60 },
+                materialsUploaded: { type: "integer", example: 3 },
+                teachingSummary: { type: "string" },
+                studentProgress: { type: "string" },
+                challenges: { type: "string" },
+                overallRating: { type: "number", minimum: 0, maximum: 5, example: 4.5 }
               }
             }
           }
@@ -43,6 +49,10 @@ export const weeklyReportsPaths = {
       tags: ["Weekly Reports"],
       summary: "Get weekly report metrics",
       security: [{ bearerAuth: [] }],
+      parameters: [
+        { name: "weekStarting", in: "query", required: true, schema: { type: "string", format: "date" } },
+        { name: "weekEnding", in: "query", required: true, schema: { type: "string", format: "date" } }
+      ],
       responses: { 200: { description: "Report metrics retrieved." } }
     }
   },
@@ -63,6 +73,28 @@ export const weeklyReportsPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                weekStarting: { type: "string", format: "date-time" },
+                weekEnding: { type: "string", format: "date-time" },
+                totalClasses: { type: "integer" },
+                studentsTaught: { type: "integer" },
+                avgSessionDuration: { type: "number" },
+                materialsUploaded: { type: "integer" },
+                teachingSummary: { type: "string" },
+                studentProgress: { type: "string" },
+                challenges: { type: "string" },
+                overallRating: { type: "number" }
+              }
+            }
+          }
+        }
+      },
       responses: { 200: { description: "Weekly report updated." } }
     },
     delete: {

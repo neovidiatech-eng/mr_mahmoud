@@ -20,6 +20,8 @@ import { transactionsPaths } from "./docs/transactions.swagger.js";
 import { settingsPaths } from "./docs/settings.swagger.js";
 import { coursePurchaseRequestsPaths } from "./docs/coursePurchaseRequests.swagger.js";
 import { subscriptionPaths } from "./docs/subscription.swagger.js";
+import { postsPaths } from "./docs/posts.swagger.js";
+import { attendancePaths } from "./docs/attendance.swagger.js";
 
 export const swaggerSpec = {
   openapi: "3.0.0",
@@ -84,7 +86,9 @@ export const swaggerSpec = {
     { name: "Course Purchase Requests", description: "Course Enrolment & Purchase Requests" },
     { name: "Subscriptions", description: "Student Subscription Plans & Renewals" },
     { name: "Subscription Plans", description: "Subscription Plans Management" },
-    { name: "Subscription Requests", description: "Subscription Plan Upgrade Requests" }
+    { name: "Subscription Requests", description: "Subscription Plan Upgrade Requests" },
+    { name: "Posts Management", description: "Blog & News Articles Management" },
+    { name: "Attendance", description: "Onsite Student Attendance & Check-In Management" }
   ],
   paths: {
     ...authPaths,
@@ -108,6 +112,8 @@ export const swaggerSpec = {
     ...transactionsPaths,
     ...settingsPaths,
     ...coursePurchaseRequestsPaths,
-    ...subscriptionPaths
+    ...subscriptionPaths,
+    ...postsPaths,
+    ...attendancePaths
   }
 };

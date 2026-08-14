@@ -5,8 +5,11 @@ export const financesPaths = {
       summary: "Get expenses list",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "page", in: "query", schema: { type: "integer" } },
-        { name: "limit", in: "query", schema: { type: "integer" } }
+        { name: "search", in: "query", schema: { type: "string" } },
+        { name: "status", in: "query", schema: { type: "string", enum: ["paid", "unpaid", "pending"] } },
+        { name: "type", in: "query", schema: { type: "string", enum: ["salary", "amenities", "general", "management", "marketing", "other"] } },
+        { name: "page", in: "query", schema: { type: "integer", minimum: 1 } },
+        { name: "limit", in: "query", schema: { type: "integer", minimum: 1 } }
       ],
       responses: { 200: { description: "Expenses list retrieved." } }
     },
@@ -20,12 +23,15 @@ export const financesPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["title", "amount", "category"],
+              required: ["title", "currencyId", "amount", "payment_type", "type", "status", "date"],
               properties: {
                 title: { type: "string", example: "Server hosting fee" },
+                currencyId: { type: "string", example: "EGP" },
                 amount: { type: "number", example: 150.00 },
-                category: { type: "string", example: "INFRASTRUCTURE" },
-                notes: { type: "string" }
+                payment_type: { type: "string", example: "bank_transfer" },
+                type: { type: "string", enum: ["salary", "amenities", "general", "management", "marketing", "other"], example: "general" },
+                status: { type: "string", enum: ["paid", "unpaid", "pending"], example: "paid" },
+                date: { type: "string", format: "date-time" }
               }
             }
           }
@@ -51,6 +57,25 @@ export const financesPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                currencyId: { type: "string" },
+                amount: { type: "number" },
+                payment_type: { type: "string" },
+                type: { type: "string", enum: ["salary", "amenities", "general", "management", "marketing", "other"] },
+                status: { type: "string", enum: ["paid", "unpaid", "pending"] },
+                date: { type: "string", format: "date-time" }
+              }
+            }
+          }
+        }
+      },
       responses: { 200: { description: "Expense updated." } }
     },
     delete: {

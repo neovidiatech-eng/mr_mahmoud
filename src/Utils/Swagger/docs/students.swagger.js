@@ -24,7 +24,7 @@ export const studentsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name", "email", "password", "phone", "phone_code", "country", "planId", "gender", "active"],
+              required: ["name", "email", "password", "phone", "phone_code", "country", "planId", "gender", "active", "type"],
               properties: {
                 name: { type: "string", example: "Karem Mahmoud" },
                 email: { type: "string", format: "email", example: "karem@example.com" },
@@ -40,6 +40,7 @@ export const studentsPaths = {
                 rankId: { type: "string" },
                 startingCourseId: { type: "string" },
                 startingLectureId: { type: "string" },
+                type: { type: "string", enum: ["online", "onsite"], default: "online", example: "online" },
                 timezone: { type: "string", example: "Africa/Cairo" }
               }
             }
@@ -96,6 +97,7 @@ export const studentsPaths = {
                 gender: { type: "string", enum: ["MALE", "FEMALE"] },
                 active: { type: "boolean" },
                 rankId: { type: "string" },
+                type: { type: "string", enum: ["online", "onsite"] },
                 timezone: { type: "string" }
               }
             }

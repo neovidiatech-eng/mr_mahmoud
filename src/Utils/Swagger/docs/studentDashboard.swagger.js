@@ -8,7 +8,30 @@ export const studentDashboardPaths = {
         200: { description: "Student profile retrieved successfully." },
         401: { description: "Unauthorized" }
       }
-    },
+    }
+  },
+  "/student/profile/qr": {
+    get: {
+      tags: ["Student Dashboard"],
+      summary: "Get student profile details by QR token",
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: "token",
+          in: "query",
+          required: true,
+          schema: { type: "string" },
+          description: "Encrypted QR code token"
+        }
+      ],
+      responses: {
+        200: { description: "Student profile retrieved successfully." },
+        404: { description: "Student not found" },
+        401: { description: "Unauthorized" }
+      }
+    }
+  },
+  "/student/profile/update-profile": {
     patch: {
       tags: ["Student Dashboard"],
       summary: "Update student profile",
@@ -46,3 +69,4 @@ export const studentDashboardPaths = {
     }
   }
 };
+

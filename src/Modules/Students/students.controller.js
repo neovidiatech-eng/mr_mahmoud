@@ -9,6 +9,8 @@ import { decryptText, hash, encryptText } from "../../Utils/Security/index.js";
 import { DEFAULT_TIMEZONE } from "../../Utils/Date/time.js";
 import { findRankByAge, resolveStudentAge } from "../../Utils/Helpers.js";
 import { nanoid } from "nanoid";
+import crypto from "crypto";
+import { studentTypes } from "../../Utils/Enums/studentTypes.js";
 
 const getStartingPointLectureIds = async ({
   rankId,
@@ -118,7 +120,9 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
   const studentsData = await Promise.all(
     students.map(async (student) => {
       const phone = await decryptText({ text: student.user.phone });
-      const decryptedPassword = student.user.password ? await decryptText({ text: student.user.password }) : undefined;
+      const decryptedPassword = student.user.password
+        ? await decryptText({ text: student.user.password })
+        : undefined;
       return {
         ...student,
         user: {
@@ -159,7 +163,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     rankId,
     startingCourseId,
     startingLectureId,
-    timezone,
+    type,
   } = req.body;
 
   const studentAge = resolveStudentAge({ age, birthDate: birth_date });
@@ -250,6 +254,10 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         ...(studentRole && { roleId: studentRole.id }),
       },
     });
+    let qrToken;
+    if (type === studentTypes.ONSITE || type === "onsite") {
+      qrToken = crypto.randomBytes(32).toString("hex");
+    }
 
     // 2. Create student profile
     createdStudent = await tx.create({
@@ -265,6 +273,8 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         sessions_attended: 0,
         sessions_remaining: checkPlan.sessionsCount,
         rank: { connect: { id: effectiveRankId } },
+        ...(qrToken && { qrToken, qrActive: true }),
+        type,
       },
       include: {
         user: true,
@@ -325,10 +335,14 @@ export const createStudent = asyncHandler(async (req, res, next) => {
 
   if (createdStudent && createdStudent.user) {
     if (createdStudent.user.phone) {
-      createdStudent.user.phone = await decryptText({ text: createdStudent.user.phone });
+      createdStudent.user.phone = await decryptText({
+        text: createdStudent.user.phone,
+      });
     }
     if (createdStudent.user.password) {
-      createdStudent.user.password = await decryptText({ text: createdStudent.user.password });
+      createdStudent.user.password = await decryptText({
+        text: createdStudent.user.password,
+      });
     }
   }
 
@@ -390,6 +404,9 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     active,
     rankId,
     timezone,
+    type,
+    regenerateQr,
+    qrActive,
   } = req.body;
 
   const student = await ensureExists({
@@ -448,7 +465,11 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       });
   }
 
-  if (password && req.user.role.name !== "admin" && req.user.role.name !== "super_admin") {
+  if (
+    password &&
+    req.user.role.name !== "admin" &&
+    req.user.role.name !== "super_admin"
+  ) {
     return errorResponse({
       req,
       next,
@@ -488,6 +509,11 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     });
   }
 
+  let newQrToken;
+  if (regenerateQr || (type === "onsite" && !student.qrToken)) {
+    newQrToken = crypto.randomBytes(32).toString("hex");
+  }
+
   const updatedStudent = await db.updateOne({
     model: "student",
     where: { id },
@@ -495,8 +521,10 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(country && { country }),
       ...(planId && { plan: { connect: { id: planId } } }),
       ...(birth_date && { birth_date: new Date(birth_date) }),
-
+      ...(type && { type }),
       ...(active !== undefined && { active }),
+      ...(qrActive !== undefined && { qrActive }),
+      ...(newQrToken && { qrToken: newQrToken, qrActive: true }),
       ...(autoRank
         ? { rank: { connect: { id: autoRank.id } } }
         : rankId

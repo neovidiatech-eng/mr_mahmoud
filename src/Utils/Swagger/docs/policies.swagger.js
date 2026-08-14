@@ -16,10 +16,16 @@ export const policiesPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["title", "content"],
+              required: ["title_ar", "description_ar"],
               properties: {
-                title: { type: "string" },
-                content: { type: "string" }
+                title_ar: { type: "string", example: "سياسة الخصوصية" },
+                title_en: { type: "string", example: "Privacy Policy" },
+                description_ar: { type: "string", example: "تفاصيل سياسة الخصوصية..." },
+                description_en: { type: "string", example: "Privacy policy details..." },
+                icon: { type: "string", example: "shield" },
+                color: { type: "string", example: "#4CAF50" },
+                lastUpdated: { type: "string", format: "date-time" },
+                active: { type: "boolean", default: true }
               }
             }
           }
@@ -45,10 +51,13 @@ export const policiesPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["message"],
+              required: ["title_ar", "content_ar"],
               properties: {
-                message: { type: "string" },
-                isActive: { type: "boolean", default: true }
+                title_ar: { type: "string", example: "تنويه هام" },
+                title_en: { type: "string", example: "Important Notice" },
+                content_ar: { type: "string", example: "سيتم إجراء صيانه سريعة للنظام..." },
+                content_en: { type: "string", example: "Scheduled system maintenance..." },
+                active: { type: "boolean", default: true }
               }
             }
           }
@@ -65,6 +74,26 @@ export const policiesPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                title_ar: { type: "string" },
+                title_en: { type: "string" },
+                description_ar: { type: "string" },
+                description_en: { type: "string" },
+                icon: { type: "string" },
+                color: { type: "string" },
+                lastUpdated: { type: "string", format: "date-time" },
+                active: { type: "boolean" }
+              }
+            }
+          }
+        }
+      },
       responses: { 200: { description: "Policy updated." } }
     },
     delete: {

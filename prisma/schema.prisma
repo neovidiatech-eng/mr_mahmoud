@@ -154,26 +154,26 @@ model stuff {
 }
 
 model teacher {
-  id           String     @id @default(uuid())
-  user_id      String     @unique
-  currencyId   String
-  hour_price   Float
+  id               String     @id @default(uuid())
+  user_id          String     @unique
+  currencyId       String
+  hour_price       Float
   group_hour_price Float?     @default(0)
-  active       Boolean    @default(false)
-  roleId       String?
-  createdAt    DateTime   @default(now())
-  updatedAt    DateTime   @updatedAt
-  avgRating    Float      @default(0)
-  totalReviews Int        @default(0)
-  exams        exam[]
-  homeworks    homework[]
-  schedules    schedule[]
-  currency     currency   @relation(fields: [currencyId], references: [id])
-  role         role?      @relation(fields: [roleId], references: [id])
-  user         user       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  active           Boolean    @default(false)
+  roleId           String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  avgRating        Float      @default(0)
+  totalReviews     Int        @default(0)
+  exams            exam[]
+  homeworks        homework[]
+  schedules        schedule[]
+  currency         currency   @relation(fields: [currencyId], references: [id])
+  role             role?      @relation(fields: [roleId], references: [id])
+  user             user       @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
-  conversations Conversation[]
-  weeklyReports weekly_report[]
+  conversations   Conversation[]
+  weeklyReports   weekly_report[]
   teacherSubjects TeacherSubject[]
 }
 
@@ -199,42 +199,47 @@ model weekly_report {
 }
 
 model student {
-  id                 String              @id @default(uuid())
-  user_id            String              @unique
-  birth_date         DateTime?
-  active             Boolean             @default(false)
-  planId             String?
-  country            String
-  status             String              @default("pending")
-  createdAt          DateTime            @default(now())
-  updatedAt          DateTime            @updatedAt
-  sessions           Float               @default(0)
-  sessions_attended  Float               @default(0)
-  sessions_remaining Float               @default(0)
-  avgRating          Float               @default(0)
-  totalReviews       Int                 @default(0)
-  rankId             String?
-  rank               ranks?              @relation(fields: [rankId], references: [id])
-  exams              exam[]
-  homeworks          homework[]
-  schedules          schedule[]
-  plan               plan?               @relation(fields: [planId], references: [id])
-  user               user                @relation(fields: [user_id], references: [id], onDelete: Cascade)
-  conversations      Conversation[]
-  userRankHistories  user_rank_history[]
-  groupSchedules     GroupScheduleStudent[]
+  id                     String                    @id @default(uuid())
+  user_id                String                    @unique
+  birth_date             DateTime?
+  qrToken                String?                   @unique
+  qrActive               Boolean                   @default(true)
+  type                   String?                   @default("online")
+  active                 Boolean                   @default(false)
+  planId                 String?
+  country                String
+  status                 String                    @default("pending")
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  sessions               Float                     @default(0)
+  sessions_attended      Float                     @default(0)
+  sessions_remaining     Float                     @default(0)
+  avgRating              Float                     @default(0)
+  totalReviews           Int                       @default(0)
+  rankId                 String?
+  rank                   ranks?                    @relation(fields: [rankId], references: [id])
+  exams                  exam[]
+  homeworks              homework[]
+  schedules              schedule[]
+  plan                   plan?                     @relation(fields: [planId], references: [id])
+  user                   user                      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  conversations          Conversation[]
+  userRankHistories      user_rank_history[]
+  groupSchedules         GroupScheduleStudent[]
   coursePurchaseRequests course_purchase_request[]
-  coursePurchases    CoursePurchase[]
+  coursePurchases        CoursePurchase[]
+
+  attendances Attendance[]
 }
 
 model schedule {
-  id                  String       @id @default(uuid())
+  id                  String                 @id @default(uuid())
   teacherId           String
   studentId           String?
   courseId            String
-  status              String       @default("scheduled")
-  createdAt           DateTime     @default(now())
-  updatedAt           DateTime     @updatedAt
+  status              String                 @default("scheduled")
+  createdAt           DateTime               @default(now())
+  updatedAt           DateTime               @updatedAt
   notes               String?
   pdfUrl              String?
   description         String?
@@ -242,32 +247,32 @@ model schedule {
   slidesUrl           String?
   link                String
   title               String
-  platform            String?      @default("zoom")
-  type                String       @default("half")
-  language            String       @default("en")
+  platform            String?                @default("zoom")
+  type                String                 @default("half")
+  language            String                 @default("en")
   end_time            DateTime
   start_time          DateTime
   day_of_week         String?
-  is_recurring        Boolean      @default(false)
-  isGroup             Boolean      @default(false)
-  maxStudents         String       @default("1")
+  is_recurring        Boolean                @default(false)
+  isGroup             Boolean                @default(false)
+  maxStudents         String                 @default("1")
   parent_recurring_id String?
-  rescheduledFromId   String?      @unique
-  rescheduledToId     String?      @unique
+  rescheduledFromId   String?                @unique
+  rescheduledToId     String?                @unique
   reviews             Review[]
   scheduleLogs        ScheduleLog?
-  rescheduledTo       schedule?    @relation("RescheduleHistory", fields: [rescheduledToId], references: [id])
-  rescheduledFrom     schedule?    @relation("RescheduleHistory")
-  student             student?     @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  course              courses      @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  teacher             teacher      @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  rescheduledTo       schedule?              @relation("RescheduleHistory", fields: [rescheduledToId], references: [id])
+  rescheduledFrom     schedule?              @relation("RescheduleHistory")
+  student             student?               @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course              courses                @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  teacher             teacher                @relation(fields: [teacherId], references: [id], onDelete: Cascade)
   requests            request[]
-  lectures            lectures?    @relation(fields: [lecturesId], references: [id])
+  lectures            lectures?              @relation(fields: [lecturesId], references: [id])
   lecturesId          String?
-  order               Int?         @default(0)
+  order               Int?                   @default(0)
   groupStudents       GroupScheduleStudent[]
   subjectId           String?
-  subject             subject?     @relation(fields: [subjectId], references: [id])
+  subject             subject?               @relation(fields: [subjectId], references: [id])
 
   @@index([teacherId])
   @@index([studentId])
@@ -352,19 +357,19 @@ model homework {
   title_en       String?
   description_ar String   @default("")
   description_en String?
-  status      String   @default("pending")
-  dueDate     DateTime
-  studentId   String
-  teacherId   String
-  subjectId   String?
-  grade       Float?
-  feedback    String?
-  attachments Json?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
-  student     student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  teacher     teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
-  subject     subject? @relation(fields: [subjectId], references: [id])
+  status         String   @default("pending")
+  dueDate        DateTime
+  studentId      String
+  teacherId      String
+  subjectId      String?
+  grade          Float?
+  feedback       String?
+  attachments    Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  student        student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher        teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject        subject? @relation(fields: [subjectId], references: [id])
 
   @@index([teacherId])
   @@index([studentId])
@@ -405,7 +410,7 @@ model exam_question {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  exam    exam            @relation(fields: [examId], references: [id], onDelete: Cascade)
+  exam    exam          @relation(fields: [examId], references: [id], onDelete: Cascade)
   options exam_option[]
   answers exam_answer[]
 
@@ -622,20 +627,20 @@ model ranks {
 }
 
 model category {
-  id        String     @id @default(uuid())
-  name_ar   String     @default("")
+  id        String   @id @default(uuid())
+  name_ar   String   @default("")
   name_en   String?
-  color     String     @default("#6366f1")
-  active    Boolean    @default(true)
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  color     String   @default("#6366f1")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  courses   courses[]
+  courses courses[]
 }
 
 model post {
   id           String    @id @default(uuid())
-  type         String    // "blog" | "news"
+  type         String // "blog" | "news"
   title_ar     String
   title_en     String?
   slug         String    @unique
@@ -658,24 +663,24 @@ model post {
 }
 
 model courses {
-    id             String     @id @default(uuid())
-    title_ar       String     @unique @default("")
-    title_en       String?
-    description_ar String?
-    description_en String?
-    keywords    String[]   @default([])
-    rankId      String
-    categoryId  String?
-    price       Float?
-    image       String     @default("default_course.jpg")
-    rank        ranks      @relation(fields: [rankId], references: [id], onDelete: Cascade)
-    category    category?  @relation(fields: [categoryId], references: [id])
-    lectures    lectures[]
-    createdAt   DateTime   @default(now())
-    updatedAt   DateTime   @updatedAt
-    schedules   schedule[]
-    purchaseRequests course_purchase_request[]
-    purchases   CoursePurchase[]
+  id               String                    @id @default(uuid())
+  title_ar         String                    @unique @default("")
+  title_en         String?
+  description_ar   String?
+  description_en   String?
+  keywords         String[]                  @default([])
+  rankId           String
+  categoryId       String?
+  price            Float?
+  image            String                    @default("default_course.jpg")
+  rank             ranks                     @relation(fields: [rankId], references: [id], onDelete: Cascade)
+  category         category?                 @relation(fields: [categoryId], references: [id])
+  lectures         lectures[]
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  schedules        schedule[]
+  purchaseRequests course_purchase_request[]
+  purchases        CoursePurchase[]
 
   @@index([rankId])
   @@index([categoryId])
@@ -699,9 +704,9 @@ model course_purchase_request {
 }
 
 model CoursePurchase {
-  id         String   @id @default(uuid())
-  studentId  String
-  courseId   String
+  id          String   @id @default(uuid())
+  studentId   String
+  courseId    String
   purchasedAt DateTime @default(now())
 
   student student @relation(fields: [studentId], references: [id], onDelete: Cascade)
@@ -718,16 +723,16 @@ model lectures {
   title_en   String?
   content_ar String?
   content_en String?
-  videoUrl  String?
-  pdfUrl    String?
-  slidesUrl String?
-  date      DateTime?
-  order     Int
-  courseId  String
-  course    courses   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  duration  String?
-  createdAt DateTime  @default(now())
-  updatedAt DateTime  @updatedAt
+  videoUrl   String?
+  pdfUrl     String?
+  slidesUrl  String?
+  date       DateTime?
+  order      Int
+  courseId   String
+  course     courses   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  duration   String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
 
   userLectures user_lectures[]
   schedules    schedule[]
@@ -746,15 +751,15 @@ model settings {
 }
 
 model user_lectures {
-  id          String    @id @default(uuid())
-  userId      String
-  lectureId   String
-  status      String    @default("completed")
-  progress    Float     @default(0)
-  lastPosition Float    @default(0)
-  completedAt DateTime?
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id           String    @id @default(uuid())
+  userId       String
+  lectureId    String
+  status       String    @default("completed")
+  progress     Float     @default(0)
+  lastPosition Float     @default(0)
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   user    user     @relation(fields: [userId], references: [id], onDelete: Cascade)
   lecture lectures @relation(fields: [lectureId], references: [id], onDelete: Cascade)
@@ -783,12 +788,12 @@ model policy {
   title_en       String?
   description_ar String   @default("")
   description_en String?
-  icon        String? // e.g., "Shield", "Clock", "FileText", "AlertCircle"
-  color       String? // e.g., "blue", "green", "purple", "orange"
-  lastUpdated DateTime @default(now())
-  active      Boolean  @default(true)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  icon           String? // e.g., "Shield", "Clock", "FileText", "AlertCircle"
+  color          String? // e.g., "blue", "green", "purple", "orange"
+  lastUpdated    DateTime @default(now())
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 
   @@index([active])
 }
@@ -799,38 +804,52 @@ model policy_notice {
   title_en   String?  @default("Important Notice")
   content_ar String   @default("")
   content_en String?
-  active    Boolean  @default(true)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
 
   @@index([active])
 }
 
 model support {
-  id              String           @id @default(uuid())
-  title_ar        String           @default("")
-  title_en        String?
-  url          String
+  id             String           @id @default(uuid())
+  title_ar       String           @default("")
+  title_en       String?
+  url            String
   description_ar String           @default("")
   description_en String?
-  category     support_category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
-  categoryId   String
-  readingCount Int              @default(0)
-  active       Boolean          @default(true)
-  createdAt    DateTime         @default(now())
-  updatedAt    DateTime         @updatedAt
+  category       support_category @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  categoryId     String
+  readingCount   Int              @default(0)
+  active         Boolean          @default(true)
+  createdAt      DateTime         @default(now())
+  updatedAt      DateTime         @updatedAt
 
   @@index([active])
 }
 
 model support_category {
-  id         String    @id @default(uuid())
-  title_ar   String    @default("")
-  title_en   String?
+  id        String    @id @default(uuid())
+  title_ar  String    @default("")
+  title_en  String?
   active    Boolean   @default(true)
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
   supports  support[]
 
   @@index([active])
+}
+
+model Attendance {
+  id             String   @id @default(uuid())
+  studentId      String
+  attendanceDate DateTime @db.Date // اليوم بس، للـ unique constraint
+  checkedInAt    DateTime @default(now()) // الوقت الفعلي للـ check-in
+  status         String   @default("present")
+  checkedInBy    String?
+
+  student student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, attendanceDate])
+  @@index([studentId])
 }

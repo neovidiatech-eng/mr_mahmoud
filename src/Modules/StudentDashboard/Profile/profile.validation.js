@@ -17,3 +17,10 @@ export const updateProfileSchema = {
     })
     .min(1),
 };
+
+
+export const getProfileQrSchema={
+  query:Joi.object().keys({
+    token:Joi.string().required()
+  })
+}

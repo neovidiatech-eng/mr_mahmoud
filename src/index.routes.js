@@ -33,6 +33,8 @@ import supportRouter from "./Modules/Support/support.routes.js";
 import coursePurchaseRequestsRouter from "./Modules/CoursePurchaseRequests/coursePurchaseRequests.routes.js";
 import postsRouter from "./Modules/Posts/posts.routes.js";
 
+import attendanceRouter from "./Modules/Attendance/attendance.routes.js";
+
 import { ROLES, ADMIN_ROLES } from "./Utils/Permissions/permissions.js";
 
 const rootRouter = Router();
@@ -75,6 +77,7 @@ rootRouter.use("/transactions/currency", authentication, currencyRouter);
 rootRouter.use("/settings", settingsRouter);
 rootRouter.use("/course-purchase-requests", authentication, coursePurchaseRequestsRouter);
 rootRouter.use("/subscription", subscriptionRouter);
+rootRouter.use("/attendance", authentication, attendanceRouter);
 
 // Root health check
 rootRouter.get("/", (req, res) => {

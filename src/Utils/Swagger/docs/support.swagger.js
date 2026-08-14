@@ -16,11 +16,15 @@ export const supportPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["subject", "message", "categoryId"],
+              required: ["title_ar", "url", "description_ar", "categoryId"],
               properties: {
-                subject: { type: "string" },
-                message: { type: "string" },
-                categoryId: { type: "string" }
+                title_ar: { type: "string", example: "مشكلة في تشغيل الفيديو" },
+                title_en: { type: "string", example: "Video Playback Issue" },
+                url: { type: "string", example: "https://example.com/issue-screenshot.jpg" },
+                description_ar: { type: "string", example: "الفيديو لا يعمل بشكل صحيح أثناء المحاضرة" },
+                description_en: { type: "string", example: "Video fails to load during lecture" },
+                categoryId: { type: "string" },
+                active: { type: "boolean", default: true }
               }
             }
           }
@@ -54,8 +58,12 @@ export const supportPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name"],
-              properties: { name: { type: "string" } }
+              required: ["title_ar"],
+              properties: {
+                title_ar: { type: "string", example: "الدعم الفني" },
+                title_en: { type: "string", example: "Technical Support" },
+                active: { type: "boolean", default: true }
+              }
             }
           }
         }
@@ -75,11 +83,30 @@ export const supportPaths = {
     },
     patch: {
       tags: ["Support Tickets"],
-      summary: "Update support ticket status",
+      summary: "Update support ticket details",
       security: [{ bearerAuth: [] }],
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                title_ar: { type: "string" },
+                title_en: { type: "string" },
+                url: { type: "string" },
+                description_ar: { type: "string" },
+                description_en: { type: "string" },
+                categoryId: { type: "string" },
+                active: { type: "boolean" }
+              }
+            }
+          }
+        }
+      },
       responses: { 200: { description: "Ticket updated." } }
     },
     delete: {
@@ -100,6 +127,21 @@ export const supportPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                title_ar: { type: "string" },
+                title_en: { type: "string" },
+                active: { type: "boolean" }
+              }
+            }
+          }
+        }
+      },
       responses: { 200: { description: "Category updated." } }
     },
     delete: {

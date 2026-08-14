@@ -8,10 +8,11 @@ export const materialsPaths = {
         { name: "rankId", in: "query", schema: { type: "string" } },
         { name: "categoryId", in: "query", schema: { type: "string" } },
         { name: "title", in: "query", schema: { type: "string" } },
+        { name: "search", in: "query", schema: { type: "string" } },
         { name: "page", in: "query", schema: { type: "integer", minimum: 1 } },
         { name: "limit", in: "query", schema: { type: "integer", minimum: 1 } },
         { name: "sort", in: "query", schema: { type: "string", enum: ["asc", "desc"] } },
-        { name: "sortBy", in: "query", schema: { type: "string", enum: ["rankId", "createdAt", "title"] } }
+        { name: "sortBy", in: "query", schema: { type: "string", enum: ["rankId", "createdAt", "title_ar"] } }
       ],
       responses: { 200: { description: "Courses list retrieved." } }
     },
@@ -25,10 +26,12 @@ export const materialsPaths = {
           "multipart/form-data": {
             schema: {
               type: "object",
-              required: ["title", "description", "rankId"],
+              required: ["title_ar", "description_ar", "rankId"],
               properties: {
-                title: { type: "string", example: "Physics Chapter 1" },
-                description: { type: "string", example: "Fundamentals of Motion and Energy" },
+                title_ar: { type: "string", example: "الفيزياء - الفصل الأول" },
+                title_en: { type: "string", example: "Physics - Chapter 1" },
+                description_ar: { type: "string", example: "أساسيات الحركة والطاقة" },
+                description_en: { type: "string", example: "Fundamentals of Motion and Energy" },
                 rankId: { type: "string" },
                 categoryId: { type: "string" },
                 price: { type: "number", example: 199.99 },
@@ -65,8 +68,10 @@ export const materialsPaths = {
             schema: {
               type: "object",
               properties: {
-                title: { type: "string" },
-                description: { type: "string" },
+                title_ar: { type: "string" },
+                title_en: { type: "string" },
+                description_ar: { type: "string" },
+                description_en: { type: "string" },
                 rankId: { type: "string" },
                 categoryId: { type: "string" },
                 price: { type: "number" },
@@ -115,13 +120,19 @@ export const materialsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["title", "courseId", "videoUrl"],
+              required: ["title_ar", "content_ar", "videoUrl", "slidesUrl", "pdfUrl", "order", "courseId"],
               properties: {
-                title: { type: "string", example: "Lecture 1: Newton Laws" },
-                courseId: { type: "string" },
+                title_ar: { type: "string", example: "المحاضرة الأولى: قوانين نيوتن" },
+                title_en: { type: "string", example: "Lecture 1: Newton's Laws" },
+                content_ar: { type: "string", example: "شرح كامل لقوانين نيوتن للحركة" },
+                content_en: { type: "string", example: "Full explanation of Newton's laws of motion" },
                 videoUrl: { type: "string", example: "https://vimeo.com/123456" },
-                description: { type: "string" },
-                durationSeconds: { type: "integer", example: 3600 }
+                slidesUrl: { type: "string", example: "https://example.com/slides.pdf" },
+                pdfUrl: { type: "string", example: "https://example.com/notes.pdf" },
+                order: { type: "number", example: 1 },
+                courseId: { type: "string" },
+                duration: { type: "string", example: "01:00:00" },
+                date: { type: "string", format: "date-time" }
               }
             }
           }
@@ -153,10 +164,17 @@ export const materialsPaths = {
             schema: {
               type: "object",
               properties: {
-                title: { type: "string" },
+                title_ar: { type: "string" },
+                title_en: { type: "string" },
+                content_ar: { type: "string" },
+                content_en: { type: "string" },
                 videoUrl: { type: "string" },
-                description: { type: "string" },
-                durationSeconds: { type: "integer" }
+                slidesUrl: { type: "string" },
+                pdfUrl: { type: "string" },
+                order: { type: "number" },
+                courseId: { type: "string" },
+                duration: { type: "string" },
+                date: { type: "string", format: "date-time" }
               }
             }
           }
@@ -199,9 +217,10 @@ export const materialsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["watchedSeconds"],
+              required: ["position"],
               properties: {
-                watchedSeconds: { type: "number", example: 450 }
+                position: { type: "number", example: 450 },
+                duration: { type: "number", example: 3600 }
               }
             }
           }
@@ -216,9 +235,7 @@ export const materialsPaths = {
       summary: "Get categories",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "page", in: "query", schema: { type: "integer" } },
-        { name: "limit", in: "query", schema: { type: "integer" } },
-        { name: "name", in: "query", schema: { type: "string" } }
+        { name: "search", in: "query", schema: { type: "string" } }
       ],
       responses: { 200: { description: "Categories list retrieved." } }
     },
@@ -232,8 +249,13 @@ export const materialsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name"],
-              properties: { name: { type: "string", example: "Physics" } }
+              required: ["name_ar"],
+              properties: {
+                name_ar: { type: "string", example: "الفيزياء" },
+                name_en: { type: "string", example: "Physics" },
+                color: { type: "string", example: "#FF5733" },
+                active: { type: "boolean", default: true }
+              }
             }
           }
         }
@@ -264,8 +286,12 @@ export const materialsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name"],
-              properties: { name: { type: "string" } }
+              properties: {
+                name_ar: { type: "string" },
+                name_en: { type: "string" },
+                color: { type: "string" },
+                active: { type: "boolean" }
+              }
             }
           }
         }
@@ -301,8 +327,15 @@ export const materialsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["title"],
-              properties: { title: { type: "string", example: "Grade 12 Senior" } }
+              required: ["name_ar", "color", "ageRange"],
+              properties: {
+                name_ar: { type: "string", example: "الصف الثالث الثانوي" },
+                name_en: { type: "string", example: "Grade 12 Senior" },
+                color: { type: "string", example: "#3357FF" },
+                ageRange: { type: "string", example: "17-18" },
+                stageName_ar: { type: "string", example: "المرحلة الثانوية" },
+                stageName_en: { type: "string", example: "Secondary Stage" }
+              }
             }
           }
         }
@@ -333,8 +366,14 @@ export const materialsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["title"],
-              properties: { title: { type: "string" } }
+              properties: {
+                name_ar: { type: "string" },
+                name_en: { type: "string" },
+                color: { type: "string" },
+                ageRange: { type: "string" },
+                stageName_ar: { type: "string" },
+                stageName_en: { type: "string" }
+              }
             }
           }
         }

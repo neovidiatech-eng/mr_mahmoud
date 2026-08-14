@@ -1,6 +1,5 @@
 import { Router } from "express";
 import authentication from "../../Middlewares/Authentication.js";
-import { authorizeResource } from "../../Middlewares/AuthorizeResource.js";
 import { authorize } from "../../Middlewares/Authorize.js";
 import { validation } from "../../Middlewares/Validation.js";
 import * as withdrawalController from "./withdrawals.controller.js";

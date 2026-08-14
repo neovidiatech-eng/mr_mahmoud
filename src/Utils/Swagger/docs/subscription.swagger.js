@@ -29,9 +29,11 @@ export const subscriptionPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["planId"],
+              required: ["planId", "rankId", "courseId"],
               properties: {
-                planId: { type: "string" }
+                planId: { type: "string" },
+                rankId: { type: "string" },
+                courseId: { type: "string" }
               }
             }
           }
@@ -56,13 +58,21 @@ export const subscriptionPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name", "price", "durationMonths"],
+              required: ["name", "price", "duration", "currencyId", "type"],
               properties: {
                 name: { type: "string", example: "Monthly Premium" },
-                price: { type: "number", example: 299.99 },
-                durationMonths: { type: "integer", example: 1 },
                 description: { type: "string" },
-                features: { type: "array", items: { type: "string" } }
+                price: { type: "number", example: 299.99 },
+                duration: { type: "integer", example: 1, description: "Duration in months" },
+                sessionsCount: { type: "integer", default: 0 },
+                rescheduleCount: { type: "integer", default: 0 },
+                active: { type: "boolean", default: false },
+                features: { type: "array", items: { type: "string" } },
+                currencyId: { type: "string" },
+                type: { type: "string", enum: ["quarterly", "annually", "halfAnnually"], example: "quarterly" },
+                isGroup: { type: "boolean", default: false },
+                maxStudents: { type: "string", default: "1" },
+                planType: { type: "string", enum: ["individual", "group"], default: "individual" }
               }
             }
           }
@@ -79,6 +89,31 @@ export const subscriptionPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                name: { type: "string" },
+                description: { type: "string" },
+                price: { type: "number" },
+                duration: { type: "integer" },
+                sessionsCount: { type: "integer" },
+                rescheduleCount: { type: "integer" },
+                active: { type: "boolean" },
+                features: { type: "array", items: { type: "string" } },
+                currencyId: { type: "string" },
+                type: { type: "string", enum: ["quarterly", "annually", "halfAnnually"] },
+                isGroup: { type: "boolean" },
+                maxStudents: { type: "string" },
+                planType: { type: "string", enum: ["individual", "group"] }
+              }
+            }
+          }
+        }
+      },
       responses: { 200: { description: "Plan updated." } }
     },
     delete: {
@@ -96,6 +131,10 @@ export const subscriptionPaths = {
       tags: ["Subscription Requests"],
       summary: "Get subscription requests",
       security: [{ bearerAuth: [] }],
+      parameters: [
+        { name: "search", in: "query", schema: { type: "string" } },
+        { name: "status", in: "query", schema: { type: "string", enum: ["pending", "rejected", "approved"] } }
+      ],
       responses: { 200: { description: "Subscription requests retrieved." } }
     }
   },
@@ -115,7 +154,8 @@ export const subscriptionPaths = {
               type: "object",
               required: ["status"],
               properties: {
-                status: { type: "string", enum: ["APPROVED", "REJECTED"] }
+                status: { type: "string", enum: ["approved", "rejected"] },
+                rankId: { type: "string" }
               }
             }
           }

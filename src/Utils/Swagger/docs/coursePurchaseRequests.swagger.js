@@ -5,8 +5,9 @@ export const coursePurchaseRequestsPaths = {
       summary: "Get all course purchase requests",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "page", in: "query", schema: { type: "integer" } },
-        { name: "limit", in: "query", schema: { type: "integer" } }
+        { name: "status", in: "query", schema: { type: "string", enum: ["pending", "approved", "rejected"] } },
+        { name: "page", in: "query", schema: { type: "integer", minimum: 1 } },
+        { name: "limit", in: "query", schema: { type: "integer", minimum: 1 } }
       ],
       responses: { 200: { description: "Course purchase requests retrieved." } }
     },
@@ -23,7 +24,7 @@ export const coursePurchaseRequestsPaths = {
               required: ["courseId"],
               properties: {
                 courseId: { type: "string" },
-                paymentReceipt: { type: "string" }
+                notes: { type: "string" }
               }
             }
           }
@@ -48,7 +49,7 @@ export const coursePurchaseRequestsPaths = {
               type: "object",
               required: ["status"],
               properties: {
-                status: { type: "string", enum: ["APPROVED", "REJECTED"] },
+                status: { type: "string", enum: ["approved", "rejected"] },
                 notes: { type: "string" }
               }
             }

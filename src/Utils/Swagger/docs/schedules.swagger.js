@@ -5,15 +5,6 @@ export const schedulesPaths = {
       summary: "Get all schedules / live sessions",
       security: [{ bearerAuth: [] }],
       responses: { 200: { description: "Schedules retrieved." } }
-    },
-    patch: {
-      tags: ["Schedules"],
-      summary: "Update schedule",
-      security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
-      ],
-      responses: { 200: { description: "Schedule updated." } }
     }
   },
   "/schedules/reviews": {
@@ -54,13 +45,26 @@ export const schedulesPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["title", "startTime", "endTime"],
+              required: ["platform", "teacherId", "courseId", "title", "link", "start_time", "type", "notification_Time"],
               properties: {
-                title: { type: "string", example: "Physics Chapter 1 Live" },
-                startTime: { type: "string", format: "date-time" },
-                endTime: { type: "string", format: "date-time" },
+                title: { type: "string", example: "Physics Chapter 1 Live Session" },
+                description: { type: "string", example: "Discussion on kinematics" },
+                platform: { type: "string", example: "zoom" },
+                teacherId: { type: "string" },
+                courseId: { type: "string" },
                 subjectId: { type: "string" },
-                teacherId: { type: "string" }
+                link: { type: "string", example: "https://zoom.us/j/123456789" },
+                notes: { type: "string" },
+                start_time: { type: "string", format: "date-time" },
+                type: { type: "string", example: "individual" },
+                language: { type: "string", enum: ["en", "ar", "fr"], default: "en" },
+                videoUrl: { type: "string" },
+                slidesUrl: { type: "string" },
+                notification_Time: { type: "string", example: "15m" },
+                studentId: { type: "string" },
+                studentIds: { type: "array", items: { type: "string" } },
+                isGroup: { type: "boolean", default: false },
+                maxStudents: { type: "string", default: "1" }
               }
             }
           }
@@ -80,12 +84,33 @@ export const schedulesPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["title", "repeatDays", "startDate", "endDate"],
+              required: ["teacherId", "courseId", "link", "startTime", "days", "startDate", "endDate", "notification_Time"],
               properties: {
                 title: { type: "string" },
-                repeatDays: { type: "array", items: { type: "string" }, example: ["MONDAY", "WEDNESDAY"] },
+                description: { type: "string" },
+                teacherId: { type: "string" },
+                courseId: { type: "string" },
+                subjectId: { type: "string" },
+                link: { type: "string", example: "https://zoom.us/j/123456789" },
+                notes: { type: "string" },
+                startTime: { type: "string", example: "18:00", description: "Time in HH:mm format" },
+                days: {
+                  type: "array",
+                  items: {
+                    type: "string",
+                    enum: ["Saturday", "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday"]
+                  },
+                  example: ["Sunday", "Wednesday"]
+                },
                 startDate: { type: "string", format: "date" },
-                endDate: { type: "string", format: "date" }
+                endDate: { type: "string", format: "date" },
+                notification_Time: { type: "string", example: "15m" },
+                language: { type: "string", enum: ["en", "ar", "fr"], default: "en" },
+                videoUrl: { type: "string" },
+                studentId: { type: "string" },
+                studentIds: { type: "array", items: { type: "string" } },
+                isGroup: { type: "boolean", default: false },
+                maxStudents: { type: "string", default: "1" }
               }
             }
           }
@@ -103,6 +128,40 @@ export const schedulesPaths = {
         { name: "id", in: "path", required: true, schema: { type: "string" } }
       ],
       responses: { 200: { description: "Schedule details retrieved." } }
+    },
+    patch: {
+      tags: ["Schedules"],
+      summary: "Update schedule",
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        { name: "id", in: "path", required: true, schema: { type: "string" } }
+      ],
+      requestBody: {
+        required: true,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                title: { type: "string" },
+                description: { type: "string" },
+                subjectId: { type: "string" },
+                link: { type: "string" },
+                notes: { type: "string" },
+                status: { type: "string", enum: ["planned", "completed", "missed", "cancelled"] },
+                start_time: { type: "string", format: "date-time" },
+                type: { type: "string" },
+                language: { type: "string", enum: ["en", "ar", "fr"] },
+                videoUrl: { type: "string" },
+                slidesUrl: { type: "string" },
+                notification_Time: { type: "string" },
+                instractor: { type: "string" }
+              }
+            }
+          }
+        }
+      },
+      responses: { 200: { description: "Schedule updated." } }
     },
     delete: {
       tags: ["Schedules"],
@@ -184,10 +243,12 @@ export const schedulesPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["rating"],
+              required: ["rating", "comment", "teacherAttended", "studentAttended"],
               properties: {
                 rating: { type: "number", minimum: 1, maximum: 5, example: 5 },
-                comment: { type: "string", example: "Great session!" }
+                comment: { type: "string", example: "Great session!" },
+                teacherAttended: { type: "boolean", default: true },
+                studentAttended: { type: "boolean", default: true }
               }
             }
           }

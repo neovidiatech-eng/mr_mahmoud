@@ -11,14 +11,22 @@ const router = Router();
 router.get(
   "/",
   authentication,
-  authorize(PERMISSIONS_V2.PROFILE.VIEW), 
+  authorize(PERMISSIONS_V2.PROFILE.VIEW),
   profileController.getProfile,
+);
+
+router.get(
+  "/qr",
+  authentication,
+  //authorize(PERMISSIONS_V2.PROFILE.VIEW),
+  validation(schema.getProfileQrSchema),
+  profileController.getProfileQr,
 );
 
 router.patch(
   "/update-profile",
   authentication,
-  authorize(PERMISSIONS_V2.PROFILE.UPDATE), 
+  authorize(PERMISSIONS_V2.PROFILE.UPDATE),
   validation(schema.updateProfileSchema),
   profileController.updateProfile,
 );
