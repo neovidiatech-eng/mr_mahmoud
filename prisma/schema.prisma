@@ -41,6 +41,7 @@ model user {
   conversationsStudent Conversation[]          @relation("StudentConversations")
   userLectures         user_lectures[]
   posts                post[]
+  attendancesCheckedIn Attendance[]            @relation("AttendanceCheckedInBy")
 
   @@index([email])
   @@index([username])
@@ -846,10 +847,12 @@ model Attendance {
   attendanceDate DateTime @db.Date // اليوم بس، للـ unique constraint
   checkedInAt    DateTime @default(now()) // الوقت الفعلي للـ check-in
   status         String   @default("present")
-  checkedInBy    String?
+  checkedInById  String?  @map("checkedInBy")
 
-  student student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  student     student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  checkedInBy user?   @relation("AttendanceCheckedInBy", fields: [checkedInById], references: [id], onDelete: SetNull)
 
   @@unique([studentId, attendanceDate])
   @@index([studentId])
 }
+ 

@@ -44,4 +44,4 @@ ENV NODE_ENV=production
 EXPOSE 3013
 
 # Run migrations and start app
-CMD ["sh", "-c", "npx prisma migrate deploy && npm start"]
+CMD ["sh", "-c", "until npx prisma migrate deploy; do echo 'Waiting for database connection...'; sleep 3; done && npm start"]

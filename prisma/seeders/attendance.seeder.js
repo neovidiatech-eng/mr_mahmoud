@@ -66,14 +66,14 @@ export async function seedAttendance() {
         update: {
           status,
           checkedInAt: status !== "absent" ? checkInTime : new Date(attendanceDate),
-          checkedInBy: checkedInById,
+          checkedInById: checkedInById,
         },
         create: {
           studentId: student.id,
           attendanceDate,
           checkedInAt: status !== "absent" ? checkInTime : new Date(attendanceDate),
           status,
-          checkedInBy: checkedInById,
+          checkedInById: checkedInById,
         },
       });
     }
