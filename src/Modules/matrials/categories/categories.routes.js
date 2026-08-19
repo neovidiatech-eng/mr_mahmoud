@@ -9,14 +9,12 @@ const categoriesResource = "categories";
 
 router.get(
   "/",
-  authorizeResource(categoriesResource),
   validation(schema.getCategoriesSchema),
   categoriesController.getAllCategories,
 );
 
 router.get(
   "/:id",
-  authorizeResource(categoriesResource),
   validation(schema.getCategorySchema),
   categoriesController.getCategory,
 );
