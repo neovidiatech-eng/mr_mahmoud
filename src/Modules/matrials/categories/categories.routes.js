@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as categoriesController from "./categories.controller.js";
 import { validation } from "../../../Middlewares/Validation.js";
+import authentication from "../../../Middlewares/Authentication.js";
 import { authorizeResource } from "../../../Middlewares/AuthorizeResource.js";
 import * as schema from "./categories.validation.js";
 
@@ -21,6 +22,7 @@ router.get(
 
 router.post(
   "/",
+  authentication,
   authorizeResource(categoriesResource),
   validation(schema.createCategorySchema),
   categoriesController.createCategory,
@@ -28,6 +30,7 @@ router.post(
 
 router.patch(
   "/:id",
+  authentication,
   authorizeResource(categoriesResource),
   validation(schema.updateCategorySchema),
   categoriesController.updateCategory,
@@ -35,6 +38,7 @@ router.patch(
 
 router.delete(
   "/:id",
+  authentication,
   authorizeResource(categoriesResource),
   validation(schema.deleteCategorySchema),
   categoriesController.deleteCategory,
