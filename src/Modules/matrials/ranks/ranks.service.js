@@ -1,4 +1,5 @@
 import * as db from "../../../database/dbService.js";
+import slugify from "slugify";
 
 /* -----------------------------
    Constants & Shared Includes
@@ -41,15 +42,13 @@ export const getRanks = async (req, res, next) => {
 ----------------------------- */
 export const addRank = async (req, res, next) => {
   const { name_ar, name_en, color, ageRange, stageName_ar, stageName_en } = req.body || {};
-  const slug = name_ar
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+  const slug = slugify(name_en, { lower: true, replacement: "-", trim: true });
+
 
   const check = await db.findFirst({
     model: "ranks",
     where: {
-      OR: [{ name_ar }, { slug }]
+      OR: [{ name_en }, { slug }, {name_ar}]
     },
   });
 

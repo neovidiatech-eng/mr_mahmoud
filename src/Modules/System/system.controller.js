@@ -218,7 +218,7 @@ export const updateRole = asyncHandler(async (req, res, next) => {
   }
 
   const updatedRole = await db.transaction(async (tx) => {
-    const role = await tx.update({
+    const role = await tx.updateOne({
       model: "role",
       where: { id },
       data: { name },
