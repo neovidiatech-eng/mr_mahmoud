@@ -14,13 +14,8 @@ const requestInclude = {
 };
 
 export const createRequest = asyncHandler(async (req, res, next) => {
-  const student = req.user.student;
-  const { courseId, courseIds, parentPhone, notes } = req.body;
+  const { name, email, phone, rankId, courseId, courseIds, parentPhone, notes } = req.body;
   const receipt_img = req.file?.finalPath || req.file?.path || null;
-
-  if (!student) {
-    return errorResponse({ req, next, message: "STUDENT_NOT_FOUND", status: 404 });
-  }
 
   const targetCourseIds = Array.isArray(courseIds) && courseIds.length > 0
     ? courseIds
@@ -30,13 +25,97 @@ export const createRequest = asyncHandler(async (req, res, next) => {
     return errorResponse({ req, next, message: "COURSE_ID_REQUIRED", status: 400 });
   }
 
+  // 1. Resolve or Create Student
+  let student = req.user?.student;
+
+  if (!student) {
+    // Search existing user by email or phone
+    const existingUser = await db.findFirst({
+      model: "user",
+      where: {
+        OR: [
+          ...(email ? [{ email }] : []),
+          ...(phone ? [{ phone }] : []),
+        ],
+      },
+      include: { student: true },
+    });
+
+    if (existingUser) {
+      if (existingUser.student) {
+        student = existingUser.student;
+      } else {
+        student = await db.create({
+          model: "student",
+          data: {
+            user_id: existingUser.id,
+            country: "Egypt",
+            status: "pending",
+            ...(parentPhone && { parentNumber: parentPhone }),
+            ...(rankId && { rankId }),
+          },
+        });
+      }
+    } else {
+      const studentRole = await db.findFirst({
+        model: "role",
+        where: { name: { equals: "student", mode: "insensitive" } },
+      });
+
+      const username = `${(name || "user").trim().replace(/\s+/g, "_").toLowerCase()}_${Date.now().toString().slice(-6)}`;
+
+      await db.transaction(async (tx) => {
+        const newUser = await tx.create({
+          model: "user",
+          data: {
+            name,
+            email,
+            phone,
+            username,
+            status: "pending",
+            ...(studentRole && { roleId: studentRole.id }),
+          },
+        });
+
+        student = await tx.create({
+          model: "student",
+          data: {
+            user_id: newUser.id,
+            country: "Egypt",
+            status: "pending",
+            ...(parentPhone && { parentNumber: parentPhone }),
+            ...(rankId && { rankId }),
+          },
+        });
+      });
+    }
+  }
+
+  // Update parentNumber / rankId on student if missing
+  if (student && (parentPhone || rankId)) {
+    const updateData = {};
+    if (parentPhone && !student.parentNumber) updateData.parentNumber = parentPhone;
+    if (rankId && !student.rankId) updateData.rankId = rankId;
+    if (Object.keys(updateData).length > 0) {
+      await db.updateOne({
+        model: "student",
+        where: { id: student.id },
+        data: updateData,
+      });
+    }
+  }
+
+  // 2. Fetch courses and create purchase requests
   const createdRequests = [];
   const errors = [];
-   const courses = await db.findMany({ model: "courses", where: { id: {in: targetCourseIds} } });
+  const courses = await db.findMany({
+    model: "courses",
+    where: { id: { in: targetCourseIds } },
+  });
 
   for (const cId of targetCourseIds) {
-    const course=courses.find(el=>el.id===cId);
-   
+    const course = courses.find((el) => el.id === cId);
+
     if (!course) {
       errors.push({ courseId: cId, error: "COURSE_NOT_FOUND" });
       continue;
