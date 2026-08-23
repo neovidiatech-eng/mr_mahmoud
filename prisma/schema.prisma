@@ -694,9 +694,11 @@ model course_purchase_request {
   id        String   @id @default(uuid())
   studentId String
   courseId  String
-  status    String   @default("pending")
-  notes     String?
-  createdAt DateTime @default(now())
+  status      String   @default("pending")
+  receipt_img String?
+  parentPhone String?
+  notes       String?
+  createdAt   DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   student student @relation(fields: [studentId], references: [id], onDelete: Cascade)

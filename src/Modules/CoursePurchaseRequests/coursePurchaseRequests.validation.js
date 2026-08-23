@@ -4,9 +4,12 @@ import { generalFields } from "../../Utils/GeneralFields/index.js";
 export const createRequestSchema = {
   body: joi
     .object({
-      courseId: generalFields.id.required(),
+      courseId: generalFields.id.optional(),
+      courseIds: joi.array().items(generalFields.id).min(1).optional(),
+      parentPhone: joi.string().max(20).allow("").optional(),
       notes: joi.string().max(1000).allow("").optional(),
     })
+    .or("courseId", "courseIds")
     .required(),
 };
 
