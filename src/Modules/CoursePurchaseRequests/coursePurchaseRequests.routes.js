@@ -5,6 +5,8 @@ import { authorize } from "../../Middlewares/Authorize.js";
 import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 import * as schema from "./coursePurchaseRequests.validation.js";
 
+import { fileValidation, localMulterUpload } from "../../Utils/Multer/local.multer.js";
+
 const router = Router();
 
 router.get(
@@ -17,6 +19,10 @@ router.get(
 router.post(
   "/",
   authorize(PERMISSIONS_V2.COURSE_PURCHASE_REQUESTS.CREATE),
+  localMulterUpload({
+    customPath: "course-purchases/receipts",
+    fileValidation: fileValidation.image,
+  }).single("image"),
   validation(schema.createRequestSchema),
   controller.createRequest,
 );

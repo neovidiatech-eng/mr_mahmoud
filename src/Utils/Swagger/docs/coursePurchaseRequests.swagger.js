@@ -18,19 +18,32 @@ export const coursePurchaseRequestsPaths = {
       requestBody: {
         required: true,
         content: {
+          "multipart/form-data": {
+            schema: {
+              type: "object",
+              properties: {
+                courseId: { type: "string", description: "Single course ID" },
+                courseIds: { type: "array", items: { type: "string" }, description: "Array of course IDs for cart purchases" },
+                parentPhone: { type: "string", example: "01000000000", description: "Parent phone number (optional)" },
+                notes: { type: "string", description: "Additional notes" },
+                image: { type: "string", format: "binary", description: "Payment receipt proof image (optional)" }
+              }
+            }
+          },
           "application/json": {
             schema: {
               type: "object",
-              required: ["courseId"],
               properties: {
                 courseId: { type: "string" },
+                courseIds: { type: "array", items: { type: "string" } },
+                parentPhone: { type: "string" },
                 notes: { type: "string" }
               }
             }
           }
         }
       },
-      responses: { 201: { description: "Request submitted." } }
+      responses: { 201: { description: "Request submitted successfully." } }
     }
   },
   "/course-purchase-requests/{id}/status": {
