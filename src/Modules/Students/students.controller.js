@@ -119,16 +119,18 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
     });
   const studentsData = await Promise.all(
     students.map(async (student) => {
-      const phone = await decryptText({ text: student.user.phone });
+      const phone = student.user.phone ? await decryptText({ text: student.user.phone }) : undefined
       const decryptedPassword = student.user.password
         ? await decryptText({ text: student.user.password })
         : undefined;
+      const parentNumber = student.user.parentNumber ? await decryptText({ text: student.user.parentNumber }) : undefined
       return {
         ...student,
         user: {
           ...student.user,
           phone: phone,
           ...(decryptedPassword && { password: decryptedPassword }),
+          ...(parentNumber && {parentNumber:parentNumber})
         },
       };
     }),
@@ -385,6 +387,11 @@ export const getStudentById = asyncHandler(async (req, res, next) => {
   if (student.user.phone) {
     student.user.phone = await decryptText({ text: student.user.phone });
   }
+  if (student.user.parentNumber) {
+    student.user.parentNumber = await decryptText({
+      text: student.user.parentNumber,
+    });
+  }
   if (student.user.password) {
     student.user.password = await decryptText({ text: student.user.password });
   }
@@ -406,6 +413,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     password,
     phone,
     phone_code,
+    parentNumber,
     country,
     planId,
     birth_date,
@@ -497,12 +505,14 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     password ||
     phone ||
     phone_code ||
+    parentNumber ||
     birth_date ||
     age ||
     gender ||
     timezone
   ) {
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
+    const encryptedParentNumber = parentNumber ? encryptText({ text: parentNumber }) : undefined;
     await db.updateOne({
       model: "user",
       where: { id: student.user_id },
@@ -514,6 +524,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         ...(studentAge !== null ? { age: studentAge } : {}),
         ...(phone && { phone: encryptedPhone }),
         ...(phone_code && { code_country: phone_code }),
+        ...(encryptedParentNumber && { parentNumber: encryptedParentNumber }),
         ...(timezone && { timezone }),
       },
     });
@@ -550,6 +561,11 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
   if (updatedStudent.user.password) {
     updatedStudent.user.password = await decryptText({
       text: updatedStudent.user.password,
+    });
+  }
+  if (updatedStudent.user.parentNumber) {
+    updatedStudent.user.parentNumber = await decryptText({
+      text: updatedStudent.user.parentNumber,
     });
   }
 
