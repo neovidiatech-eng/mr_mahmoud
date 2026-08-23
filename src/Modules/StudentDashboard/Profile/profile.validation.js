@@ -20,7 +20,7 @@ export const updateProfileSchema = {
 
 
 export const getProfileQrSchema={
-  query:Joi.object().keys({
+  params:Joi.object().keys({
     token:Joi.string().required()
   })
 }

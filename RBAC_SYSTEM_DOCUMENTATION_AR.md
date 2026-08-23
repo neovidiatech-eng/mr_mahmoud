@@ -21,7 +21,7 @@
 *   طلبات `GET` تتطلب صلاحية `read`.
 *   طلبات `POST` تتطلب صلاحية `create`.
 *   طلبات `PATCH/PUT` تتطلب صلاحية `update`.
-*   طلبات `DELETE` تتطلب صلاحية `delete`.
+*   طلبات `DELETE` تتطلب صلاحية `delete`.x
 
 **مثال:**
 `router.get("/", authenticate, authorizeResource("courses"), controller.list);`

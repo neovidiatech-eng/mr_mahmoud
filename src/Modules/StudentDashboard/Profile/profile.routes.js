@@ -16,7 +16,7 @@ router.get(
 );
 
 router.get(
-  "/qr",
+  "/qr/:token",
   authentication,
   //authorize(PERMISSIONS_V2.PROFILE.VIEW),
   validation(schema.getProfileQrSchema),

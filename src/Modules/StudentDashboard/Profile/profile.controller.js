@@ -114,7 +114,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
 });
 
 export const getProfileQr = asyncHandler(async (req, res, next) => {
-  const { token } = req.query;
+  const { token } = req.params;
 
   if (!token) {
     const error = createError({

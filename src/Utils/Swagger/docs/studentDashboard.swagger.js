@@ -10,7 +10,7 @@ export const studentDashboardPaths = {
       }
     }
   },
-  "/student/profile/qr": {
+  "/student/profile/qr/{token}": {
     get: {
       tags: ["Student Dashboard"],
       summary: "Get student profile details by QR token",
@@ -18,7 +18,7 @@ export const studentDashboardPaths = {
       parameters: [
         {
           name: "token",
-          in: "query",
+          in: "path",
           required: true,
           schema: { type: "string" },
           description: "Encrypted QR code token"

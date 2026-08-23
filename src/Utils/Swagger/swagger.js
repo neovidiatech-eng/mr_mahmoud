@@ -28,17 +28,23 @@ export const swaggerSpec = {
   info: {
     title: "Mr. Mahmoud Platform Backend API",
     version: "1.0.0",
-    description: "Complete RESTful API Documentation for all endpoints across Mr. Mahmoud Educational Platform."
+    description:
+      "Complete RESTful API Documentation for all endpoints across Mr. Mahmoud Educational Platform.",
   },
   servers: [
-    {
-      url: "http://localhost:3013",
-      description: "Local Development Server"
-    },
-    {
-      url: "https://copy.agro-plus.net",
-      description: "Production Server"
-    }
+    ...(process.env.NODE_ENV === "development"
+      ? [
+          {
+            url: "http://localhost:3013",
+            description: "Local Development Server",
+          },
+        ]
+      : [
+          {
+            url: "https://copy.agro-plus.net",
+            description: "Production Server",
+          },
+        ]),
   ],
   components: {
     securitySchemes: {
@@ -46,49 +52,130 @@ export const swaggerSpec = {
         type: "http",
         scheme: "bearer",
         bearerFormat: "JWT",
-        description: "Enter JWT Bearer token in format: Bearer <TOKEN>"
-      }
-    }
+        description: "Enter JWT Bearer token in format: Bearer <TOKEN>",
+      },
+    },
   },
   tags: [
-    { name: "Authentication", description: "User Sign Up, Sign In, OTP & Password Management" },
+    {
+      name: "Authentication",
+      description: "User Sign Up, Sign In, OTP & Password Management",
+    },
     { name: "Student Dashboard", description: "Student Profile & Analytics" },
-    { name: "Teacher Dashboard", description: "Teacher Profile, Students & Financial Transactions" },
+    {
+      name: "Teacher Dashboard",
+      description: "Teacher Profile, Students & Financial Transactions",
+    },
     { name: "Requests", description: "System Requests Management" },
-    { name: "Homework", description: "Homework Assignments, Submissions & Grading" },
+    {
+      name: "Homework",
+      description: "Homework Assignments, Submissions & Grading",
+    },
     { name: "Exams", description: "Exams Management" },
-    { name: "Exams Question Bank", description: "Question Bank & Questions Management" },
+    {
+      name: "Exams Question Bank",
+      description: "Question Bank & Questions Management",
+    },
     { name: "Exams Attempt", description: "Student Exam Session Lifecycle" },
     { name: "Calendar", description: "Events & Schedules Calendar" },
     { name: "Schedules", description: "Live Sessions, Scheduling & Reviews" },
-    { name: "Schedules Session Lifecycle", description: "Join/Leave Live Sessions" },
-    { name: "Schedules Reviews", description: "Session Feedback & Reviews Moderation" },
+    {
+      name: "Schedules Session Lifecycle",
+      description: "Join/Leave Live Sessions",
+    },
+    {
+      name: "Schedules Reviews",
+      description: "Session Feedback & Reviews Moderation",
+    },
     { name: "Chat", description: "Real-time Direct Messaging & Conversations" },
-    { name: "System Administration", description: "Admin System Dashboard & Timezones" },
-    { name: "System Roles & Permissions", description: "RBAC Roles & Permissions Management" },
-    { name: "System Staff Management", description: "Admin & Staff User Accounts Management" },
-    { name: "Students Management", description: "Admin Management of Student Accounts" },
-    { name: "Teachers Management", description: "Admin Management of Teacher Accounts" },
-    { name: "Subjects Management", description: "Subjects & Curricula Management" },
+    {
+      name: "System Administration",
+      description: "Admin System Dashboard & Timezones",
+    },
+    {
+      name: "System Roles & Permissions",
+      description: "RBAC Roles & Permissions Management",
+    },
+    {
+      name: "System Staff Management",
+      description: "Admin & Staff User Accounts Management",
+    },
+    {
+      name: "Students Management",
+      description: "Admin Management of Student Accounts",
+    },
+    {
+      name: "Teachers Management",
+      description: "Admin Management of Teacher Accounts",
+    },
+    {
+      name: "Subjects Management",
+      description: "Subjects & Curricula Management",
+    },
     { name: "Finances & Expenses", description: "Financial Expenses Tracking" },
-    { name: "Educational Materials - Courses", description: "Courses & Curricula Materials" },
-    { name: "Educational Materials - Lectures", description: "Lectures & Video Content" },
-    { name: "Educational Materials - Categories", description: "Course Categories" },
+    {
+      name: "Educational Materials - Courses",
+      description: "Courses & Curricula Materials",
+    },
+    {
+      name: "Educational Materials - Lectures",
+      description: "Lectures & Video Content",
+    },
+    {
+      name: "Educational Materials - Categories",
+      description: "Course Categories",
+    },
     { name: "Educational Materials - Ranks", description: "Educational Ranks" },
-    { name: "Weekly Reports", description: "Student Weekly Performance & Assessment Reports" },
-    { name: "Policies & Notices", description: "Platform Terms, Privacy Policies & Announcement Notices" },
-    { name: "Support Tickets", description: "Helpdesk & Customer Support Tickets" },
+    {
+      name: "Weekly Reports",
+      description: "Student Weekly Performance & Assessment Reports",
+    },
+    {
+      name: "Policies & Notices",
+      description: "Platform Terms, Privacy Policies & Announcement Notices",
+    },
+    {
+      name: "Support Tickets",
+      description: "Helpdesk & Customer Support Tickets",
+    },
     { name: "Support Categories", description: "Support Ticket Categories" },
-    { name: "Withdrawals", description: "Teacher Wallet Withdrawal Requests & Approvals" },
-    { name: "Transactions", description: "Payment & System Financial Transactions" },
-    { name: "Transactions Currency", description: "System Currency Configurations" },
+    {
+      name: "Withdrawals",
+      description: "Teacher Wallet Withdrawal Requests & Approvals",
+    },
+    {
+      name: "Transactions",
+      description: "Payment & System Financial Transactions",
+    },
+    {
+      name: "Transactions Currency",
+      description: "System Currency Configurations",
+    },
     { name: "Settings", description: "Platform System Configuration Settings" },
-    { name: "Course Purchase Requests", description: "Course Enrolment & Purchase Requests" },
-    { name: "Subscriptions", description: "Student Subscription Plans & Renewals" },
-    { name: "Subscription Plans", description: "Subscription Plans Management" },
-    { name: "Subscription Requests", description: "Subscription Plan Upgrade Requests" },
-    { name: "Posts Management", description: "Blog & News Articles Management" },
-    { name: "Attendance", description: "Onsite Student Attendance & Check-In Management" }
+    {
+      name: "Course Purchase Requests",
+      description: "Course Enrolment & Purchase Requests",
+    },
+    {
+      name: "Subscriptions",
+      description: "Student Subscription Plans & Renewals",
+    },
+    {
+      name: "Subscription Plans",
+      description: "Subscription Plans Management",
+    },
+    {
+      name: "Subscription Requests",
+      description: "Subscription Plan Upgrade Requests",
+    },
+    {
+      name: "Posts Management",
+      description: "Blog & News Articles Management",
+    },
+    {
+      name: "Attendance",
+      description: "Onsite Student Attendance & Check-In Management",
+    },
   ],
   paths: {
     ...authPaths,
@@ -114,6 +201,6 @@ export const swaggerSpec = {
     ...coursePurchaseRequestsPaths,
     ...subscriptionPaths,
     ...postsPaths,
-    ...attendancePaths
-  }
+    ...attendancePaths,
+  },
 };
