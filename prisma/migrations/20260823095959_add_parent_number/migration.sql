@@ -1,5 +1,3 @@
 -- AlterTable
-ALTER TABLE "student" ADD COLUMN     "parentNumber" TEXT;
+ALTER TABLE "student" ADD COLUMN    "parentNumber" TEXT;
 
--- AddForeignKey
-ALTER TABLE "Attendance" ADD CONSTRAINT "Attendance_checkedInBy_fkey" FOREIGN KEY ("checkedInBy") REFERENCES "user"("id") ON DELETE SET NULL ON UPDATE CASCADE;

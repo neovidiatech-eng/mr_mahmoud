@@ -5,6 +5,9 @@ export const createRequestSchema = {
   body: joi
     .object({
       courseId: generalFields.id.optional(),
+      name:generalFields.name.required(),
+      phone:generalFields.phone.required(),
+      email:generalFields.email.required(),
       courseIds: joi.array().items(generalFields.id).min(1).optional(),
       parentPhone: joi.string().max(20).allow("").optional(),
       notes: joi.string().max(1000).allow("").optional(),

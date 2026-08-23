@@ -131,15 +131,15 @@ model plan {
 }
 
 model subscription_requests {
-  id              String  @id @default(uuid())
+  id              String   @id @default(uuid())
   planId          String?
-  status          String  @default("pending")
-  subscrption_img String?   
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  user_id   String
-  plan      plan?    @relation(fields: [planId], references: [id])
-  user      user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  status          String   @default("pending")
+  subscrption_img String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user_id         String
+  plan            plan?    @relation(fields: [planId], references: [id])
+  user            user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
 
   @@index([user_id])
   @@index([planId])
@@ -691,18 +691,21 @@ model courses {
 }
 
 model course_purchase_request {
-  id        String   @id @default(uuid())
-  studentId String
-  courseId  String
+  id          String   @id @default(uuid())
+  studentId   String?
+  name        String
+  phone       String
+  email       String
+  courseId    String
   status      String   @default("pending")
   receipt_img String?
   parentPhone String?
   notes       String?
   createdAt   DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  updatedAt   DateTime @updatedAt
 
-  student student @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  course  courses @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  student student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
 
   @@index([studentId])
   @@index([courseId])
@@ -858,4 +861,16 @@ model Attendance {
 
   @@unique([studentId, attendanceDate])
   @@index([studentId])
+}
+
+
+
+model freeCourses{
+id String @id @default(uuid())
+coursesId String[]
+qrtoken String @unique
+status String @default("active")
+createdAt DateTime @default(now())
+updatedAt DateTime @updatedAt
+
 }
