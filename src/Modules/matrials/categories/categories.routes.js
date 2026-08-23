@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as categoriesController from "./categories.controller.js";
 import { validation } from "../../../Middlewares/Validation.js";
+import authentication from "../../../Middlewares/Authentication.js";
 import { authorizeResource } from "../../../Middlewares/AuthorizeResource.js";
 import * as schema from "./categories.validation.js";
 
@@ -9,20 +10,19 @@ const categoriesResource = "categories";
 
 router.get(
   "/",
-  authorizeResource(categoriesResource),
   validation(schema.getCategoriesSchema),
   categoriesController.getAllCategories,
 );
 
 router.get(
   "/:id",
-  authorizeResource(categoriesResource),
   validation(schema.getCategorySchema),
   categoriesController.getCategory,
 );
 
 router.post(
   "/",
+  authentication,
   authorizeResource(categoriesResource),
   validation(schema.createCategorySchema),
   categoriesController.createCategory,
@@ -30,6 +30,7 @@ router.post(
 
 router.patch(
   "/:id",
+  authentication,
   authorizeResource(categoriesResource),
   validation(schema.updateCategorySchema),
   categoriesController.updateCategory,
@@ -37,6 +38,7 @@ router.patch(
 
 router.delete(
   "/:id",
+  authentication,
   authorizeResource(categoriesResource),
   validation(schema.deleteCategorySchema),
   categoriesController.deleteCategory,

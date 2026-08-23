@@ -46,6 +46,7 @@ const bootstrap = async () => {
     "http://127.0.0.1:5500",
     "https://dashboard.mr-mahmoud.com",
     "https://mr-mahmoud.vercel.app",
+    "https://copy.agro-plus.net",
   ];
 
   const allowedOrigins = process.env.CORS_ORIGINS

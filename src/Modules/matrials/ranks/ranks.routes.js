@@ -26,7 +26,7 @@ router.get(
 
 router.post(
   "/create",
-  
+  authentication,
   authorizeResource(ranksResource),
   validation(schema.createRank),
   controller.addRank,
@@ -34,7 +34,7 @@ router.post(
 
 router.patch(
   "/:id",
-  
+  authentication,
   authorizeResource(ranksResource),
   validation(schema.updateRank),
   controller.updateRank,
@@ -42,7 +42,7 @@ router.patch(
 
 router.delete(
   "/:id",
-  
+  authentication,
   authorizeResource(ranksResource),
   validation(schema.deleteRank),
   controller.deleteRank,

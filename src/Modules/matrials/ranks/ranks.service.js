@@ -1,4 +1,5 @@
 import * as db from "../../../database/dbService.js";
+import slugify from "slugify";
 
 /* -----------------------------
    Constants & Shared Includes
@@ -41,15 +42,26 @@ export const getRanks = async (req, res, next) => {
 ----------------------------- */
 export const addRank = async (req, res, next) => {
   const { name_ar, name_en, color, ageRange, stageName_ar, stageName_en } = req.body || {};
-  const slug = name_ar
-    .toLowerCase()
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/(^-|-$)/g, "");
+  
+  const slugSource = name_en || name_ar;
+  if (!slugSource) {
+    const error = new Error("NAME_REQUIRED");
+    error.status = 400;
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  const slug = slugify(slugSource, { lower: true, replacement: "-", trim: true }) 
+               || `rank-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
 
   const check = await db.findFirst({
     model: "ranks",
     where: {
-      OR: [{ name_ar }, { slug }]
+      OR: [
+        { name_ar },
+        ...(name_en ? [{ name_en }] : []),
+        { slug }
+      ]
     },
   });
 
@@ -115,21 +127,20 @@ export const updateRank = async (req, res, next) => {
   }
 
   const updateData = {};
-  if (name_ar) {
-    const slug = name_ar
-      .toLowerCase()
-      .replace(/[^a-z0-9]+/g, "-")
-      .replace(/(^-|-$)/g, "");
+  let shouldRegenerateSlug = false;
+  let targetNameEn = name_en !== undefined ? name_en : rank.name_en;
+  let targetNameAr = name_ar !== undefined ? name_ar : rank.name_ar;
 
-    const check = await db.findFirst({
+  if (name_ar !== undefined && name_ar !== rank.name_ar) {
+    const checkAr = await db.findFirst({
       model: "ranks",
       where: {
         id: { not: id },
-        OR: [{ name_ar }, { slug }]
+        name_ar,
       },
     });
 
-    if (check) {
+    if (checkAr) {
       const error = new Error("RANK_EXISTS");
       error.status = 400;
       error.isMessageKey = true;
@@ -137,9 +148,53 @@ export const updateRank = async (req, res, next) => {
     }
 
     updateData.name_ar = name_ar;
+    shouldRegenerateSlug = true;
+  }
+
+  if (name_en !== undefined && name_en !== rank.name_en) {
+    if (name_en) {
+      const checkEn = await db.findFirst({
+        model: "ranks",
+        where: {
+          id: { not: id },
+          name_en,
+        },
+      });
+
+      if (checkEn) {
+        const error = new Error("RANK_EXISTS");
+        error.status = 400;
+        error.isMessageKey = true;
+        throw error;
+      }
+    }
+
+    updateData.name_en = name_en;
+    shouldRegenerateSlug = true;
+  }
+
+  if (shouldRegenerateSlug) {
+    const slugSource = targetNameEn || targetNameAr;
+    const slug = slugify(slugSource || "", { lower: true, replacement: "-", trim: true }) 
+                 || `rank-${id}`;
+
+    const checkSlug = await db.findFirst({
+      model: "ranks",
+      where: {
+        id: { not: id },
+        slug,
+      },
+    });
+
+    if (checkSlug) {
+      const error = new Error("RANK_EXISTS");
+      error.status = 400;
+      error.isMessageKey = true;
+      throw error;
+    }
+
     updateData.slug = slug;
   }
-  if (name_en !== undefined) updateData.name_en = name_en;
 
   if (color) updateData.color = color;
   if (ageRange) updateData.ageRange = ageRange;

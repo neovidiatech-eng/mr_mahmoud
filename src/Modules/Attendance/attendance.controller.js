@@ -101,7 +101,7 @@ export const checkIn = asyncHandler(async (req, res, next) => {
         attendanceDate: targetDate,
         checkedInAt: new Date(),
         status,
-        checkedInBy: adminOrTeacherId,
+        checkedInById: adminOrTeacherId,
       },
     });
 
@@ -193,6 +193,14 @@ export const getAttendanceList = asyncHandler(async (req, res, next) => {
             },
           },
           rank: true,
+        },
+      },
+      checkedInBy: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          username: true,
         },
       },
     },

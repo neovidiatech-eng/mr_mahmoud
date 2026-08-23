@@ -1,6 +1,7 @@
 import { Router } from "express";
 import * as coursesController from "./courses.controller.js";
 import { validation } from "../../../Middlewares/Validation.js";
+import authentication from "../../../Middlewares/Authentication.js";
 import { authorizeResource } from "../../../Middlewares/AuthorizeResource.js";
 import * as coursesValidation from "./courses.validation.js";
 import {
@@ -17,8 +18,6 @@ router.get(
   coursesController.getAllCourses,
 );
 
-
-
 router.get(
   "/:id",
   validation(coursesValidation.courseIdSchema),
@@ -27,6 +26,7 @@ router.get(
 
 router.get(
   "/:id/student-progress",
+  authentication,
   authorizeResource(coursesResource),
   validation(coursesValidation.courseIdSchema),
   coursesController.getCourseLecturesForStudent,
@@ -34,6 +34,7 @@ router.get(
 
 router.post(
   "/",
+  authentication,
   authorizeResource(coursesResource),
   localMulterUpload({
     customPath: (req) =>
@@ -46,6 +47,7 @@ router.post(
 
 router.patch(
   "/:id",
+  authentication,
   authorizeResource(coursesResource),
   localMulterUpload({
     customPath: "courses",
@@ -57,6 +59,7 @@ router.patch(
 
 router.delete(
   "/:id",
+  authentication,
   authorizeResource(coursesResource),
   validation(coursesValidation.courseIdSchema),
   coursesController.deleteCourse,

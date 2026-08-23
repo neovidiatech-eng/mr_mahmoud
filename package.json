@@ -19,6 +19,7 @@
     "seed:expenses": "node prisma/seeders/expenses.seeder.js",
     "seed:system-wallet": "node prisma/seeders/systemWallet.seeder.js",
     "seed:matrials": "node prisma/seeders/matrials.seeder.js",
+    "seed:attendance": "node prisma/seeders/attendance.seeder.js",
     "seed:all": "npx prisma db seed"
   },
   "keywords": [],
@@ -56,6 +57,7 @@
     "prisma": "^7.4.2",
     "qrcode": "^1.5.4",
     "redis": "^5.10.0",
+    "slugify": "^1.6.9",
     "socket.io": "^4.8.3",
     "swagger-ui-express": "^5.0.1"
   },
