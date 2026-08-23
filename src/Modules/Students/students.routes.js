@@ -8,6 +8,7 @@ import {
   studentIdSchema,
 } from "./students.validation.js";
 import * as studentController from "../Students/students.controller.js";
+import { localMulterUpload } from "../../Utils/Multer/local.multer.js";
 
 const router = Router();
 const studentResource = "users"; // Students are users

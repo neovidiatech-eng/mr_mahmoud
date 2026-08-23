@@ -13,6 +13,8 @@ import {
   resolveStudentAge,
 } from "../../../Utils/Helpers.js";
 
+import fs from "node:fs";
+import path from "node:path";
 
 export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
   const { search, status, page = 1, limit = 10 } = req.query;
@@ -85,7 +87,6 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
     });
   }
 
-  // ✅ استخدم userId بدل email (أضمن)
   const redisKey = `${subscriptionRequest.user.email}_Student_data`;
 
   const studentDataJson = await redis.get(redisKey);
@@ -110,9 +111,8 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       birthDate: parsedStudentData?.birth_date,
     });
 
-    selectedRank = studentAge !== null
-      ? await findRankByAge({ age: studentAge })
-      : null;
+    selectedRank =
+      studentAge !== null ? await findRankByAge({ age: studentAge }) : null;
 
     if (!selectedRank && rankId) {
       selectedRank = await ensureExists({
@@ -126,9 +126,10 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       return errorResponse({
         next,
         req,
-        message: studentAge === null
-          ? "AGE_OR_BIRTH_DATE_REQUIRED"
-          : "AGE_RANK_NOT_FOUND",
+        message:
+          studentAge === null
+            ? "AGE_OR_BIRTH_DATE_REQUIRED"
+            : "AGE_RANK_NOT_FOUND",
         status: 400,
       });
     }
@@ -160,27 +161,48 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         throw error;
       }
 
-      // ... existing user and request updates ...
+      // Update user status
       await tx.updateOne({
         model: "user",
         where: { id: subscriptionRequest.user_id },
         data: {
           status: status === "approved" ? "active" : "rejected",
-          ...(status === "approved" && studentAge !== null && { age: studentAge }),
+          ...(status === "approved" &&
+            studentAge !== null && { age: studentAge }),
           ...(status === "approved" &&
             studentRole && { roleId: studentRole.id }),
         },
       });
 
+      // Update request status & set subscrption_img to null
       await tx.updateOne({
         model: "subscription_requests",
         where: { id },
-        data: { status },
+        data: {
+          status,
+          ...(subscriptionRequest.subscrption_img && { subscrption_img: null }),
+        },
       });
+
+      // Delete physical file from disk
+      if (subscriptionRequest.subscrption_img) {
+        try {
+          const relativePath = subscriptionRequest.subscrption_img;
+          const fullFilePath = relativePath.startsWith("src/")
+            ? path.resolve(`./${relativePath}`)
+            : path.resolve(`./src/${relativePath}`);
+
+          if (fs.existsSync(fullFilePath)) {
+            fs.unlinkSync(fullFilePath);
+          }
+        } catch (err) {
+          console.error("[Delete Subscription Image Error]:", err);
+        }
+      }
 
       if (status !== "approved") return;
 
-      // ... existing student creation ...
+      // Student creation
       const existingStudent = await tx.findFirst({
         model: "student",
         where: { user_id: subscriptionRequest.user_id },
@@ -210,7 +232,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         },
       });
 
-      // ✅ Fetch plan with currency for conversion
+      // Fetch plan with currency
       const plan = await tx.findOne({
         model: "plan",
         where: { id: subscriptionRequest.planId },
@@ -218,9 +240,13 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       });
 
       const rawPrice = parseFloat(plan?.price) || 0;
-      const convertedAmount = convertAmount(rawPrice, plan.currency.exchangeRate, defaultCurrency.exchangeRate);
+      const convertedAmount = convertAmount(
+        rawPrice,
+        plan.currency.exchangeRate,
+        defaultCurrency.exchangeRate,
+      );
 
-      // ✅ create subscription
+      // Create subscription
       const subscription = await tx.create({
         model: "Subscription",
         data: {
@@ -234,7 +260,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         },
       });
 
-      // ✅ ledger (transaction)
+      // Ledger (transaction)
       await tx.create({
         model: "Transaction",
         data: {
@@ -247,7 +273,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         },
       });
 
-      // ✅ update balance
+      // Update wallet balance
       await tx.updateOne({
         model: "Wallet",
         where: { id: systemWallet.id },
@@ -266,10 +292,11 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       status: 200,
     });
   } catch (error) {
-    const err = new Error(error.isMessageKey ? error.message : "INTERNAL_SERVER_ERROR");
+    const err = new Error(
+      error.isMessageKey ? error.message : "INTERNAL_SERVER_ERROR",
+    );
     err.cause = error.cause || 500;
     err.isMessageKey = true;
     return next(err);
   }
 });
-

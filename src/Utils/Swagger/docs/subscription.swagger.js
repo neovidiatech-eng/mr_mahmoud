@@ -135,7 +135,43 @@ export const subscriptionPaths = {
         { name: "search", in: "query", schema: { type: "string" } },
         { name: "status", in: "query", schema: { type: "string", enum: ["pending", "rejected", "approved"] } }
       ],
-      responses: { 200: { description: "Subscription requests retrieved." } }
+      responses: {
+        200: {
+          description: "Subscription requests retrieved.",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  message: { type: "string", example: "FETCH_SUCCESS" },
+                  data: {
+                    type: "object",
+                    properties: {
+                      subscriptionRequests: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            id: { type: "string" },
+                            planId: { type: "string" },
+                            status: { type: "string", enum: ["pending", "approved", "rejected"] },
+                            subscrption_img: { type: "string", nullable: true, description: "Uploaded payment receipt image path" },
+                            createdAt: { type: "string", format: "date-time" },
+                            user_id: { type: "string" },
+                            user: { type: "object" },
+                            plan: { type: "object" }
+                          }
+                        }
+                      },
+                      pagination: { type: "object" }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "/subscription/requests/change-status/{id}": {

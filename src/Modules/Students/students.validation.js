@@ -25,6 +25,7 @@ export const createStudentSchema = {
     startingCourseId: generalFields.id,
     startingLectureId: generalFields.id,
     type: generalFields.studentType.required(),
+    
     timezone: generalFields.timezone, // optional — fallback to default
   })
     .and("startingCourseId", "startingLectureId")

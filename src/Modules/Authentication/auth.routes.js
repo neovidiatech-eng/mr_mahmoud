@@ -15,10 +15,23 @@ import {
   resetPasswordSchema,
   verifiyCodeSchema,
 } from "./auth.validation.js";
+import { fileValidation, localMulterUpload } from "../../Utils/Multer/local.multer.js";
 
 const router = Router();
 
-router.post("/sign-up", authRateLimiter, validation(registeritonSchema), auth.register);
+router.post(
+  "/sign-up",
+  authRateLimiter,
+  localMulterUpload({
+    customPath: (req) =>
+      req.body?.email
+        ? `users/${req.body.email.toLowerCase().replaceAll("@", "_").replaceAll(".", "_")}`
+        : "users/subscriptions",
+    fileValidation: fileValidation.image,
+  }).single("image"),
+  validation(registeritonSchema),
+  auth.register,
+);
 
 router.post("/sign-in", authRateLimiter, validation(loginSchema), auth.login);
 
@@ -40,7 +53,12 @@ router.post(
   auth.verifyAccount,
 );
 
-router.post("/resend-otp", otpRateLimiter, validation(resendOtpSchema), auth.resendOtp);
+router.post(
+  "/resend-otp",
+  otpRateLimiter,
+  validation(resendOtpSchema),
+  auth.resendOtp,
+);
 
 router.post(
   "/forget-password",
