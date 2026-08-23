@@ -7,6 +7,26 @@ export const authPaths = {
       requestBody: {
         required: true,
         content: {
+          "multipart/form-data": {
+            schema: {
+              type: "object",
+              required: ["name", "email", "password", "codeCountry", "phone", "gender", "country", "plan_id"],
+              properties: {
+                name: { type: "string", example: "Ahmed Ali" },
+                email: { type: "string", format: "email", example: "ahmed@example.com" },
+                password: { type: "string", format: "password", example: "Password123!" },
+                codeCountry: { type: "string", example: "+20" },
+                phone: { type: "string", example: "1000000000" },
+                gender: { type: "string", enum: ["male", "female"], example: "male" },
+                country: { type: "string", example: "Egypt" },
+                plan_id: { type: "string", example: "60d5ec49f1b2c80015f8e4a1" },
+                age: { type: "integer", example: 17 },
+                birth_date: { type: "string", format: "date", example: "2007-05-15" },
+                timezone: { type: "string", example: "Africa/Cairo" },
+                image: { type: "string", format: "binary", description: "Subscription image / payment receipt proof (optional)" }
+              }
+            }
+          },
           "application/json": {
             schema: {
               type: "object",

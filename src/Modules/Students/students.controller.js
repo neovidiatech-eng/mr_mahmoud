@@ -237,6 +237,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     const username = `${name.trim().replace(/\s+/g, "-")}_${nanoid(3)}_${prefix}`;
 
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
+    
     const user = await tx.create({
       model: "user",
       data: {
@@ -252,6 +253,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         age: studentAge,
         timezone: userTimezone,
         ...(studentRole && { roleId: studentRole.id }),
+
       },
     });
     let qrToken;
