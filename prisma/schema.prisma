@@ -201,24 +201,24 @@ model weekly_report {
 }
 
 model student {
-  id                 String    @id @default(uuid())
-  user_id            String    @unique
-  birth_date         DateTime?
-  qrToken            String?   @unique
-  qrActive           Boolean   @default(true)
-  type               String?   @default("online")
-  active             Boolean   @default(false)
-  planId             String?
-  country            String
-  status             String    @default("pending")
-  createdAt          DateTime  @default(now())
-  updatedAt          DateTime  @updatedAt
-  sessions           Float     @default(0)
-  sessions_attended  Float     @default(0)
-  sessions_remaining Float     @default(0)
-  avgRating          Float     @default(0)
-  totalReviews       Int       @default(0)
-
+  id                     String                    @id @default(uuid())
+  user_id                String                    @unique
+  birth_date             DateTime?
+  qrToken                String?                   @unique
+  qrActive               Boolean                   @default(true)
+  type                   String?                   @default("online")
+  active                 Boolean                   @default(false)
+  planId                 String?
+  country                String
+  status                 String                    @default("pending")
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  sessions               Float                     @default(0)
+  sessions_attended      Float                     @default(0)
+  sessions_remaining     Float                     @default(0)
+  avgRating              Float                     @default(0)
+  totalReviews           Int                       @default(0)
+  parentNumber           String?
   rankId                 String?
   rank                   ranks?                    @relation(fields: [rankId], references: [id])
   exams                  exam[]
