@@ -131,9 +131,10 @@ model plan {
 }
 
 model subscription_requests {
-  id        String   @id @default(uuid())
-  planId    String?
-  status    String   @default("pending")
+  id              String  @id @default(uuid())
+  planId          String?
+  status          String  @default("pending")
+  subscrption_img String?   
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
   user_id   String
@@ -856,4 +857,3 @@ model Attendance {
   @@unique([studentId, attendanceDate])
   @@index([studentId])
 }
- 

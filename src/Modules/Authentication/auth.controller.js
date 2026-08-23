@@ -44,6 +44,7 @@ export const register = asyncHandler(async (req, res, next) => {
     db.findFirst({ model: "user", where: { email } }),
     db.findFirst({ model: "settings" }),
   ]);
+  const image_path = req.file?.finalPath || req.file?.path;
 
   const userRole = await db.findFirst({
     model: "role",
@@ -91,13 +92,13 @@ export const register = asyncHandler(async (req, res, next) => {
   // 4. Send Verification Email
   const mailResult = await sendEmail({ email, otp, lang: req.lang });
 
-  if (!mailResult.success) {
+/*   if (!mailResult.success) {
     const errorMsg =
       mailResult.code === "ETIMEDOUT"
         ? "EMAIL_SERVICE_TIMEOUT"
         : "EMAIL_SEND_FAILED";
     return errorResponse({ req, next, message: errorMsg, status: 500 });
-  }
+  } */
 
   // 5. Transactional Database Operations
   await db.transaction(async (tx) => {
@@ -145,6 +146,7 @@ export const register = asyncHandler(async (req, res, next) => {
         data: {
           user_id: user.id,
           planId: plan_id,
+          subscrption_img: image_path,
         },
       });
     }

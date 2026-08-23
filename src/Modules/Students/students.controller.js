@@ -254,6 +254,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         age: studentAge,
         timezone: userTimezone,
         ...(studentRole && { roleId: studentRole.id }),
+
       },
     });
     let qrToken;

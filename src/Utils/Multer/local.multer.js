@@ -18,6 +18,7 @@ export const localMulterUpload = ({
   validation = [],
   maxSize = 1024 * 1024 * 1024 * 1,
 } = {}) => {
+  
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
       const pathValue =
