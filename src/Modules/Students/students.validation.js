@@ -8,6 +8,7 @@ export const createStudentSchema = {
     password: generalFields.password.required(),
     phone: generalFields.phone.required(),
     phone_code: generalFields.codeCountry.required(),
+    parentNumber:generalFields.phone.required(),
     country: generalFields.country.required(),
     planId: generalFields.id
       .messages({
@@ -43,6 +44,7 @@ export const updateStudentSchema = {
       password: generalFields.password,
       phone: generalFields.phone,
       phone_code: generalFields.codeCountry,
+      parentNumber:generalFields.phone,
       country: generalFields.country,
       planId: generalFields.id,
       birth_date: generalFields.birth_date,

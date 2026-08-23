@@ -153,6 +153,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     email,
     password,
     phone,
+    parentNumber,
     phone_code,
     country,
     planId,
@@ -237,6 +238,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     const username = `${name.trim().replace(/\s+/g, "-")}_${nanoid(3)}_${prefix}`;
 
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
+    const encryptedParentNumber = parentNumber ? encryptText({ text: parentNumber }) : undefined;
     const user = await tx.create({
       model: "user",
       data: {
@@ -264,6 +266,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       model: "student",
       data: {
         user: { connect: { id: user.id } },
+        parentNumber: encryptedParentNumber,
         country,
         plan: { connect: { id: planId } },
         ...(birth_date && { birth_date: new Date(birth_date) }),
@@ -275,6 +278,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         rank: { connect: { id: effectiveRankId } },
         ...(qrToken && { qrToken, qrActive: true }),
         type,
+
       },
       include: {
         user: true,
@@ -342,6 +346,11 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     if (createdStudent.user.password) {
       createdStudent.user.password = await decryptText({
         text: createdStudent.user.password,
+      });
+    }
+    if (createdStudent.user.parentNumber) {
+      createdStudent.user.parentNumber = await decryptText({
+        text: createdStudent.user.parentNumber,
       });
     }
   }

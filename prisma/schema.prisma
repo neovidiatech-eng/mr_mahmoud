@@ -217,6 +217,7 @@ model student {
   sessions_remaining     Float                     @default(0)
   avgRating              Float                     @default(0)
   totalReviews           Int                       @default(0)
+  parentNumber           String?
   rankId                 String?
   rank                   ranks?                    @relation(fields: [rankId], references: [id])
   exams                  exam[]
