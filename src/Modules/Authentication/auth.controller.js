@@ -81,7 +81,7 @@ export const register = asyncHandler(async (req, res, next) => {
   // 2. Preparation (Hashing, Encryption, OTP)
   const hashedPassword = encryptText({ password });
   const encryptedPhone = encryptText({ text: phone });
-  const otp = generateOtp();
+  const otp = /* generateOtp(); */"225566"
   const hashedOtp = await hash({ password: otp });
 
   // 3. Redis OTP Setup
