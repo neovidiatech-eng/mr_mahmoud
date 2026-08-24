@@ -18,7 +18,6 @@ router.get(
 
 router.post(
   "/",
-  authorize(PERMISSIONS_V2.COURSE_PURCHASE_REQUESTS.CREATE),
   localMulterUpload({
     customPath: "course-purchases/receipts",
     fileValidation: fileValidation.image,

@@ -440,5 +440,11 @@
   "RANK_ID_STRING": "Rank ID must be a string",
   "RANK_ID_EMPTY": "Rank ID cannot be empty",
   "RANK_ID_MAX": "Rank ID must be at most {{limit}} characters",
-  "ONLY_SUPER_ADMIN_CAN_CHANGE_STAFF_PASSWORD": "Only a super admin can change staff passwords"
+  "ONLY_SUPER_ADMIN_CAN_CHANGE_STAFF_PASSWORD": "Only a super admin can change staff passwords",
+  "QUIZ_EXISTS": "Quiz already exists",
+  "QUIZZ_EXIST": "Quiz already exists",
+  "QUIZ_NOT_FOUND": "Quiz not found",
+  "QUIZ_CREATED": "Quiz created successfully",
+  "QUIZ_UPDATED": "Quiz updated successfully",
+  "QUIZ_DELETED": "Quiz deleted successfully"
 }

@@ -22,6 +22,7 @@ import { coursePurchaseRequestsPaths } from "./docs/coursePurchaseRequests.swagg
 import { subscriptionPaths } from "./docs/subscription.swagger.js";
 import { postsPaths } from "./docs/posts.swagger.js";
 import { attendancePaths } from "./docs/attendance.swagger.js";
+import { quizPaths } from "./docs/quiz.swagger.js";
 
 export const swaggerSpec = {
   openapi: "3.0.0",
@@ -176,6 +177,10 @@ export const swaggerSpec = {
       name: "Attendance",
       description: "Onsite Student Attendance & Check-In Management",
     },
+    {
+      name: "Quizzes",
+      description: "Quizzes Management",
+    },
   ],
   paths: {
     ...authPaths,
@@ -202,5 +207,6 @@ export const swaggerSpec = {
     ...subscriptionPaths,
     ...postsPaths,
     ...attendancePaths,
+    ...quizPaths,
   },
 };
