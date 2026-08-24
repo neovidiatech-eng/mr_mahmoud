@@ -1,0 +1,141 @@
+model currency {
+  id                 String              @id @default(uuid())
+  name_en            String
+  name_ar            String
+  symbol             String
+  code               String              @unique
+  default            Boolean             @default(false)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+  exchangeRate       Float
+  plan               plan[]
+  subscriptions      Subscription[]
+  wallets            Wallet[]
+  expenses           expenses[]
+  teachers           teacher[]
+  withdrawalRequests WithdrawalRequest[]
+
+  @@index([name_en])
+  @@index([name_ar])
+  @@index([code])
+}
+
+model plan {
+  id                   String                  @id @default(uuid())
+  name                 String                  @unique
+  description          String?
+  price                String
+  duration             Int
+  features             Json?
+  sessionsCount        Int                     @default(0)
+  rescheduleCount      Int                     @default(0)
+  type                 String                  @default("quarterly") // annual or monthly
+  isGroup              Boolean                 @default(false)
+  maxStudents          String                  @default("1")
+  planType             String                  @default("individual")
+  currencyId           String
+  createdAt            DateTime                @default(now())
+  updatedAt            DateTime                @updatedAt
+  active               Boolean                 @default(false)
+  currency             currency                @relation(fields: [currencyId], references: [id])
+  subscriptions        Subscription[]
+  students             student[]
+  subscriptionRequests subscription_requests[]
+
+  @@index([name])
+}
+
+model subscription_requests {
+  id              String   @id @default(uuid())
+  planId          String?
+  status          String   @default("pending")
+  subscrption_img String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  user_id         String
+  plan            plan?    @relation(fields: [planId], references: [id])
+  user            user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  @@index([user_id])
+  @@index([planId])
+}
+
+model Subscription {
+  id           String        @id @default(uuid())
+  userId       String
+  planId       String
+  status       String        @default("active")
+  amount       Float
+  startDate    DateTime      @default(now())
+  paidAt       DateTime?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  currencyId   String
+  currency     currency      @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+  plan         plan          @relation(fields: [planId], references: [id], onDelete: Cascade)
+  user         user          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+}
+
+model Wallet {
+  id           String        @id @default(uuid())
+  type         String
+  ownerId      String?
+  balance      Float         @default(0)
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  currencyId   String
+  userId       String?
+  transactions Transaction[]
+  currency     currency      @relation(fields: [currencyId], references: [id])
+  user         user?         @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WithdrawalRequest {
+  id           String        @id @default(uuid())
+  teacherId    String
+  amount       Float
+  status       String        @default("pending")
+  currencyId   String?
+  currency     currency?     @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+  adminNotes   String?
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
+  teacher      user          @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId])
+  @@index([status])
+}
+
+model Transaction {
+  id                  String             @id @default(uuid())
+  walletId            String
+  type                String
+  amount              Float
+  status              String             @default("completed")
+  reason              String?
+  createdAt           DateTime           @default(now())
+  expenseId           String?
+  subscriptionId      String?
+  withdrawalRequestId String?
+  expense             expenses?          @relation(fields: [expenseId], references: [id], onDelete: Cascade)
+  subscription        Subscription?      @relation(fields: [subscriptionId], references: [id], onDelete: Cascade)
+  wallet              Wallet             @relation(fields: [walletId], references: [id], onDelete: Cascade)
+  withdrawalRequest   WithdrawalRequest? @relation(fields: [withdrawalRequestId], references: [id], onDelete: Cascade)
+}
+
+model expenses {
+  id           String        @id @default(uuid())
+  title        String
+  currencyId   String
+  amount       Float
+  payment_type String
+  type         String
+  status       String
+  date         DateTime
+  createdAt    DateTime      @default(now())
+  updatedAt    DateTime      @updatedAt
+  transactions Transaction[]
+  currency     currency      @relation(fields: [currencyId], references: [id], onDelete: Cascade)
+}

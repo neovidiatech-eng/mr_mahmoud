@@ -1,0 +1,95 @@
+model teacher {
+  id               String     @id @default(uuid())
+  user_id          String     @unique
+  currencyId       String
+  hour_price       Float
+  group_hour_price Float?     @default(0)
+  active           Boolean    @default(false)
+  roleId           String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  avgRating        Float      @default(0)
+  totalReviews     Int        @default(0)
+  exams            exam[]
+  homeworks        homework[]
+  schedules        schedule[]
+  currency         currency   @relation(fields: [currencyId], references: [id])
+  role             role?      @relation(fields: [roleId], references: [id])
+  user             user       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  conversations   Conversation[]
+  weeklyReports   weekly_report[]
+  teacherSubjects TeacherSubject[]
+}
+
+model student {
+  id                     String                    @id @default(uuid())
+  user_id                String                    @unique
+  birth_date             DateTime?
+  qrToken                String?                   @unique
+  qrActive               Boolean                   @default(true)
+  type                   String?                   @default("online")
+  active                 Boolean                   @default(false)
+  planId                 String?
+  country                String
+  status                 String                    @default("pending")
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  sessions               Float                     @default(0)
+  sessions_attended      Float                     @default(0)
+  sessions_remaining     Float                     @default(0)
+  avgRating              Float                     @default(0)
+  totalReviews           Int                       @default(0)
+  parentNumber           String?
+  rankId                 String?
+  offlineGroupId         String?
+  offlineGroup           offlineGroup?             @relation(fields: [offlineGroupId], references: [id])
+  rank                   ranks?                    @relation(fields: [rankId], references: [id])
+  exams                  exam[]
+  homeworks              homework[]
+  schedules              schedule[]
+  plan                   plan?                     @relation(fields: [planId], references: [id])
+  user                   user                      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  conversations          Conversation[]
+  userRankHistories      user_rank_history[]
+  groupSchedules         GroupScheduleStudent[]
+  coursePurchaseRequests course_purchase_request[]
+  coursePurchases        CoursePurchase[]
+  studentQuizzes         studentQuiz[]
+
+  attendances Attendance[]
+}
+
+model weekly_report {
+  id                 String   @id @default(uuid())
+  teacherId          String
+  weekStarting       DateTime
+  weekEnding         DateTime
+  totalClasses       Int      @default(0)
+  studentsTaught     Int      @default(0)
+  avgSessionDuration Float    @default(0)
+  materialsUploaded  Int      @default(0)
+  teachingSummary    String?
+  studentProgress    String?
+  challenges         String?
+  overallRating      Float?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  teacher            teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId])
+  @@index([weekStarting])
+}
+
+model user_rank_history {
+  id         String   @id @default(uuid())
+  studentId  String
+  rankId     String
+  status     String   @default("locked") // locked, unlocked, completed
+  achievedAt DateTime @default(now())
+
+  student student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  rank    ranks   @relation(fields: [rankId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+}

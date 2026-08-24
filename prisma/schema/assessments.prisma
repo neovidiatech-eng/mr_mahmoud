@@ -1,0 +1,202 @@
+model homework {
+  id             String   @id @default(uuid())
+  title_ar       String   @default("")
+  title_en       String?
+  description_ar String   @default("")
+  description_en String?
+  status         String   @default("pending")
+  dueDate        DateTime
+  studentId      String
+  teacherId      String
+  subjectId      String?
+  grade          Float?
+  feedback       String?
+  attachments    Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+  student        student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher        teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject        subject? @relation(fields: [subjectId], references: [id])
+
+  @@index([teacherId])
+  @@index([studentId])
+  @@index([subjectId])
+}
+
+model exam {
+  id          String    @id @default(uuid())
+  title_ar    String    @default("")
+  title_en    String?
+  subject     String?
+  grade       Float     @default(0)
+  studentId   String
+  teacherId   String
+  dueDate     DateTime
+  totalMarks  Float     @default(100)
+  duration    Float
+  status      String    @default("pending")
+  startedAt   DateTime?
+  submittedAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  student     student   @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  teacher     teacher   @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  questions exam_question[]
+  answers   exam_answer[]
+}
+
+model exam_question {
+  id        String   @id @default(uuid())
+  examId    String
+  text_ar   String   @default("")
+  text_en   String?
+  type      String   @default("mcq") // mcq | true_false
+  points    Float    @default(1)
+  order     Int      @default(0)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  exam    exam          @relation(fields: [examId], references: [id], onDelete: Cascade)
+  options exam_option[]
+  answers exam_answer[]
+
+  @@index([examId])
+}
+
+model exam_option {
+  id         String  @id @default(uuid())
+  questionId String
+  text_ar    String  @default("")
+  text_en    String?
+  isCorrect  Boolean @default(false)
+  order      Int     @default(0)
+
+  question exam_question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  answers  exam_answer[]
+
+  @@index([questionId])
+}
+
+model exam_answer {
+  id               String   @id @default(uuid())
+  examId           String
+  questionId       String
+  selectedOptionId String?
+  isCorrect        Boolean  @default(false)
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+
+  exam           exam          @relation(fields: [examId], references: [id], onDelete: Cascade)
+  question       exam_question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  selectedOption exam_option?  @relation(fields: [selectedOptionId], references: [id])
+
+  @@unique([examId, questionId])
+  @@index([examId])
+  @@index([questionId])
+}
+
+model quiz {
+  id             String        @id @default(uuid())
+  title_ar       String        @default("")
+  title_en       String?       @default("")
+  slug           String?       @unique
+  description_ar String        @default("")
+  description_en String?       @default("")
+  total_points   Int           @default(0)
+  pass_points    Int           @default(0)
+  duration_min   Int           @default(30)
+  questions      question[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @default(now())
+  studentQuizs   studentQuiz[]
+
+  @@index([title_ar])
+  @@index([title_en])
+  @@index([slug])
+}
+
+model question {
+  id                 String              @id @default(uuid())
+  question_ar        String              @default("")
+  question_en        String?             @default("")
+  type               String              @default("MCQ") // MCQ, TRUE_FALSE
+  points             Int                 @default(1)
+  order              Int
+  quiz_id            String
+  quiz               quiz                @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
+  options            options[]
+  studentQuizAnswers studentQuizAnswer[]
+
+  @@index([quiz_id])
+}
+
+model options {
+  id                 String              @id @default(uuid())
+  question_id        String
+  option_text_ar     String              @default("")
+  option_text_en     String?             @default("")
+  is_correct         Boolean             @default(false)
+  question           question            @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @default(now())
+  studentQuizAnswers studentQuizAnswer[]
+
+  @@index([question_id])
+}
+
+model studentQuiz {
+  id String @id @default(uuid())
+
+  student_id String
+  quiz_id    String
+
+  score        Int @default(0)
+  total_points Int @default(0)
+  pass_points  Int @default(0)
+
+  passed Boolean @default(false)
+
+  startedAt   DateTime  @default(now())
+  submittedAt DateTime?
+
+  student student @relation(fields: [student_id], references: [id], onDelete: Cascade)
+
+  quiz quiz @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+
+  answers studentQuizAnswer[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([student_id])
+  @@index([quiz_id])
+  @@index([student_id, quiz_id])
+}
+
+model studentQuizAnswer {
+  id String @id @default(uuid())
+
+  student_quiz_id String
+  question_id     String
+  option_id       String?
+
+  is_correct Boolean @default(false)
+  points     Int     @default(0)
+
+  studentQuiz studentQuiz @relation(fields: [student_quiz_id], references: [id], onDelete: Cascade)
+
+  question question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+
+  option options? @relation(fields: [option_id], references: [id], onDelete: SetNull)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@unique([student_quiz_id, question_id])
+  @@index([student_quiz_id])
+  @@index([question_id])
+  @@index([option_id])
+}

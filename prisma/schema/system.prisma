@@ -1,0 +1,115 @@
+model subject {
+  id        String   @id @default(uuid())
+  name_ar   String   @default("")
+  name_en   String?
+  color     String   @default("#10b981")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacherSubjects TeacherSubject[]
+  homeworks       homework[]
+  schedules       schedule[]
+}
+
+model TeacherSubject {
+  id        String   @id @default(uuid())
+  teacherId String
+  subjectId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  teacher teacher @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  subject subject @relation(fields: [subjectId], references: [id], onDelete: Cascade)
+
+  @@unique([teacherId, subjectId])
+  @@index([teacherId])
+  @@index([subjectId])
+}
+
+model audit_log {
+  id         String   @id @default(uuid())
+  entityType String
+  entityId   String
+  action     String
+  userId     String
+  changes    Json?
+  createdAt  DateTime @default(now())
+}
+
+model settings {
+  id          String   @id @default(uuid())
+  userPrefix  String   @default("mr_mahmoud")
+  socialLinks Json
+  contactInfo Json
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model policy {
+  id             String   @id @default(uuid())
+  title_ar       String   @default("")
+  title_en       String?
+  description_ar String   @default("")
+  description_en String?
+  icon           String? // e.g., "Shield", "Clock", "FileText", "AlertCircle"
+  color          String? // e.g., "blue", "green", "purple", "orange"
+  lastUpdated    DateTime @default(now())
+  active         Boolean  @default(true)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  @@index([active])
+}
+
+model policy_notice {
+  id         String   @id @default(uuid())
+  title_ar   String   @default("تنبيه هام")
+  title_en   String?  @default("Important Notice")
+  content_ar String   @default("")
+  content_en String?
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  @@index([active])
+}
+
+model post {
+  id           String    @id @default(uuid())
+  type         String // "blog" | "news"
+  title_ar     String
+  title_en     String?
+  slug         String    @unique
+  excerpt_ar   String?
+  excerpt_en   String?
+  content_ar   String
+  content_en   String?
+  coverImage   String?
+  authorId     String?
+  author       user?     @relation(fields: [authorId], references: [id], onDelete: SetNull)
+  published    Boolean   @default(false)
+  publishedAt  DateTime?
+  readingCount Int       @default(0)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@index([type])
+  @@index([published])
+  @@index([slug])
+}
+
+model Attendance {
+  id             String   @id @default(uuid())
+  studentId      String
+  attendanceDate DateTime @db.Date // اليوم بس، للـ unique constraint
+  checkedInAt    DateTime @default(now()) // الوقت الفعلي للـ check-in
+  status         String   @default("present")
+  checkedInById  String?  @map("checkedInBy")
+
+  student     student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  checkedInBy user?   @relation("AttendanceCheckedInBy", fields: [checkedInById], references: [id], onDelete: SetNull)
+
+  @@unique([studentId, attendanceDate])
+  @@index([studentId])
+}
