@@ -34,6 +34,7 @@ import coursePurchaseRequestsRouter from "./Modules/CoursePurchaseRequests/cours
 import postsRouter from "./Modules/Posts/posts.routes.js";
 
 import attendanceRouter from "./Modules/Attendance/attendance.routes.js";
+import quizRouter from "./Modules/quiz/quiz.routes.js";
 
 import { ROLES, ADMIN_ROLES } from "./Utils/Permissions/permissions.js";
 
@@ -61,6 +62,7 @@ rootRouter.use("/exams", authentication, examRouter);
 rootRouter.use("/calendar", authentication, calendarRouter);
 rootRouter.use("/schedules", authentication, schedulesRouter);
 rootRouter.use("/chat", authentication, chatRouter);
+rootRouter.use("/quiz", quizRouter);
 
 // ─── 4. Management Routes (Admin Protected) ─────────────────────────────────
 rootRouter.use("/system", authentication, systemRouter);

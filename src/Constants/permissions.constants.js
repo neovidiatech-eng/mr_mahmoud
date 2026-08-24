@@ -197,4 +197,11 @@ export const PERMISSIONS_V2 = {
     UPDATE: "attendance:update",
     DELETE: "attendance:delete",
   },
+
+  QUIZ: {
+    READ: "quiz:read",
+    CREATE: "quiz:create",
+    UPDATE: "quiz:update",
+    DELETE: "quiz:delete",
+  },
 };
