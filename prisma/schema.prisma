@@ -220,6 +220,8 @@ model student {
   totalReviews           Int                       @default(0)
   parentNumber           String?
   rankId                 String?
+  offlineGroupId         String? /// offline group   
+  offlineGroup           offlineGroup?             @relation(fields: [offlineGroupId], references: [id])
   rank                   ranks?                    @relation(fields: [rankId], references: [id])
   exams                  exam[]
   homeworks              homework[]
@@ -620,6 +622,7 @@ model ranks {
   ageRange          Json
   stageName_ar      String?
   stageName_en      String?
+  offlineGroup      offlineGroup? ///offlineGroup
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   students          student[]
@@ -679,6 +682,7 @@ model courses {
   rank             ranks                     @relation(fields: [rankId], references: [id], onDelete: Cascade)
   category         category?                 @relation(fields: [categoryId], references: [id])
   lectures         lectures[]
+  offlineGroup     offlineGroupCourses[] ///offlineGroup
   createdAt        DateTime                  @default(now())
   updatedAt        DateTime                  @updatedAt
   schedules        schedule[]
@@ -863,6 +867,35 @@ model Attendance {
   @@index([studentId])
 }
 
+/// offlineGroup
+
+model offlineGroup {
+  id        String                @id @default(uuid())
+  rankId    String                @unique
+  rank      ranks                 @relation(fields: [rankId], references: [id], onDelete: Cascade)
+  qrToken   String                @unique
+  qrActive  Boolean               @default(true)
+  courses   offlineGroupCourses[]
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  students student[]
+}
+
+/// offlineGroupLectures
+
+model offlineGroupCourses {
+  id        String       @id @default(uuid())
+  groupId   String
+  courseId  String
+  group     offlineGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  course    courses      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([groupId, courseId])
+  @@index([groupId])
+  @@index([courseId])}
 model quiz {
   id             String  @id @default(uuid())
   title_ar       String  @default("")
