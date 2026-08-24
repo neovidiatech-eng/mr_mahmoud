@@ -45,7 +45,7 @@ services:
       resources:
         limits:
           cpus: "0.5"
-          memory: "512"
+          memory: "512M"
 
   redis:
     container_name: mr_mahmoud_redis
