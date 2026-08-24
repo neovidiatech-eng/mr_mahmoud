@@ -1,8 +1,18 @@
 import { getMessage, getDir, SUPPORTED_LANGUAGES } from "../Utils/i18n.js";
 
-// Parses an `Accept-Language` header (e.g. "ar-EG,ar;q=0.9,en;q=0.8") and
-// picks the highest-priority language we actually support, defaulting to "en".
-const resolveLang = (header) => {
+// Parses language headers (`accept-language`, `lang`, `x-lang`, `language`) or query parameter (`?lang=ar`)
+// and picks the highest-priority supported language ("ar" or "en"), defaulting to "en".
+const resolveLang = (header, queryLang, customHeader) => {
+  if (queryLang) {
+    const primary = String(queryLang).trim().split("-")[0].toLowerCase();
+    if (SUPPORTED_LANGUAGES.includes(primary)) return primary;
+  }
+
+  if (customHeader) {
+    const primary = String(customHeader).trim().split("-")[0].toLowerCase();
+    if (SUPPORTED_LANGUAGES.includes(primary)) return primary;
+  }
+
   if (!header) return "en";
 
   const candidates = header
@@ -21,7 +31,11 @@ const resolveLang = (header) => {
 };
 
 export const langMiddleware = (req, res, next) => {
-  const lang = resolveLang(req.headers["accept-language"]);
+  const lang = resolveLang(
+    req.headers["accept-language"],
+    req.query?.lang,
+    req.headers["lang"] || req.headers["x-lang"] || req.headers["language"]
+  );
 
   // Attach to request object
   req.lang = lang;

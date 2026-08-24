@@ -20,7 +20,9 @@
     "seed:system-wallet": "node prisma/seeders/systemWallet.seeder.js",
     "seed:matrials": "node prisma/seeders/matrials.seeder.js",
     "seed:attendance": "node prisma/seeders/attendance.seeder.js",
-    "seed:all": "npx prisma db seed"
+    "seed:quiz": "node prisma/seeders/quiz.seeder.js",
+    "seed:all": "npx prisma db seed",
+    "generate:postman": "node scripts/generatePostmanCollection.js"
   },
   "keywords": [],
   "author": "",

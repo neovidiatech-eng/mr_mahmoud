@@ -693,9 +693,9 @@ model courses {
 model course_purchase_request {
   id          String   @id @default(uuid())
   studentId   String?
-  name        String
-  phone       String
-  email       String
+  name        String?
+  phone       String?
+  email       String?
   courseId    String
   status      String   @default("pending")
   receipt_img String?
@@ -863,14 +863,50 @@ model Attendance {
   @@index([studentId])
 }
 
+model quiz {
+  id             String  @id @default(uuid())
+  title_ar       String  @default("")
+  title_en       String? @default("")
+  slug           String?  @unique
+  description_ar String  @default("")
+  description_en String? @default("")
+  total_points   Int     @default(0)
+  pass_points    Int     @default(0)
+  duration_min   Int     @default(30)
+  questions question[]
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @default(now())
 
+  @@index([title_ar])
+  @@index([title_en])
+  @@index([slug])
+}
 
-model freeCourses{
-id String @id @default(uuid())
-coursesId String[]
-qrtoken String @unique
-status String @default("active")
-createdAt DateTime @default(now())
-updatedAt DateTime @updatedAt
+model question {
+  id          String    @id @default(uuid())
+  question_ar String    @default("")
+  question_en String?   @default("")
+  type        String    @default("MCQ") // MCQ, TRUE_FALSE
+  points      Int       @default(1)
+  order       Int
+  quiz_id     String
+  quiz        quiz      @relation(fields: [quiz_id], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @default(now())
+  options     options[]
 
+  @@index([quiz_id])
+}
+
+model options {
+  id             String   @id @default(uuid())
+  question_id    String
+  option_text_ar String   @default("")
+  option_text_en String?  @default("")
+  is_correct     Boolean  @default(false)
+  question       question @relation(fields: [question_id], references: [id], onDelete: Cascade)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @default(now())
+
+  @@index([question_id])
 }
