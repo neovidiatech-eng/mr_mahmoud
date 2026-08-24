@@ -1,0 +1,132 @@
+model ranks {
+  id                String              @id @default(uuid())
+  name_ar           String              @unique @default("")
+  name_en           String?
+  slug              String              @unique
+  color             String?
+  ageRange          Json
+  stageName_ar      String?
+  stageName_en      String?
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  students          student[]
+  courses           courses[]
+  userRankHistories user_rank_history[]
+
+  @@index([name_ar])
+}
+
+model category {
+  id        String   @id @default(uuid())
+  name_ar   String   @default("")
+  name_en   String?
+  color     String   @default("#6366f1")
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses courses[]
+}
+
+model courses {
+  id               String                    @id @default(uuid())
+  title_ar         String                    @unique @default("")
+  title_en         String?
+  description_ar   String?
+  description_en   String?
+  keywords         String[]                  @default([])
+  rankId           String
+  categoryId       String?
+  price            Float?
+  image            String                    @default("default_course.jpg")
+  rank             ranks                     @relation(fields: [rankId], references: [id], onDelete: Cascade)
+  category         category?                 @relation(fields: [categoryId], references: [id])
+  lectures         lectures[]
+  createdAt        DateTime                  @default(now())
+  updatedAt        DateTime                  @updatedAt
+  schedules        schedule[]
+  purchaseRequests course_purchase_request[]
+  purchases        CoursePurchase[]
+
+  @@index([rankId])
+  @@index([categoryId])
+  @@index([title_ar])
+}
+
+model course_purchase_request {
+  id          String   @id @default(uuid())
+  studentId   String?
+  name        String?
+  phone       String?
+  email       String?
+  courseId    String
+  status      String   @default("pending")
+  receipt_img String?
+  parentPhone String?
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  student student? @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  courses  @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+  @@index([courseId])
+}
+
+model CoursePurchase {
+  id          String   @id @default(uuid())
+  studentId   String
+  courseId    String
+  purchasedAt DateTime @default(now())
+
+  student student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  course  courses @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+  @@index([studentId])
+  @@index([courseId])
+}
+
+model lectures {
+  id         String    @id @default(uuid())
+  title_ar   String    @default("")
+  title_en   String?
+  content_ar String?
+  content_en String?
+  videoUrl   String?
+  pdfUrl     String?
+  slidesUrl  String?
+  date       DateTime?
+  order      Int
+  courseId   String
+  course     courses   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  duration   String?
+  createdAt  DateTime  @default(now())
+  updatedAt  DateTime  @updatedAt
+
+  userLectures user_lectures[]
+  schedules    schedule[]
+
+  @@unique([courseId, order])
+  @@index([courseId])
+}
+
+model user_lectures {
+  id           String    @id @default(uuid())
+  userId       String
+  lectureId    String
+  status       String    @default("completed")
+  progress     Float     @default(0)
+  lastPosition Float     @default(0)
+  completedAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  user    user     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lecture lectures @relation(fields: [lectureId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lectureId])
+  @@index([userId])
+  @@index([lectureId])
+}

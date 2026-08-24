@@ -203,5 +203,7 @@ export const PERMISSIONS_V2 = {
     CREATE: "quiz:create",
     UPDATE: "quiz:update",
     DELETE: "quiz:delete",
+    READ_CORRECT_ANSWERS: "quiz:read_correct_answers",
+    SUBMIT: "quiz:submit",
   },
 };

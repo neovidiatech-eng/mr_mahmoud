@@ -1,0 +1,86 @@
+model user {
+  id                   String                  @id @default(uuid())
+  email                String?                 @unique
+  username             String?                 @unique
+  password             String?
+  name                 String?
+  phone                String?
+  createdAt            DateTime                @default(now())
+  gender               String?
+  age                  Int?
+  updatedAt            DateTime                @updatedAt
+  confirmAt            DateTime?
+  roleId               String?
+  code_country         String?
+  status               String                  @default("pending")
+  googleId             String?                 @unique
+  provider             String                  @default("local")
+  timezone             String                  @default("Africa/Cairo")
+  image                Json?
+  reviewsReceived      Review[]                @relation("ReviewsReceived")
+  reviewsGiven         Review[]                @relation("ReviewsGiven")
+  subscriptions        Subscription[]
+  wallet               Wallet[]
+  withdrawalRequests   WithdrawalRequest[]
+  sessionRequests      request[]
+  student              student?
+  stuff                stuff?
+  subscriptionRequests subscription_requests[]
+  teacher              teacher?
+  role                 role?                   @relation(fields: [roleId], references: [id])
+  messages             Message[]
+  conversations        Conversation[]          @relation("TeacherConversations")
+  conversationsStudent Conversation[]          @relation("StudentConversations")
+  userLectures         user_lectures[]
+  posts                post[]
+  attendancesCheckedIn Attendance[]            @relation("AttendanceCheckedInBy")
+
+  @@index([email])
+  @@index([username])
+  @@index([googleId])
+}
+
+model role {
+  id              String           @id @default(uuid())
+  name            String           @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  rolePermissions rolePermission[]
+  stuff           stuff[]
+  teachers        teacher[]
+  users           user[]
+}
+
+model permission {
+  id              String           @id @default(uuid())
+  name            String           @unique
+  code            String           @unique
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+  rolePermissions rolePermission[]
+
+  @@index([name])
+  @@index([code])
+}
+
+model rolePermission {
+  id           String     @id @default(uuid())
+  roleId       String
+  permissionId String
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+  permission   permission @relation(fields: [permissionId], references: [id], onDelete: Cascade)
+  role         role       @relation(fields: [roleId], references: [id], onDelete: Cascade)
+
+  @@unique([roleId, permissionId])
+}
+
+model stuff {
+  id        String   @id @default(uuid())
+  user_id   String   @unique
+  roleId    String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  role      role?    @relation(fields: [roleId], references: [id])
+  user      user     @relation(fields: [user_id], references: [id], onDelete: Cascade)
+}
