@@ -42,6 +42,8 @@ model student {
   totalReviews           Int                       @default(0)
   parentNumber           String?
   rankId                 String?
+  offlineGroupId         String?
+  offlineGroup           offlineGroup?             @relation(fields: [offlineGroupId], references: [id])
   rank                   ranks?                    @relation(fields: [rankId], references: [id])
   exams                  exam[]
   homeworks              homework[]

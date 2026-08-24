@@ -12,6 +12,7 @@ model ranks {
   students          student[]
   courses           courses[]
   userRankHistories user_rank_history[]
+  offlineGroup      offlineGroup?
 
   @@index([name_ar])
 }
@@ -42,6 +43,7 @@ model courses {
   rank             ranks                     @relation(fields: [rankId], references: [id], onDelete: Cascade)
   category         category?                 @relation(fields: [categoryId], references: [id])
   lectures         lectures[]
+  offlineGroup     offlineGroupCourses[]
   createdAt        DateTime                  @default(now())
   updatedAt        DateTime                  @updatedAt
   schedules        schedule[]
@@ -129,4 +131,34 @@ model user_lectures {
   @@unique([userId, lectureId])
   @@index([userId])
   @@index([lectureId])
+}
+
+
+model offlineGroup {
+  id        String                @id @default(uuid())
+  rankId    String                @unique
+  rank      ranks                 @relation(fields: [rankId], references: [id], onDelete: Cascade)
+  qrToken   String                @unique
+  qrActive  Boolean               @default(true)
+  courses   offlineGroupCourses[]
+  createdAt DateTime              @default(now())
+  updatedAt DateTime              @updatedAt
+
+  students student[]
+}
+
+/// offlineGroupLectures
+
+model offlineGroupCourses {
+  id        String       @id @default(uuid())
+  groupId   String
+  courseId  String
+  group     offlineGroup @relation(fields: [groupId], references: [id], onDelete: Cascade)
+  course    courses      @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+
+  @@unique([groupId, courseId])
+  @@index([groupId])
+  @@index([courseId])
 }

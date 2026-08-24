@@ -6,8 +6,6 @@
   "REQUEST_REJECTED": "Request was rejected",
   "REQUEST_SUBMITTED": "Request submitted for admin approval",
   "REQUEST_NOT_FOUND": "Request not found",
-  "
-  ": "Request has already been processed",
   "SESSION_NOT_FOUND": "Session not found",
   "SESSION_CANCELLED": "Session cancelled",
   "SESSION_RESCHEDULED": "Session moved to {{date}}",
