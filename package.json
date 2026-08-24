@@ -64,6 +64,7 @@
     "swagger-ui-express": "^5.0.1"
   },
   "prisma": {
+    "schema": "prisma/schema",
     "seed": "node prisma/seed.js"
   }
 }
