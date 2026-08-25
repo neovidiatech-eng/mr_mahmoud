@@ -43,6 +43,7 @@ model courses {
   rank             ranks                     @relation(fields: [rankId], references: [id], onDelete: Cascade)
   category         category?                 @relation(fields: [categoryId], references: [id])
   lectures         lectures[]
+  sections         sections[]
   offlineGroup     offlineGroupCourses[]
   createdAt        DateTime                  @default(now())
   updatedAt        DateTime                  @updatedAt
@@ -110,6 +111,7 @@ model lectures {
   userLectures user_lectures[]
   schedules    schedule[]
 
+
   @@unique([courseId, order])
   @@index([courseId])
 }
@@ -132,7 +134,6 @@ model user_lectures {
   @@index([userId])
   @@index([lectureId])
 }
-
 
 model offlineGroup {
   id        String                @id @default(uuid())
