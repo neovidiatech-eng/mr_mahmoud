@@ -332,9 +332,7 @@ export const materialsPaths = {
                 name_ar: { type: "string", example: "الصف الثالث الثانوي" },
                 name_en: { type: "string", example: "Grade 12 Senior" },
                 color: { type: "string", example: "#3357FF" },
-                ageRange: { type: "string", example: "17-18" },
-                stageName_ar: { type: "string", example: "المرحلة الثانوية" },
-                stageName_en: { type: "string", example: "Secondary Stage" }
+                ageRange: { type: "string", example: "17-18" }
               }
             }
           }
@@ -370,9 +368,7 @@ export const materialsPaths = {
                 name_ar: { type: "string" },
                 name_en: { type: "string" },
                 color: { type: "string" },
-                ageRange: { type: "string" },
-                stageName_ar: { type: "string" },
-                stageName_en: { type: "string" }
+                ageRange: { type: "string" }
               }
             }
           }

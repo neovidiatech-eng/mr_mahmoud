@@ -23,6 +23,8 @@ import { subscriptionPaths } from "./docs/subscription.swagger.js";
 import { postsPaths } from "./docs/posts.swagger.js";
 import { attendancePaths } from "./docs/attendance.swagger.js";
 import { quizPaths } from "./docs/quiz.swagger.js";
+import { stagesPaths } from "./docs/stages.swagger.js";
+import { offlineGroupsPaths } from "./docs/offlineGroups.swagger.js";
 
 export const swaggerSpec = {
   openapi: "3.0.0",
@@ -128,6 +130,14 @@ export const swaggerSpec = {
     },
     { name: "Educational Materials - Ranks", description: "Educational Ranks" },
     {
+      name: "Educational Materials - Stages",
+      description: "Educational Stages for Ranks",
+    },
+    {
+      name: "Offline Groups",
+      description: "Offline Study Groups & QR Code Access Management",
+    },
+    {
       name: "Weekly Reports",
       description: "Student Weekly Performance & Assessment Reports",
     },
@@ -197,6 +207,8 @@ export const swaggerSpec = {
     ...teachersPaths,
     ...financesPaths,
     ...materialsPaths,
+    ...stagesPaths,
+    ...offlineGroupsPaths,
     ...weeklyReportsPaths,
     ...policiesPaths,
     ...supportPaths,

@@ -5,6 +5,7 @@ import slugify from "slugify";
    Constants & Shared Includes
 ----------------------------- */
 const nestedInclude = {
+  stages: true,
   courses: {
     include: {
       lectures: {
@@ -41,7 +42,7 @@ export const getRanks = async (req, res, next) => {
    ADD RANK
 ----------------------------- */
 export const addRank = async (req, res, next) => {
-  const { name_ar, name_en, color, ageRange, stageName_ar, stageName_en } = req.body || {};
+  const { name_ar, name_en, color, ageRange } = req.body || {};
   
   const slugSource = name_en || name_ar;
   if (!slugSource) {
@@ -80,8 +81,7 @@ export const addRank = async (req, res, next) => {
       slug,
       color,
       ageRange,
-      ...(stageName_ar !== undefined && { stageName_ar }),
-      ...(stageName_en !== undefined && { stageName_en }),
+      
     },
   });
 };
@@ -112,7 +112,7 @@ export const getRank = async (req, res, next) => {
 ----------------------------- */
 export const updateRank = async (req, res, next) => {
   const { id } = req.params;
-  const { name_ar, name_en, color, ageRange, stageName_ar, stageName_en } = req.body;
+  const { name_ar, name_en, color, ageRange } = req.body;
 
   const rank = await db.findFirst({
     model: "ranks",
@@ -198,8 +198,6 @@ export const updateRank = async (req, res, next) => {
 
   if (color) updateData.color = color;
   if (ageRange) updateData.ageRange = ageRange;
-  if (stageName_ar !== undefined) updateData.stageName_ar = stageName_ar;
-  if (stageName_en !== undefined) updateData.stageName_en = stageName_en;
 
   return await db.updateOne({
     model: "ranks",
@@ -226,12 +224,13 @@ export const deleteRank = async (req, res, next) => {
     throw error;
   }
 
-  const [coursesCount, studentsCount] = await Promise.all([
+  const [coursesCount, studentsCount,stagesCount] = await Promise.all([
     db.count({ model: "courses", where: { rankId: id } }),
     db.count({ model: "student", where: { rankId: id } }),
+    db.count({ model: "stages", where: { rankId: id } }),
   ]);
 
-  if (coursesCount > 0 || studentsCount > 0) {
+  if (coursesCount > 0 || studentsCount > 0 || stagesCount > 0) {
     const error = new Error("RANK_IN_USE");
     error.status = 409;
     error.isMessageKey = true;

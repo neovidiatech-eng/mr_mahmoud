@@ -1,10 +1,9 @@
 import { Router } from "express";
-import authentication from "../../Middlewares/Authentication";
-import { authorizeResource } from "../../Middlewares/AuthorizeResource";
-import { validation } from "../../Middlewares/Validation";
-import * as offlineValidation from "./offline.validation";
-import * as offlineController from "./offline.controller";
-import { auth } from "google-auth-library";
+import authentication from "../../Middlewares/Authentication.js";
+import { authorizeResource } from "../../Middlewares/AuthorizeResource.js";
+import { validation } from "../../Middlewares/Validation.js";
+import * as schema from "./offline.validations.js";
+import * as offlineController from "./offline.controller.js";
 
 const router = Router();
 const offlineGroupsResource = "offlinegroups";
@@ -13,7 +12,7 @@ router.post(
     "/",
     authentication,
     authorizeResource(offlineGroupsResource),
-    validation(offlineValidation.createOfflineGroupSchema),
+    validation(schema.createOfflineGroupSchema),
     offlineController.createOfflineGroup
 );
 router.get("/",
@@ -23,10 +22,16 @@ router.get("/",
 );
 
 router.get(
+  "/scan",
+  validation(schema.scanOfflineGroupSchema),
+  offlineController.scanForOfflineGroup
+);
+
+router.get(
     "/:id",
     authentication,
     authorizeResource(offlineGroupsResource),
-    validation(offlineValidation.getOfflineGroupSchema),
+    validation(schema.offlineGroupIdSchema),
     offlineController.getGroupById
 );
 
@@ -34,15 +39,15 @@ router.delete(
     "/:id",
     authentication,
     authorizeResource(offlineGroupsResource),
-    validation(offlineValidation.getOfflineGroupSchema),
+    validation(schema.offlineGroupIdSchema),
     offlineController.deleteOfflineGroup
-)
+);
 
 router.put(
   "/:id",
   authentication,
   authorizeResource(offlineGroupsResource),
-  validation(offlineValidation.updateOfflineGroupSchema),
+  validation(schema.updateOfflineGroupSchema),
   offlineController.updateOfflineGroup
 );
 

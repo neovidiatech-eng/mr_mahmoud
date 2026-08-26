@@ -36,7 +36,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Ahmed Ali\",\n  \"email\": \"ahmed@example.com\",\n  \"password\": \"Password123!\",\n  \"codeCountry\": \"+20\",\n  \"phone\": \"1000000000\",\n  \"gender\": \"MALE\",\n  \"country\": \"Egypt\",\n  \"plan_id\": \"60d5ec49f1b2c80015f8e4a1\",\n  \"age\": 17,\n  \"birth_date\": \"2007-05-15\",\n  \"timezone\": \"Africa/Cairo\"\n}",
+              "raw": "{\n  \"name\": \"Ahmed Ali\",\n  \"email\": \"ahmed@example.com\",\n  \"password\": \"Password123!\",\n  \"stageId\": \"45f94b32-9c16-43b3-8d07-c5ef547781b1\",\n  \"codeCountry\": \"+20\",\n  \"phone\": \"1000000000\",\n  \"parentNumber\": \"1000000002\",\n  \"gender\": \"male\",\n  \"country\": \"Egypt\",\n  \"plan_id\": \"60d5ec49f1b2c80015f8e4a1\",\n  \"age\": 17,\n  \"birth_date\": \"2007-05-15\",\n  \"timezone\": \"Africa/Cairo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -565,7 +565,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"type\": \"reschedule\",\n  \"reason\": \"Need to reschedule session due to medical appointment\",\n  \"sessionId\": \"string\",\n  \"priority\": \"low\",\n  \"title\": \"string\",\n  \"requestedData\": {\n    \"new_start_time\": \"2026-08-24T13:25:41.812Z\",\n    \"new_end_time\": \"2026-08-24T13:25:41.812Z\",\n    \"new_status\": \"completed\",\n    \"suggested_notes\": \"string\",\n    \"studentId\": \"string\",\n    \"teacherId\": \"string\",\n    \"courseId\": \"string\",\n    \"title\": \"string\"\n  }\n}",
+              "raw": "{\n  \"type\": \"reschedule\",\n  \"reason\": \"Need to reschedule session due to medical appointment\",\n  \"sessionId\": \"string\",\n  \"priority\": \"low\",\n  \"title\": \"string\",\n  \"requestedData\": {\n    \"new_start_time\": \"2026-08-26T12:04:11.804Z\",\n    \"new_end_time\": \"2026-08-26T12:04:11.804Z\",\n    \"new_status\": \"completed\",\n    \"suggested_notes\": \"string\",\n    \"studentId\": \"string\",\n    \"teacherId\": \"string\",\n    \"courseId\": \"string\",\n    \"title\": \"string\"\n  }\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -790,7 +790,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"واجب الرياضيات 1\",\n  \"title_en\": \"Math Homework 1\",\n  \"description_ar\": \"حل التمارين من الصفحة 10 إلى 15\",\n  \"description_en\": \"Solve exercises from page 10 to 15\",\n  \"dueDate\": \"2026-08-24T13:25:41.812Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\"\n}",
+              "raw": "{\n  \"title_ar\": \"واجب الرياضيات 1\",\n  \"title_en\": \"Math Homework 1\",\n  \"description_ar\": \"حل التمارين من الصفحة 10 إلى 15\",\n  \"description_en\": \"Solve exercises from page 10 to 15\",\n  \"dueDate\": \"2026-08-26T12:04:11.805Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -894,7 +894,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"dueDate\": \"2026-08-24T13:25:41.812Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"grade\": 1,\n  \"feedback\": \"string\",\n  \"status\": \"pending\"\n}",
+              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"dueDate\": \"2026-08-26T12:04:11.805Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"grade\": 1,\n  \"feedback\": \"string\",\n  \"status\": \"pending\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1077,7 +1077,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"امتحان منتصف الفصل في الفيزياء\",\n  \"title_en\": \"Midterm Physics Exam\",\n  \"subject\": \"Physics\",\n  \"dueDate\": \"2026-08-24T13:25:41.812Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\",\n  \"totalMarks\": 100,\n  \"duration\": 60\n}",
+              "raw": "{\n  \"title_ar\": \"امتحان منتصف الفصل في الفيزياء\",\n  \"title_en\": \"Midterm Physics Exam\",\n  \"subject\": \"Physics\",\n  \"dueDate\": \"2026-08-26T12:04:11.805Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\",\n  \"totalMarks\": 100,\n  \"duration\": 60\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1181,7 +1181,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"subject\": \"string\",\n  \"dueDate\": \"2026-08-24T13:25:41.812Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"totalMarks\": 1,\n  \"duration\": 1,\n  \"status\": \"pending\"\n}",
+              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"subject\": \"string\",\n  \"dueDate\": \"2026-08-26T12:04:11.806Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"totalMarks\": 1,\n  \"duration\": 1,\n  \"status\": \"pending\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1718,7 +1718,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Physics Chapter 1 Live Session\",\n  \"description\": \"Discussion on kinematics\",\n  \"platform\": \"zoom\",\n  \"teacherId\": \"string\",\n  \"courseId\": \"string\",\n  \"subjectId\": \"string\",\n  \"link\": \"https://zoom.us/j/123456789\",\n  \"notes\": \"string\",\n  \"start_time\": \"2026-08-24T13:25:41.813Z\",\n  \"type\": \"individual\",\n  \"language\": \"en\",\n  \"videoUrl\": \"string\",\n  \"slidesUrl\": \"string\",\n  \"notification_Time\": \"15m\",\n  \"studentId\": \"string\",\n  \"studentIds\": [\n    \"string\"\n  ],\n  \"isGroup\": true,\n  \"maxStudents\": \"string\"\n}",
+              "raw": "{\n  \"title\": \"Physics Chapter 1 Live Session\",\n  \"description\": \"Discussion on kinematics\",\n  \"platform\": \"zoom\",\n  \"teacherId\": \"string\",\n  \"courseId\": \"string\",\n  \"subjectId\": \"string\",\n  \"link\": \"https://zoom.us/j/123456789\",\n  \"notes\": \"string\",\n  \"start_time\": \"2026-08-26T12:04:11.807Z\",\n  \"type\": \"individual\",\n  \"language\": \"en\",\n  \"videoUrl\": \"string\",\n  \"slidesUrl\": \"string\",\n  \"notification_Time\": \"15m\",\n  \"studentId\": \"string\",\n  \"studentIds\": [\n    \"string\"\n  ],\n  \"isGroup\": true,\n  \"maxStudents\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1835,7 +1835,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"string\",\n  \"description\": \"string\",\n  \"subjectId\": \"string\",\n  \"link\": \"string\",\n  \"notes\": \"string\",\n  \"status\": \"planned\",\n  \"start_time\": \"2026-08-24T13:25:41.813Z\",\n  \"type\": \"string\",\n  \"language\": \"en\",\n  \"videoUrl\": \"string\",\n  \"slidesUrl\": \"string\",\n  \"notification_Time\": \"string\",\n  \"instractor\": \"string\"\n}",
+              "raw": "{\n  \"title\": \"string\",\n  \"description\": \"string\",\n  \"subjectId\": \"string\",\n  \"link\": \"string\",\n  \"notes\": \"string\",\n  \"status\": \"planned\",\n  \"start_time\": \"2026-08-26T12:04:11.807Z\",\n  \"type\": \"string\",\n  \"language\": \"en\",\n  \"videoUrl\": \"string\",\n  \"slidesUrl\": \"string\",\n  \"notification_Time\": \"string\",\n  \"instractor\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3032,7 +3032,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Karem Mahmoud\",\n  \"email\": \"karem@example.com\",\n  \"password\": \"Password123!\",\n  \"phone\": \"1000000001\",\n  \"phone_code\": \"+20\",\n  \"country\": \"Egypt\",\n  \"planId\": \"string\",\n  \"age\": 16,\n  \"birth_date\": \"2008-01-01\",\n  \"gender\": \"MALE\",\n  \"active\": true,\n  \"rankId\": \"string\",\n  \"startingCourseId\": \"string\",\n  \"startingLectureId\": \"string\",\n  \"type\": \"online\",\n  \"timezone\": \"Africa/Cairo\"\n}",
+              "raw": "{\n  \"name\": \"Karem Mahmoud\",\n  \"email\": \"karem@example.com\",\n  \"password\": \"Password123!\",\n  \"phone\": \"1000000001\",\n  \"phone_code\": \"+20\",\n  \"parentNumber\": \"1000000002\",\n  \"country\": \"Egypt\",\n  \"planId\": \"string\",\n  \"age\": 16,\n  \"birth_date\": \"2008-01-01\",\n  \"gender\": \"male\",\n  \"active\": true,\n  \"rankId\": \"string\",\n  \"stageId\": \"string\",\n  \"startingCourseId\": \"string\",\n  \"startingLectureId\": \"string\",\n  \"type\": \"online\",\n  \"timezone\": \"Africa/Cairo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3143,7 +3143,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"username\": \"string\",\n  \"password\": \"string\",\n  \"phone\": \"string\",\n  \"phone_code\": \"string\",\n  \"country\": \"string\",\n  \"planId\": \"string\",\n  \"birth_date\": \"2026-08-24\",\n  \"age\": 1,\n  \"gender\": \"MALE\",\n  \"active\": true,\n  \"rankId\": \"string\",\n  \"type\": \"online\",\n  \"timezone\": \"string\"\n}",
+              "raw": "{\n  \"name\": \"string\",\n  \"username\": \"string\",\n  \"password\": \"string\",\n  \"phone\": \"string\",\n  \"phone_code\": \"string\",\n  \"parentNumber\": \"1000000002\",\n  \"country\": \"string\",\n  \"planId\": \"string\",\n  \"birth_date\": \"2026-08-24\",\n  \"age\": 1,\n  \"gender\": \"male\",\n  \"active\": true,\n  \"rankId\": \"string\",\n  \"stageId\": \"string\",\n  \"type\": \"online\",\n  \"timezone\": \"string\",\n  \"regenerateQr\": false,\n  \"qrActive\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3698,7 +3698,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Server hosting fee\",\n  \"currencyId\": \"EGP\",\n  \"amount\": 150,\n  \"payment_type\": \"bank_transfer\",\n  \"type\": \"general\",\n  \"status\": \"paid\",\n  \"date\": \"2026-08-24T13:25:41.813Z\"\n}",
+              "raw": "{\n  \"title\": \"Server hosting fee\",\n  \"currencyId\": \"EGP\",\n  \"amount\": 150,\n  \"payment_type\": \"bank_transfer\",\n  \"type\": \"general\",\n  \"status\": \"paid\",\n  \"date\": \"2026-08-26T12:04:11.807Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3775,7 +3775,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"string\",\n  \"currencyId\": \"string\",\n  \"amount\": 1,\n  \"payment_type\": \"string\",\n  \"type\": \"salary\",\n  \"status\": \"paid\",\n  \"date\": \"2026-08-24T13:25:41.813Z\"\n}",
+              "raw": "{\n  \"title\": \"string\",\n  \"currencyId\": \"string\",\n  \"amount\": 1,\n  \"payment_type\": \"string\",\n  \"type\": \"salary\",\n  \"status\": \"paid\",\n  \"date\": \"2026-08-26T12:04:11.807Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4227,7 +4227,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"المحاضرة الأولى: قوانين نيوتن\",\n  \"title_en\": \"Lecture 1: Newton's Laws\",\n  \"content_ar\": \"شرح كامل لقوانين نيوتن للحركة\",\n  \"content_en\": \"Full explanation of Newton's laws of motion\",\n  \"videoUrl\": \"https://vimeo.com/123456\",\n  \"slidesUrl\": \"https://example.com/slides.pdf\",\n  \"pdfUrl\": \"https://example.com/notes.pdf\",\n  \"order\": 1,\n  \"courseId\": \"string\",\n  \"duration\": \"01:00:00\",\n  \"date\": \"2026-08-24T13:25:41.813Z\"\n}",
+              "raw": "{\n  \"title_ar\": \"المحاضرة الأولى: قوانين نيوتن\",\n  \"title_en\": \"Lecture 1: Newton's Laws\",\n  \"content_ar\": \"شرح كامل لقوانين نيوتن للحركة\",\n  \"content_en\": \"Full explanation of Newton's laws of motion\",\n  \"videoUrl\": \"https://vimeo.com/123456\",\n  \"slidesUrl\": \"https://example.com/slides.pdf\",\n  \"pdfUrl\": \"https://example.com/notes.pdf\",\n  \"order\": 1,\n  \"courseId\": \"string\",\n  \"duration\": \"01:00:00\",\n  \"date\": \"2026-08-26T12:04:11.807Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4300,7 +4300,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"content_ar\": \"string\",\n  \"content_en\": \"string\",\n  \"videoUrl\": \"string\",\n  \"slidesUrl\": \"string\",\n  \"pdfUrl\": \"string\",\n  \"order\": 1,\n  \"courseId\": \"string\",\n  \"duration\": \"string\",\n  \"date\": \"2026-08-24T13:25:41.813Z\"\n}",
+              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"content_ar\": \"string\",\n  \"content_en\": \"string\",\n  \"videoUrl\": \"string\",\n  \"slidesUrl\": \"string\",\n  \"pdfUrl\": \"string\",\n  \"order\": 1,\n  \"courseId\": \"string\",\n  \"duration\": \"string\",\n  \"date\": \"2026-08-26T12:04:11.807Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4707,7 +4707,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name_ar\": \"الصف الثالث الثانوي\",\n  \"name_en\": \"Grade 12 Senior\",\n  \"color\": \"#3357FF\",\n  \"ageRange\": \"17-18\",\n  \"stageName_ar\": \"المرحلة الثانوية\",\n  \"stageName_en\": \"Secondary Stage\"\n}",
+              "raw": "{\n  \"name_ar\": \"الصف الثالث الثانوي\",\n  \"name_en\": \"Grade 12 Senior\",\n  \"color\": \"#3357FF\",\n  \"ageRange\": \"17-18\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4785,7 +4785,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name_ar\": \"string\",\n  \"name_en\": \"string\",\n  \"color\": \"string\",\n  \"ageRange\": \"string\",\n  \"stageName_ar\": \"string\",\n  \"stageName_en\": \"string\"\n}",
+              "raw": "{\n  \"name_ar\": \"string\",\n  \"name_en\": \"string\",\n  \"color\": \"string\",\n  \"ageRange\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4853,6 +4853,451 @@
       ]
     },
     {
+      "name": "Educational Materials - Stages",
+      "item": [
+        {
+          "name": "Get all educational stages with pagination & filters",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/stages?page=1&limit=10&rankId=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "stages"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": ""
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": ""
+                },
+                {
+                  "key": "rankId",
+                  "value": "",
+                  "description": "Filter stages by rank ID"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create educational stage for a rank",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_ar\": \"المرحلة الأولى\",\n  \"name_en\": \"Stage One\",\n  \"rankId\": \"45f94b32-9c16-43b3-8d07-c5ef547781b1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials/stages",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "stages"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Get stage details by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/stages/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "stages",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123",
+                  "description": "Stage ID"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update educational stage",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name_ar\": \"المرحلة الأولى المحدثة\",\n  \"name_en\": \"Stage One Updated\",\n  \"rankId\": \"45f94b32-9c16-43b3-8d07-c5ef547781b1\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/materials/stages/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "stages",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123",
+                  "description": "Stage ID"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Delete educational stage",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/materials/stages/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "materials",
+                "stages",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123",
+                  "description": "Stage ID"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Offline Groups",
+      "item": [
+        {
+          "name": "Get all offline groups with pagination",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/offline-groups?page=1&limit=10",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "offline-groups"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "1",
+                  "description": ""
+                },
+                {
+                  "key": "limit",
+                  "value": "10",
+                  "description": ""
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Create offline group for a stage",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"stageId\": \"45f94b32-9c16-43b3-8d07-c5ef547781b1\",\n  \"courseIds\": [\n    \"1a2b3c4d-5e6f-7a8b-9c0d-1e2f3a4b5c6d\"\n  ]\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/offline-groups",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "offline-groups"
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Scan offline group QR code token",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/offline-groups/scan?token=9f8e7d6c5b4a3210fedcba9876543210",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "offline-groups",
+                "scan"
+              ],
+              "query": [
+                {
+                  "key": "token",
+                  "value": "9f8e7d6c5b4a3210fedcba9876543210",
+                  "description": "QR token string"
+                }
+              ]
+            },
+            "description": "Public endpoint to validate offline group QR token and retrieve scannable course list."
+          },
+          "response": []
+        },
+        {
+          "name": "Get offline group details by ID",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/offline-groups/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "offline-groups",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123",
+                  "description": "Offline Group ID"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Update offline group courses or QR active status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"courseIds\": [\n    \"string\"\n  ],\n  \"qrActive\": true\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/offline-groups/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "offline-groups",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123",
+                  "description": "Offline Group ID"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        },
+        {
+          "name": "Delete offline group",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/offline-groups/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "offline-groups",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123",
+                  "description": "Offline Group ID"
+                }
+              ]
+            },
+            "description": ""
+          },
+          "response": []
+        }
+      ]
+    },
+    {
       "name": "Weekly Reports",
       "item": [
         {
@@ -4902,7 +5347,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"weekStarting\": \"2026-08-24T13:25:41.813Z\",\n  \"weekEnding\": \"2026-08-24T13:25:41.813Z\",\n  \"totalClasses\": 10,\n  \"studentsTaught\": 25,\n  \"avgSessionDuration\": 60,\n  \"materialsUploaded\": 3,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 4.5\n}",
+              "raw": "{\n  \"weekStarting\": \"2026-08-26T12:04:11.808Z\",\n  \"weekEnding\": \"2026-08-26T12:04:11.808Z\",\n  \"totalClasses\": 10,\n  \"studentsTaught\": 25,\n  \"avgSessionDuration\": 60,\n  \"materialsUploaded\": 3,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 4.5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5045,7 +5490,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"weekStarting\": \"2026-08-24T13:25:41.813Z\",\n  \"weekEnding\": \"2026-08-24T13:25:41.813Z\",\n  \"totalClasses\": 1,\n  \"studentsTaught\": 1,\n  \"avgSessionDuration\": 1,\n  \"materialsUploaded\": 1,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 1\n}",
+              "raw": "{\n  \"weekStarting\": \"2026-08-26T12:04:11.808Z\",\n  \"weekEnding\": \"2026-08-26T12:04:11.808Z\",\n  \"totalClasses\": 1,\n  \"studentsTaught\": 1,\n  \"avgSessionDuration\": 1,\n  \"materialsUploaded\": 1,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5160,7 +5605,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"سياسة الخصوصية\",\n  \"title_en\": \"Privacy Policy\",\n  \"description_ar\": \"تفاصيل سياسة الخصوصية...\",\n  \"description_en\": \"Privacy policy details...\",\n  \"icon\": \"shield\",\n  \"color\": \"#4CAF50\",\n  \"lastUpdated\": \"2026-08-24T13:25:41.813Z\",\n  \"active\": true\n}",
+              "raw": "{\n  \"title_ar\": \"سياسة الخصوصية\",\n  \"title_en\": \"Privacy Policy\",\n  \"description_ar\": \"تفاصيل سياسة الخصوصية...\",\n  \"description_en\": \"Privacy policy details...\",\n  \"icon\": \"shield\",\n  \"color\": \"#4CAF50\",\n  \"lastUpdated\": \"2026-08-26T12:04:11.808Z\",\n  \"active\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -5269,7 +5714,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"icon\": \"string\",\n  \"color\": \"string\",\n  \"lastUpdated\": \"2026-08-24T13:25:41.813Z\",\n  \"active\": true\n}",
+              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"icon\": \"string\",\n  \"color\": \"string\",\n  \"lastUpdated\": \"2026-08-26T12:04:11.808Z\",\n  \"active\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6303,7 +6748,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"courseId\": \"string\",\n  \"courseIds\": [\n    \"string\"\n  ],\n  \"parentPhone\": \"string\",\n  \"notes\": \"string\"\n}",
+              "raw": "{\n  \"name\": \"Ahmed Ali\",\n  \"phone\": \"01000000000\",\n  \"email\": \"ahmed@example.com\",\n  \"courseId\": \"string\",\n  \"courseIds\": [\n    \"string\"\n  ],\n  \"parentPhone\": \"01100000000\",\n  \"notes\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

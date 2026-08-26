@@ -5,16 +5,33 @@ model ranks {
   slug              String              @unique
   color             String?
   ageRange          Json
-  stageName_ar      String?
-  stageName_en      String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   students          student[]
   courses           courses[]
   userRankHistories user_rank_history[]
-  offlineGroup      offlineGroup?
+  stages            stage[]
 
   @@index([name_ar])
+}
+
+model stage {
+  id String @id @default(uuid())
+
+  name_ar String
+  name_en String?
+
+  slug          String         @unique
+  rankId        String
+  rank          ranks          @relation(fields: [rankId], references: [id], onDelete: Cascade)
+  offlineGroups offlineGroup[]
+  students      student[]
+  courses       courses[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([rankId])
 }
 
 model category {
@@ -37,10 +54,12 @@ model courses {
   description_en   String?
   keywords         String[]                  @default([])
   rankId           String
+  stageId          String?
   categoryId       String?
   price            Float?
   image            String                    @default("default_course.jpg")
   rank             ranks                     @relation(fields: [rankId], references: [id], onDelete: Cascade)
+  stage            stage?                    @relation(fields: [stageId], references: [id], onDelete: Cascade)
   category         category?                 @relation(fields: [categoryId], references: [id])
   lectures         lectures[]
   offlineGroup     offlineGroupCourses[]
@@ -133,11 +152,10 @@ model user_lectures {
   @@index([lectureId])
 }
 
-
 model offlineGroup {
   id        String                @id @default(uuid())
-  rankId    String                @unique
-  rank      ranks                 @relation(fields: [rankId], references: [id], onDelete: Cascade)
+  stageId   String                @unique
+  stage     stage                 @relation(fields: [stageId], references: [id], onDelete: Cascade)
   qrToken   String                @unique
   qrActive  Boolean               @default(true)
   courses   offlineGroupCourses[]

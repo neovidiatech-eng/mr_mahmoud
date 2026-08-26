@@ -4,7 +4,15 @@ import { localize, localizeMany } from "../../../Utils/Localize/index.js";
 
 const localizeRank = (rank, lang) => {
   if (!rank) return rank;
-  let result = localize(rank, ["name", "stageName"], lang);
+
+  let result = localize(rank, ["name"], lang);
+  if(Array.isArray(result.stages)){
+    result={
+      ...result,
+      stages:localizeMany(result.stages,["name_ar","name_en"],lang)
+    }
+  }
+
   if (Array.isArray(result.courses)) {
     result = {
       ...result,

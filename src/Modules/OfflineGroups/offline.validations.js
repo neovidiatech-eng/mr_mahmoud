@@ -1,18 +1,18 @@
-import Joi from "joi";
+import joi from "joi";
 import { generalFields } from "../../Utils/GeneralFields/index.js";
 
 export const createOfflineGroupSchema = {
-  body: Joi.object().keys({
-    rankId: generalFields.id
+  body: joi.object().keys({
+    stageId: generalFields.id
       .messages({
-        "string.base": "RANK_ID_MUST_BE_STRING",
-        "string.empty": "RANK_ID_CANNOT_BE_EMPTY",
-        "string.pattern.base": "RANK_ID_MUST_BE_VALID_ID",
-        "any.required": "RANK_ID_REQUIRED",
+        "string.base": "STAGE_ID_MUST_BE_STRING",
+        "string.empty": "STAGE_ID_CANNOT_BE_EMPTY",
+        "string.pattern.base": "STAGE_ID_MUST_BE_VALID_ID",
+        "any.required": "STAGE_ID_REQUIRED",
       })
       .required(),
 
-    courseIds: Joi.array()
+    courseIds: joi.array()
       .items(
         generalFields.id.messages({
           "string.base": "COURSE_ID_MUST_BE_STRING",
@@ -33,7 +33,7 @@ export const createOfflineGroupSchema = {
 };
 
 export const offlineGroupIdSchema = {
-  params: Joi.object().keys({
+  params: joi.object().keys({
     id: generalFields.id
       .messages({
         "string.base": "OFFLINE_GROUP_ID_MUST_BE_STRING",
@@ -46,7 +46,7 @@ export const offlineGroupIdSchema = {
 }
 
 export const updateOfflineGroupSchema = {
-  params: Joi.object().keys({
+  params: joi.object().keys({
     id: generalFields.id
       .messages({
         "string.base": "OFFLINE_GROUP_ID_MUST_BE_STRING",
@@ -57,8 +57,8 @@ export const updateOfflineGroupSchema = {
       .required(),
   }),
 
-  body: Joi.object().keys({
-    courseIds: Joi.array()
+  body: joi.object().keys({
+    courseIds: joi.array()
       .items(
         generalFields.id.messages({
           "string.base": "COURSE_ID_MUST_BE_STRING",
@@ -74,7 +74,7 @@ export const updateOfflineGroupSchema = {
         "array.unique": "COURSE_IDS_MUST_BE_UNIQUE",
       }),
 
-    qrActive: Joi.boolean().messages({
+    qrActive: joi.boolean().messages({
       "boolean.base": "IS_ACTIVE_MUST_BE_BOOLEAN",
     }),
   })
@@ -82,4 +82,16 @@ export const updateOfflineGroupSchema = {
     .messages({
       "object.min": "AT_LEAST_ONE_FIELD_REQUIRED",
     }),
+};
+export const scanOfflineGroupSchema = {
+  query: joi.object().keys({
+    token: joi.string()
+      .trim()
+      .required()
+      .messages({
+        "string.base": "QR_TOKEN_MUST_BE_STRING",
+        "string.empty": "QR_TOKEN_CANNOT_BE_EMPTY",
+        "any.required": "QR_TOKEN_REQUIRED",
+      }),
+  }),
 };

@@ -42,7 +42,9 @@ model student {
   totalReviews           Int                       @default(0)
   parentNumber           String?
   rankId                 String?
+  stageId                String?
   offlineGroupId         String?
+  stage                  stage?                    @relation(fields: [stageId], references: [id])
   offlineGroup           offlineGroup?             @relation(fields: [offlineGroupId], references: [id])
   rank                   ranks?                    @relation(fields: [rankId], references: [id])
   exams                  exam[]

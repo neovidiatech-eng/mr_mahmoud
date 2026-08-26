@@ -6,6 +6,12 @@ export const registeritonSchema = {
     .keys({
       name: generalFields.name.required(),
       email: generalFields.email.required(),
+      stageId: generalFields.id.messages({
+        "string.base": "STAGE_ID_MUST_BE_STRING",
+        "string.empty": "STAGE_ID_CANNOT_BE_EMPTY",
+        "string.pattern.base": "STAGE_ID_MUST_BE_VALID_ID",
+        "any.required": "STAGE_ID_REQUIRED",
+      }).required(),
       password: generalFields.password.required(),
       codeCountry: generalFields.codeCountry.required(),
       age: generalFields.studentAge,
@@ -13,6 +19,7 @@ export const registeritonSchema = {
       gender: generalFields.gender.required(),
       country: generalFields.country.required(),
       phone: generalFields.phone.required(),
+      parentNumber: generalFields.phone.required(),
       timezone: generalFields.timezone,
       plan_id: generalFields.id
         .messages({
