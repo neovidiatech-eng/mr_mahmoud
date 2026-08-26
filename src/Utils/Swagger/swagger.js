@@ -23,6 +23,7 @@ import { subscriptionPaths } from "./docs/subscription.swagger.js";
 import { postsPaths } from "./docs/posts.swagger.js";
 import { attendancePaths } from "./docs/attendance.swagger.js";
 import { quizPaths } from "./docs/quiz.swagger.js";
+import { sectionsPaths } from "./docs/sections.swagger.js";
 
 export const swaggerSpec = {
   openapi: "3.0.0",
@@ -123,6 +124,10 @@ export const swaggerSpec = {
       description: "Lectures & Video Content",
     },
     {
+      name: "Educational Materials - Sections",
+      description: "Course Sections & Curriculum Modules",
+    },
+    {
       name: "Educational Materials - Categories",
       description: "Course Categories",
     },
@@ -197,6 +202,7 @@ export const swaggerSpec = {
     ...teachersPaths,
     ...financesPaths,
     ...materialsPaths,
+    ...sectionsPaths,
     ...weeklyReportsPaths,
     ...policiesPaths,
     ...supportPaths,

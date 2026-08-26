@@ -21,6 +21,7 @@
     "seed:matrials": "node prisma/seeders/matrials.seeder.js",
     "seed:attendance": "node prisma/seeders/attendance.seeder.js",
     "seed:quiz": "node prisma/seeders/quiz.seeder.js",
+    "seed:sections": "node prisma/seeders/sections.seeder.js",
     "seed:all": "npx prisma db seed",
     "generate:postman": "node scripts/generatePostmanCollection.js"
   },

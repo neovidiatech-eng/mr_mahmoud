@@ -206,4 +206,11 @@ export const PERMISSIONS_V2 = {
     READ_CORRECT_ANSWERS: "quiz:read_correct_answers",
     SUBMIT: "quiz:submit",
   },
+
+  SECTIONS: {
+    READ: "sections:read",
+    CREATE: "sections:create",
+    UPDATE: "sections:update",
+    DELETE: "sections:delete",
+  },
 };
