@@ -62,6 +62,7 @@ model courses {
   stage            stage?                    @relation(fields: [stageId], references: [id], onDelete: Cascade)
   category         category?                 @relation(fields: [categoryId], references: [id])
   lectures         lectures[]
+  sections         sections[]
   offlineGroup     offlineGroupCourses[]
   createdAt        DateTime                  @default(now())
   updatedAt        DateTime                  @updatedAt
@@ -128,6 +129,7 @@ model lectures {
 
   userLectures user_lectures[]
   schedules    schedule[]
+
 
   @@unique([courseId, order])
   @@index([courseId])

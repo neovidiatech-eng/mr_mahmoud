@@ -86,6 +86,7 @@ export const seedPermissions = async () => {
         PERMISSIONS_V2.REVIEWS.READ,
         ...Object.values(PERMISSIONS_V2.QUIZ),
         PERMISSIONS_V2.QUIZ.READ_CORRECT_ANSWERS,
+        ...Object.values(PERMISSIONS_V2.SECTIONS),
       ];
       const pObjs = await prisma.permission.findMany({ where: { code: { in: teacherCodes } } });
       permissionsToAssign = pObjs.map((p) => p.id);
@@ -98,6 +99,7 @@ export const seedPermissions = async () => {
         PERMISSIONS_V2.PROFILE.UPDATE,
         PERMISSIONS_V2.COURSES.READ,
         PERMISSIONS_V2.LECTURES.READ,
+        PERMISSIONS_V2.SECTIONS.READ,
         PERMISSIONS_V2.SESSIONS.READ,
         PERMISSIONS_V2.SESSIONS.JOIN,
         PERMISSIONS_V2.SESSIONS.LEAVE,
