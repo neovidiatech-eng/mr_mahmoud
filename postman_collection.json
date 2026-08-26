@@ -36,7 +36,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Ahmed Ali\",\n  \"email\": \"ahmed@example.com\",\n  \"password\": \"Password123!\",\n  \"codeCountry\": \"+20\",\n  \"phone\": \"1000000000\",\n  \"gender\": \"MALE\",\n  \"country\": \"Egypt\",\n  \"plan_id\": \"60d5ec49f1b2c80015f8e4a1\",\n  \"age\": 17,\n  \"birth_date\": \"2007-05-15\",\n  \"timezone\": \"Africa/Cairo\"\n}",
+              "raw": "{\n  \"name\": \"Ahmed Ali\",\n  \"email\": \"ahmed@example.com\",\n  \"password\": \"Password123!\",\n  \"stageId\": \"45f94b32-9c16-43b3-8d07-c5ef547781b1\",\n  \"codeCountry\": \"+20\",\n  \"phone\": \"1000000000\",\n  \"parentNumber\": \"1000000002\",\n  \"gender\": \"male\",\n  \"country\": \"Egypt\",\n  \"plan_id\": \"60d5ec49f1b2c80015f8e4a1\",\n  \"age\": 17,\n  \"birth_date\": \"2007-05-15\",\n  \"timezone\": \"Africa/Cairo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3032,7 +3032,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"Karem Mahmoud\",\n  \"email\": \"karem@example.com\",\n  \"password\": \"Password123!\",\n  \"phone\": \"1000000001\",\n  \"phone_code\": \"+20\",\n  \"country\": \"Egypt\",\n  \"planId\": \"string\",\n  \"age\": 16,\n  \"birth_date\": \"2008-01-01\",\n  \"gender\": \"MALE\",\n  \"active\": true,\n  \"rankId\": \"string\",\n  \"startingCourseId\": \"string\",\n  \"startingLectureId\": \"string\",\n  \"type\": \"online\",\n  \"timezone\": \"Africa/Cairo\"\n}",
+              "raw": "{\n  \"name\": \"Karem Mahmoud\",\n  \"email\": \"karem@example.com\",\n  \"password\": \"Password123!\",\n  \"phone\": \"1000000001\",\n  \"phone_code\": \"+20\",\n  \"parentNumber\": \"1000000002\",\n  \"country\": \"Egypt\",\n  \"planId\": \"string\",\n  \"age\": 16,\n  \"birth_date\": \"2008-01-01\",\n  \"gender\": \"male\",\n  \"active\": true,\n  \"rankId\": \"string\",\n  \"stageId\": \"string\",\n  \"startingCourseId\": \"string\",\n  \"startingLectureId\": \"string\",\n  \"type\": \"online\",\n  \"timezone\": \"Africa/Cairo\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -3143,7 +3143,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name\": \"string\",\n  \"username\": \"string\",\n  \"password\": \"string\",\n  \"phone\": \"string\",\n  \"phone_code\": \"string\",\n  \"country\": \"string\",\n  \"planId\": \"string\",\n  \"birth_date\": \"2026-08-24\",\n  \"age\": 1,\n  \"gender\": \"MALE\",\n  \"active\": true,\n  \"rankId\": \"string\",\n  \"type\": \"online\",\n  \"timezone\": \"string\"\n}",
+              "raw": "{\n  \"name\": \"string\",\n  \"username\": \"string\",\n  \"password\": \"string\",\n  \"phone\": \"string\",\n  \"phone_code\": \"string\",\n  \"parentNumber\": \"1000000002\",\n  \"country\": \"string\",\n  \"planId\": \"string\",\n  \"birth_date\": \"2026-08-24\",\n  \"age\": 1,\n  \"gender\": \"male\",\n  \"active\": true,\n  \"rankId\": \"string\",\n  \"stageId\": \"string\",\n  \"type\": \"online\",\n  \"timezone\": \"string\",\n  \"regenerateQr\": false,\n  \"qrActive\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4707,7 +4707,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name_ar\": \"الصف الثالث الثانوي\",\n  \"name_en\": \"Grade 12 Senior\",\n  \"color\": \"#3357FF\",\n  \"ageRange\": \"17-18\",\n  \"stageName_ar\": \"المرحلة الثانوية\",\n  \"stageName_en\": \"Secondary Stage\"\n}",
+              "raw": "{\n  \"name_ar\": \"الصف الثالث الثانوي\",\n  \"name_en\": \"Grade 12 Senior\",\n  \"color\": \"#3357FF\",\n  \"ageRange\": \"17-18\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4785,7 +4785,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"name_ar\": \"string\",\n  \"name_en\": \"string\",\n  \"color\": \"string\",\n  \"ageRange\": \"string\",\n  \"stageName_ar\": \"string\",\n  \"stageName_en\": \"string\"\n}",
+              "raw": "{\n  \"name_ar\": \"string\",\n  \"name_en\": \"string\",\n  \"color\": \"string\",\n  \"ageRange\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6613,7 +6613,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"courseId\": \"string\",\n  \"courseIds\": [\n    \"string\"\n  ],\n  \"parentPhone\": \"string\",\n  \"notes\": \"string\"\n}",
+              "raw": "{\n  \"name\": \"Ahmed Ali\",\n  \"phone\": \"01000000000\",\n  \"email\": \"ahmed@example.com\",\n  \"courseId\": \"string\",\n  \"courseIds\": [\n    \"string\"\n  ],\n  \"parentPhone\": \"01100000000\",\n  \"notes\": \"string\"\n}",
               "options": {
                 "raw": {
                   "language": "json"

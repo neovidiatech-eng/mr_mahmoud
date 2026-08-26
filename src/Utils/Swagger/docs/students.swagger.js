@@ -24,22 +24,24 @@ export const studentsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name", "email", "password", "phone", "phone_code", "country", "planId", "gender", "active", "type"],
+              required: ["name", "email", "password", "phone", "phone_code", "parentNumber", "country", "planId", "gender", "active", "type"],
               properties: {
                 name: { type: "string", example: "Karem Mahmoud" },
                 email: { type: "string", format: "email", example: "karem@example.com" },
                 password: { type: "string", format: "password", example: "Password123!" },
                 phone: { type: "string", example: "1000000001" },
                 phone_code: { type: "string", example: "+20" },
+                parentNumber: { type: "string", example: "1000000002", description: "Parent phone number" },
                 country: { type: "string", example: "Egypt" },
-                planId: { type: "string" },
+                planId: { type: "string", format: "uuid" },
                 age: { type: "integer", example: 16 },
                 birth_date: { type: "string", format: "date", example: "2008-01-01" },
-                gender: { type: "string", enum: ["MALE", "FEMALE"] },
+                gender: { type: "string", enum: ["male", "female"], example: "male" },
                 active: { type: "boolean", default: true },
-                rankId: { type: "string" },
-                startingCourseId: { type: "string" },
-                startingLectureId: { type: "string" },
+                rankId: { type: "string", format: "uuid" },
+                stageId: { type: "string", format: "uuid", description: "Educational Stage ID (optional)" },
+                startingCourseId: { type: "string", format: "uuid" },
+                startingLectureId: { type: "string", format: "uuid" },
                 type: { type: "string", enum: ["online", "onsite"], default: "online", example: "online" },
                 timezone: { type: "string", example: "Africa/Cairo" }
               }
@@ -56,7 +58,7 @@ export const studentsPaths = {
       summary: "Get student details by ID",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
       responses: { 200: { description: "Student details retrieved." } }
     },
@@ -65,7 +67,7 @@ export const studentsPaths = {
       summary: "Delete student account",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
       responses: { 200: { description: "Student deleted." } }
     }
@@ -76,7 +78,7 @@ export const studentsPaths = {
       summary: "Update student details",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
       requestBody: {
         required: true,
@@ -90,15 +92,19 @@ export const studentsPaths = {
                 password: { type: "string" },
                 phone: { type: "string" },
                 phone_code: { type: "string" },
+                parentNumber: { type: "string", example: "1000000002" },
                 country: { type: "string" },
-                planId: { type: "string" },
+                planId: { type: "string", format: "uuid" },
                 birth_date: { type: "string", format: "date" },
                 age: { type: "integer" },
-                gender: { type: "string", enum: ["MALE", "FEMALE"] },
+                gender: { type: "string", enum: ["male", "female"] },
                 active: { type: "boolean" },
-                rankId: { type: "string" },
+                rankId: { type: "string", format: "uuid" },
+                stageId: { type: "string", format: "uuid" },
                 type: { type: "string", enum: ["online", "onsite"] },
-                timezone: { type: "string" }
+                timezone: { type: "string" },
+                regenerateQr: { type: "boolean", example: false, description: "Regenerate QR token" },
+                qrActive: { type: "boolean", example: true, description: "Activate/Deactivate QR code" }
               }
             }
           }

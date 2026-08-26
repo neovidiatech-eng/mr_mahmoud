@@ -10,13 +10,15 @@ export const authPaths = {
           "multipart/form-data": {
             schema: {
               type: "object",
-              required: ["name", "email", "password", "codeCountry", "phone", "gender", "country", "plan_id"],
+              required: ["name", "email", "password", "codeCountry", "phone", "gender", "country", "plan_id", "stageId"],
               properties: {
                 name: { type: "string", example: "Ahmed Ali" },
                 email: { type: "string", format: "email", example: "ahmed@example.com" },
                 password: { type: "string", format: "password", example: "Password123!" },
+                stageId: { type: "string", format: "uuid", example: "45f94b32-9c16-43b3-8d07-c5ef547781b1", description: "Educational Stage ID" },
                 codeCountry: { type: "string", example: "+20" },
                 phone: { type: "string", example: "1000000000" },
+                parentNumber: { type: "string", example: "1000000002", description: "Parent phone number (optional)" },
                 gender: { type: "string", enum: ["male", "female"], example: "male" },
                 country: { type: "string", example: "Egypt" },
                 plan_id: { type: "string", example: "60d5ec49f1b2c80015f8e4a1" },
@@ -30,14 +32,16 @@ export const authPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name", "email", "password", "codeCountry", "phone", "gender", "country", "plan_id"],
+              required: ["name", "email", "password", "codeCountry", "phone", "gender", "country", "plan_id", "stageId"],
               properties: {
                 name: { type: "string", example: "Ahmed Ali" },
                 email: { type: "string", format: "email", example: "ahmed@example.com" },
                 password: { type: "string", format: "password", example: "Password123!" },
+                stageId: { type: "string", format: "uuid", example: "45f94b32-9c16-43b3-8d07-c5ef547781b1", description: "Educational Stage ID" },
                 codeCountry: { type: "string", example: "+20" },
                 phone: { type: "string", example: "1000000000" },
-                gender: { type: "string", enum: ["MALE", "FEMALE"], example: "MALE" },
+                parentNumber: { type: "string", example: "1000000002", description: "Parent phone number (optional)" },
+                gender: { type: "string", enum: ["male", "female"], example: "male" },
                 country: { type: "string", example: "Egypt" },
                 plan_id: { type: "string", example: "60d5ec49f1b2c80015f8e4a1" },
                 age: { type: "integer", example: 17 },

@@ -36,13 +36,16 @@ export const register = asyncHandler(async (req, res, next) => {
     birth_date,
     gender,
     country,
+    parentNumber,
     timezone,
+    stageId
   } = req.body;
 
   // 1. Initial validations (Check existence outside transaction to keep it short)
-  const [checkUserByEmail, settings] = await Promise.all([
+  const [checkUserByEmail, settings, existStadge] = await Promise.all([
     db.findFirst({ model: "user", where: { email } }),
     db.findFirst({ model: "settings" }),
+    db.findFirst({ model: "stage", where: { id: stageId } }),
   ]);
   const image_path = req.file?.finalPath || req.file?.path;
 
@@ -50,6 +53,10 @@ export const register = asyncHandler(async (req, res, next) => {
     model: "role",
     where: { name: "student" },
   });
+
+  if (!existStadge) {
+    return errorResponse({ req, next, message: "STAGE_NOT_FOUND", status: 404 });
+  }
 
   if (!userRole) {
     return errorResponse({ req, next, message: "ROLE_NOT_FOUND", status: 404 });
@@ -81,6 +88,7 @@ export const register = asyncHandler(async (req, res, next) => {
   // 2. Preparation (Hashing, Encryption, OTP)
   const hashedPassword = encryptText({ password });
   const encryptedPhone = encryptText({ text: phone });
+  const encryptedParentNumber = encryptText({ text: parentNumber });
   const otp = /* generateOtp(); */"225566"
   const hashedOtp = await hash({ password: otp });
 
@@ -92,13 +100,13 @@ export const register = asyncHandler(async (req, res, next) => {
   // 4. Send Verification Email
   const mailResult = await sendEmail({ email, otp, lang: req.lang });
 
-/*   if (!mailResult.success) {
-    const errorMsg =
-      mailResult.code === "ETIMEDOUT"
-        ? "EMAIL_SERVICE_TIMEOUT"
-        : "EMAIL_SEND_FAILED";
-    return errorResponse({ req, next, message: errorMsg, status: 500 });
-  } */
+  /*   if (!mailResult.success) {
+      const errorMsg =
+        mailResult.code === "ETIMEDOUT"
+          ? "EMAIL_SERVICE_TIMEOUT"
+          : "EMAIL_SEND_FAILED";
+      return errorResponse({ req, next, message: errorMsg, status: 500 });
+    } */
 
   // 5. Transactional Database Operations
   await db.transaction(async (tx) => {
@@ -135,6 +143,8 @@ export const register = asyncHandler(async (req, res, next) => {
         country,
         timezone: req.timezone || DEFAULT_TIMEZONE,
         user_id: user.id,
+        stadgeId: existStadge.id,
+        parentNumber: encryptedParentNumber || null,
       }),
     );
     await redis.expire(`${email}_Student_data`, 60 * 60 * 24);

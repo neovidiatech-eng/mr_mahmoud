@@ -35,6 +35,7 @@ import postsRouter from "./Modules/Posts/posts.routes.js";
 
 import attendanceRouter from "./Modules/Attendance/attendance.routes.js";
 import quizRouter from "./Modules/quiz/quiz.routes.js";
+import offlineGroupsRouter from "./Modules/OfflineGroups/offline.routes.js";
 
 import { ROLES, ADMIN_ROLES } from "./Utils/Permissions/permissions.js";
 
@@ -80,6 +81,7 @@ rootRouter.use("/settings", settingsRouter);
 rootRouter.use("/course-purchase-requests", authentication, coursePurchaseRequestsRouter);
 rootRouter.use("/subscription", subscriptionRouter);
 rootRouter.use("/attendance", authentication, attendanceRouter);
+rootRouter.use("/offline-groups", offlineGroupsRouter);
 
 // Root health check
 rootRouter.get("/", (req, res) => {

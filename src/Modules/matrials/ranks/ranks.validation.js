@@ -23,8 +23,7 @@ export const createRank = {
         "any.required": "AGE_RANGE_REQUIRED",
       })
       .required(),
-    stageName_ar: joi.string().max(64).allow("").optional(),
-    stageName_en: joi.string().max(64).allow("").optional(),
+    
   }),
 };
 
@@ -44,8 +43,6 @@ export const updateRank = {
       })
       .optional(),
     ageRange: generalFields.ageRange.optional(),
-    stageName_ar: joi.string().max(64).allow("").optional(),
-    stageName_en: joi.string().max(64).allow("").optional(),
   }),
   params: joi.object({
     id: generalFields.id.required(),

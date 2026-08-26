@@ -21,10 +21,14 @@ export const coursePurchaseRequestsPaths = {
           "multipart/form-data": {
             schema: {
               type: "object",
+              required: ["name", "phone", "email"],
               properties: {
-                courseId: { type: "string", description: "Single course ID" },
-                courseIds: { type: "array", items: { type: "string" }, description: "Array of course IDs for cart purchases" },
-                parentPhone: { type: "string", example: "01000000000", description: "Parent phone number (optional)" },
+                name: { type: "string", example: "Ahmed Ali", description: "Purchaser name" },
+                phone: { type: "string", example: "01000000000", description: "Purchaser phone number" },
+                email: { type: "string", format: "email", example: "ahmed@example.com", description: "Purchaser email address" },
+                courseId: { type: "string", format: "uuid", description: "Single course ID" },
+                courseIds: { type: "array", items: { type: "string", format: "uuid" }, description: "Array of course IDs for cart purchases" },
+                parentPhone: { type: "string", example: "01100000000", description: "Parent phone number (optional)" },
                 notes: { type: "string", description: "Additional notes" },
                 image: { type: "string", format: "binary", description: "Payment receipt proof image (optional)" }
               }
@@ -33,10 +37,14 @@ export const coursePurchaseRequestsPaths = {
           "application/json": {
             schema: {
               type: "object",
+              required: ["name", "phone", "email"],
               properties: {
-                courseId: { type: "string" },
-                courseIds: { type: "array", items: { type: "string" } },
-                parentPhone: { type: "string" },
+                name: { type: "string", example: "Ahmed Ali", description: "Purchaser name" },
+                phone: { type: "string", example: "01000000000", description: "Purchaser phone number" },
+                email: { type: "string", format: "email", example: "ahmed@example.com", description: "Purchaser email address" },
+                courseId: { type: "string", format: "uuid" },
+                courseIds: { type: "array", items: { type: "string", format: "uuid" } },
+                parentPhone: { type: "string", example: "01100000000" },
                 notes: { type: "string" }
               }
             }

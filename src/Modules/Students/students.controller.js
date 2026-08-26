@@ -108,6 +108,14 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
           },
         },
         plan: true,
+        parentNumber:true,
+
+        stage: {
+      select: {
+        id: true,
+        name_ar: true,
+        name_en: true,
+        slug: true,
         rank: {
           select: {
             id: true,
@@ -116,6 +124,9 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
           },
         },
       },
+    },
+        
+      },
     });
   const studentsData = await Promise.all(
     students.map(async (student) => {
@@ -123,7 +134,7 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
       const decryptedPassword = student.user.password
         ? await decryptText({ text: student.user.password })
         : undefined;
-      const parentNumber = student.user.parentNumber ? await decryptText({ text: student.user.parentNumber }) : undefined
+      const parentNumber = student.parentNumber ? await decryptText({ text: student.parentNumber }) : undefined
       return {
         ...student,
         user: {
@@ -164,6 +175,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     gender,
     active,
     rankId,
+    stageId,
     startingCourseId,
     startingLectureId,
     type,
@@ -279,6 +291,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         sessions_attended: 0,
         sessions_remaining: checkPlan.sessionsCount,
         rank: { connect: { id: effectiveRankId } },
+        stage: { connect: { id: stageId } },
         ...(qrToken && { qrToken, qrActive: true }),
         type,
 
@@ -351,9 +364,9 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         text: createdStudent.user.password,
       });
     }
-    if (createdStudent.user.parentNumber) {
-      createdStudent.user.parentNumber = await decryptText({
-        text: createdStudent.user.parentNumber,
+    if (createdStudent.parentNumber) {
+      createdStudent.parentNumber = await decryptText({
+        text: createdStudent.parentNumber,
       });
     }
   }
@@ -387,9 +400,9 @@ export const getStudentById = asyncHandler(async (req, res, next) => {
   if (student.user.phone) {
     student.user.phone = await decryptText({ text: student.user.phone });
   }
-  if (student.user.parentNumber) {
-    student.user.parentNumber = await decryptText({
-      text: student.user.parentNumber,
+  if (student.parentNumber) {
+    student.parentNumber = await decryptText({
+      text: student.parentNumber,
     });
   }
   if (student.user.password) {
@@ -421,6 +434,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     gender,
     active,
     rankId,
+    stageId,
     timezone,
     type,
     regenerateQr,
@@ -482,6 +496,30 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         status: 404,
       });
   }
+    if (!shouldResolveRank && stageId && stageId !== student.stageId) {
+    const stage = await db.findOne({
+      model: "stage",
+      where: { id: stageId },
+    });
+
+    if (!stage) {
+      return errorResponse({
+        req,
+        next,
+        message: "STAGE_NOT_FOUND",
+        status: 404,
+      });
+    }
+
+    if (stage.rankId !== (rankId || student.rankId)) {
+      return errorResponse({
+        req,
+        next,
+        message: "STAGE_DOES_NOT_BELONG_TO_RANK",
+        status: 400,
+      });
+    }
+  }
 
   if (
     password &&
@@ -524,8 +562,8 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         ...(studentAge !== null ? { age: studentAge } : {}),
         ...(phone && { phone: encryptedPhone }),
         ...(phone_code && { code_country: phone_code }),
-        ...(encryptedParentNumber && { parentNumber: encryptedParentNumber }),
         ...(timezone && { timezone }),
+        ...(stageId && { stage: { connect: { id: stageId } } })
       },
     });
   }
@@ -545,6 +583,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(type && { type }),
       ...(active !== undefined && { active }),
       ...(qrActive !== undefined && { qrActive }),
+      ...(encryptedParentNumber && { parentNumber: encryptedParentNumber }),
       ...(newQrToken && { qrToken: newQrToken, qrActive: true }),
       ...(autoRank
         ? { rank: { connect: { id: autoRank.id } } }
@@ -563,9 +602,9 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       text: updatedStudent.user.password,
     });
   }
-  if (updatedStudent.user.parentNumber) {
-    updatedStudent.user.parentNumber = await decryptText({
-      text: updatedStudent.user.parentNumber,
+  if (updatedStudent.parentNumber) {
+    updatedStudent.parentNumber = await decryptText({
+      text: updatedStudent.parentNumber,
     });
   }
 

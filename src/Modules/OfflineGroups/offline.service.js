@@ -1,16 +1,16 @@
 import crypto from "crypto";
 import * as db from "../../database/dbService.js";
 
-export const createGroup = async ({ rankId, courseIds }) => {
-  const rank = await db.findFirst({
-    model: "ranks",
+export const createGroup = async ({ stageId, courseIds }) => {
+  const stage = await db.findFirst({
+    model: "stage",
     where: {
-      id: rankId,
+      id: stageId,
     },
   });
 
-  if (!rank) {
-    const error = new Error("RANK_NOT_FOUND");
+  if (!stage) {
+    const error = new Error("STAGE_NOT_FOUND");
     error.status = 404;
     error.isMessageKey = true;
     throw error;
@@ -19,7 +19,7 @@ export const createGroup = async ({ rankId, courseIds }) => {
   const existingGroup = await db.findFirst({
     model: "offlineGroup",
     where: {
-      rankId,
+      stageId,
     },
   });
 
@@ -60,7 +60,7 @@ const uniqueCourseIds = [...new Set(courseIds)];
     const group = await tx.create({
       model: "offlineGroup",
       data: {
-        rankId,
+        stageId,
         qrToken,
       },
     });
@@ -79,7 +79,7 @@ const uniqueCourseIds = [...new Set(courseIds)];
         id: group.id,
       },
       include: {
-        rank: true,
+        stage: true,
         courses: {
           include: {
             course: true,
@@ -96,9 +96,9 @@ export const getAllgroups = async ()=>{
         select: {
         id: true,
         qrToken: true,
-        rankId: true,
+        stageId: true,
         createdAt: true,
-        rank: true,
+        stage: true,
          courses: {
              include: {
                  course: true,
@@ -118,8 +118,8 @@ export const getGroup = async ({id})=>{
         where:{id},
         select: {
             id: true,
-            rank: true,
-            rankId: true,
+            stage: true,
+            stageId: true,
             qrToken: true,
             createdAt: true,
             courses: {
@@ -151,7 +151,6 @@ export const deleteGroup = async ({id})=>{
     }
     return await db.deleteOne({model:"offlineGroup",where:{id}})
 }
-
 
 export const updateGroup = async ({ id, courseIds, qrActive }) => {
   const group = await db.findFirst({
@@ -216,7 +215,7 @@ export const updateGroup = async ({ id, courseIds, qrActive }) => {
       model: "offlineGroup",
       where: { id },
       include: {
-        rank: true,
+        stage: true,
         courses: {
           include: {
             course: true,
@@ -226,3 +225,38 @@ export const updateGroup = async ({ id, courseIds, qrActive }) => {
     });
   });
 };
+
+export const scanGroup = async ({qrToken})=>{
+  const group = await db.findOne({
+    model:"offlineGroup",
+    where:{
+      qrToken,
+      qrActive: true
+    },
+    select:{
+      id:true,
+      courses:{
+        include:{
+          course:true
+        }
+      }
+    }
+  })
+  if(!group){
+    const error = new Error("GROUP_NOT_FOUND")
+    error.isMessageKey = true
+    error.status = 404
+    throw error
+  }
+
+  const scannableCourses = group.courses.map(offlineGroupCourse => ({
+    course: {
+      id: offlineGroupCourse.course.id,
+      name_en: offlineGroupCourse.course.name_en,
+      name_ar: offlineGroupCourse.course.name_ar,
+    },
+  }));
+
+  return scannableCourses;
+
+}

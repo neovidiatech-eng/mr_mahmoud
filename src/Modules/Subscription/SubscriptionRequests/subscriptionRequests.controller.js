@@ -223,6 +223,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
             birth_date: new Date(parsedStudentData.birth_date),
           }),
           country: parsedStudentData.country,
+          ...(parsedStudentData.parentNumber && { parentNumber: parsedStudentData.parentNumber }),
           plan: { connect: { id: subscriptionRequest.planId } },
           sessions: subscriptionRequest.plan?.sessionsCount || 0,
           sessions_remaining: subscriptionRequest.plan?.sessionsCount || 0,
