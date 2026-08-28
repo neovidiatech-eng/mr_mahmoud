@@ -19,7 +19,7 @@ export const postsPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               required: ["type", "title_ar", "content_ar"],
@@ -31,7 +31,7 @@ export const postsPaths = {
                 excerpt_en: { type: "string", example: "Short article excerpt" },
                 content_ar: { type: "string", example: "محتوى المقال التفصيلي..." },
                 content_en: { type: "string", example: "Detailed article content..." },
-                coverImage: { type: "string", example: "https://example.com/cover.jpg" },
+                coverImage: { type: "string", format: "binary", description: "Cover image file" },
                 published: { type: "boolean", default: true }
               }
             }
@@ -71,7 +71,7 @@ export const postsPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               properties: {
@@ -82,7 +82,7 @@ export const postsPaths = {
                 excerpt_en: { type: "string" },
                 content_ar: { type: "string" },
                 content_en: { type: "string" },
-                coverImage: { type: "string" },
+                coverImage: { type: "string", format: "binary" },
                 published: { type: "boolean" }
               }
             }

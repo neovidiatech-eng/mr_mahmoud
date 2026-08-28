@@ -94,7 +94,8 @@ export const getPostById = async ({ req }) => {
 };
 
 export const createPost = async ({ req }) => {
-  const { type, title_ar, title_en, excerpt_ar, excerpt_en, content_ar, content_en, coverImage, published } = req.body;
+  const { type, title_ar, title_en, excerpt_ar, excerpt_en, content_ar, content_en, published } = req.body;
+  const coverImage = req.file?.finalPath || req.file?.path || req.body.coverImage || null;
 
   const slug = await ensureUniqueSlug(title_ar);
 
@@ -119,7 +120,8 @@ export const createPost = async ({ req }) => {
 
 export const updatePost = async ({ req }) => {
   const { id } = req.params;
-  const { type, title_ar, title_en, excerpt_ar, excerpt_en, content_ar, content_en, coverImage, published } = req.body;
+  const { type, title_ar, title_en, excerpt_ar, excerpt_en, content_ar, content_en, published } = req.body;
+  const coverImage = req.file?.finalPath || req.file?.path || req.body.coverImage;
 
   const post = await db.findOne({ model: "post", where: { id } });
   if (!post) throwError("POST_NOT_FOUND", 404);

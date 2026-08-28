@@ -7,7 +7,7 @@ import * as db from "../../database/dbService.js";
 import { ensureExists } from "../../database/genericService.js";
 import { decryptText, hash, encryptText } from "../../Utils/Security/index.js";
 import { DEFAULT_TIMEZONE } from "../../Utils/Date/time.js";
-import { findRankByAge, resolveStudentAge } from "../../Utils/Helpers.js";
+import { resolveStudentAge } from "../../Utils/Helpers.js";
 import { nanoid } from "nanoid";
 import crypto from "crypto";
 import { studentTypes } from "../../Utils/Enums/studentTypes.js";
@@ -196,8 +196,6 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       db.findFirst({ model: "settings" }),
     ]);
 
-  const rank = await findRankByAge({ age: studentAge });
-
   if (checkUserByEmail)
     return errorResponse({
       req,
@@ -209,15 +207,25 @@ export const createStudent = asyncHandler(async (req, res, next) => {
   if (!checkPlan)
     return errorResponse({ req, next, message: "PLAN_NOT_FOUND", status: 404 });
 
+  let targetRankId = rankId;
+  if (!targetRankId && stageId) {
+    const stage = await db.findOne({ model: "stage", where: { id: stageId } });
+    if (stage) targetRankId = stage.rankId;
+  }
+
+  const rank = targetRankId
+    ? await db.findOne({ model: "ranks", where: { id: targetRankId } })
+    : null;
+
   if (!rank)
     return errorResponse({
       req,
       next,
-      message: "AGE_RANK_NOT_FOUND",
-      status: 400,
+      message: "RANK_NOT_FOUND",
+      status: 404,
     });
 
-  const effectiveRankId = rankId || rank.id;
+  const effectiveRankId = rank.id;
   const completedLectureIds = await getStartingPointLectureIds({
     rankId: effectiveRankId,
     startingCourseId,
@@ -253,6 +261,8 @@ export const createStudent = asyncHandler(async (req, res, next) => {
 
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
     const encryptedParentNumber = parentNumber ? encryptText({ text: parentNumber }) : undefined;
+    const image_path = req.file?.finalPath || req.file?.path || req.body.image;
+
     const user = await tx.create({
       model: "user",
       data: {
@@ -267,8 +277,8 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         gender,
         age: studentAge,
         timezone: userTimezone,
+        ...(image_path && { image: image_path }),
         ...(studentRole && { roleId: studentRole.id }),
-
       },
     });
     let qrToken;
@@ -469,24 +479,12 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       });
   }
 
-  const shouldResolveRank = age !== undefined || birth_date;
-  const studentAge = shouldResolveRank
+  const shouldCalculateAge = age !== undefined || birth_date;
+  const studentAge = shouldCalculateAge
     ? resolveStudentAge({ age, birthDate: birth_date })
     : null;
-  const autoRank = shouldResolveRank
-    ? await findRankByAge({ age: studentAge })
-    : null;
 
-  if (shouldResolveRank && !autoRank) {
-    return errorResponse({
-      req,
-      next,
-      message: "AGE_RANK_NOT_FOUND",
-      status: 400,
-    });
-  }
-
-  if (!shouldResolveRank && rankId && rankId !== student.rankId) {
+  if (rankId && rankId !== student.rankId) {
     const rank = await db.findOne({ model: "ranks", where: { id: rankId } });
     if (!rank)
       return errorResponse({
@@ -496,7 +494,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         status: 404,
       });
   }
-    if (!shouldResolveRank && stageId && stageId !== student.stageId) {
+  if (stageId && stageId !== student.stageId) {
     const stage = await db.findOne({
       model: "stage",
       where: { id: stageId },
@@ -536,6 +534,8 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
 
   const hashedPassword = password ? encryptText({ text: password }) : undefined;
 
+  const image_path = req.file?.finalPath || req.file?.path || req.body.image;
+
   // Update user record if needed
   if (
     name ||
@@ -547,7 +547,8 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     birth_date ||
     age ||
     gender ||
-    timezone
+    timezone ||
+    image_path
   ) {
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
     const encryptedParentNumber = parentNumber ? encryptText({ text: parentNumber }) : undefined;
@@ -562,6 +563,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         ...(studentAge !== null ? { age: studentAge } : {}),
         ...(phone && { phone: encryptedPhone }),
         ...(phone_code && { code_country: phone_code }),
+        ...(image_path && { image: image_path }),
         ...(timezone && { timezone }),
         ...(stageId && { stage: { connect: { id: stageId } } })
       },

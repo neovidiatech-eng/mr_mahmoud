@@ -6,8 +6,12 @@ import { isAdmin } from "../../../Utils/Permissions/permissions.js";
    CREATE LECTURE
 ----------------------------- */
 export const createLecture = async ({ req, res, next }) => {
-  const { courseId, title_ar, title_en, content_ar, content_en, videoUrl, pdfUrl, slidesUrl, duration, date } = req.body;
+  const { courseId, title_ar, title_en, content_ar, content_en, duration, date } = req.body;
   let { order } = req.body;
+
+  const video_path = req.files?.video?.[0]?.finalPath || req.files?.video?.[0]?.path || req.body.video_path || req.body.videoUrl || null;
+  const slides_path = req.files?.slides?.[0]?.finalPath || req.files?.slides?.[0]?.path || req.body.slides_path || req.body.slidesUrl || null;
+  const pdf_path = req.files?.pdf?.[0]?.finalPath || req.files?.pdf?.[0]?.path || req.body.pdf_path || req.body.pdfUrl || null;
 
   if (!courseId) {
     const error = createError({
@@ -31,24 +35,6 @@ export const createLecture = async ({ req, res, next }) => {
   if (!content_ar) {
     const error = createError({
       message: "DESCRIPTION_REQUIRED",
-      status: 400,
-      next,
-    });
-    throw error;
-  }
-
-  if (!videoUrl) {
-    const error = createError({
-      message: "LINK_REQUIRED",
-      status: 400,
-      next,
-    });
-    throw error;
-  }
-
-  if (!pdfUrl && !videoUrl && !slidesUrl) {
-    const error = createError({
-      message: "LINK_REQUIRED",
       status: 400,
       next,
     });
@@ -88,10 +74,10 @@ export const createLecture = async ({ req, res, next }) => {
       ...(title_en !== undefined && { title_en }),
       content_ar,
       ...(content_en !== undefined && { content_en }),
-      videoUrl,
+      video_path,
+      slides_path,
+      pdf_path,
       order: parseInt(order),
-      pdfUrl,
-      slidesUrl,
       duration,
       date,
     },
@@ -216,23 +202,28 @@ const resolveLectureAccess = async (lecture, requestingUser) => {
 ----------------------------- */
 export const updateLecture = async ({ req, res, next }) => {
   const { id } = req.params;
-  const { courseId, title_ar, title_en, content_ar, content_en, videoUrl, order, pdfUrl, slidesUrl, duration, date } = req.body;
+  const { courseId, title_ar, title_en, content_ar, content_en, order, duration, date } = req.body;
   const lecture = await db.findFirst({
     model: "lectures",
     where: { id },
   });
+
+  const video_path = req.files?.video?.[0]?.finalPath || req.files?.video?.[0]?.path || req.body.video_path || req.body.videoUrl;
+  const slides_path = req.files?.slides?.[0]?.finalPath || req.files?.slides?.[0]?.path || req.body.slides_path || req.body.slidesUrl;
+  const pdf_path = req.files?.pdf?.[0]?.finalPath || req.files?.pdf?.[0]?.path || req.body.pdf_path || req.body.pdfUrl;
+
   const data = {
     courseId,
     title_ar,
     title_en,
     content_ar,
     content_en,
-    videoUrl,
     order,
-    pdfUrl,
-    slidesUrl,
     duration,
     date,
+    video_path,
+    slides_path,
+    pdf_path,
   };
   const filteredData = Object.fromEntries(
     Object.entries(data).filter(([_, value]) => value !== undefined),

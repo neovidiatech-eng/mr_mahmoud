@@ -20,7 +20,7 @@ export const requestsPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               required: ["type", "reason"],
@@ -45,6 +45,11 @@ export const requestsPaths = {
                 sessionId: { type: "string" },
                 priority: { type: "string", enum: ["low", "medium", "high"], default: "medium" },
                 title: { type: "string" },
+                attachments: {
+                  type: "array",
+                  items: { type: "string", format: "binary" },
+                  description: "Attachment files"
+                },
                 requestedData: {
                   type: "object",
                   properties: {

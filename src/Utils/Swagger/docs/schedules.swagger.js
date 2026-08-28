@@ -42,7 +42,7 @@ export const schedulesPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               required: ["platform", "teacherId", "courseId", "title", "link", "start_time", "type", "notification_Time"],
@@ -58,13 +58,14 @@ export const schedulesPaths = {
                 start_time: { type: "string", format: "date-time" },
                 type: { type: "string", example: "individual" },
                 language: { type: "string", enum: ["en", "ar", "fr"], default: "en" },
-                videoUrl: { type: "string" },
-                slidesUrl: { type: "string" },
                 notification_Time: { type: "string", example: "15m" },
                 studentId: { type: "string" },
                 studentIds: { type: "array", items: { type: "string" } },
                 isGroup: { type: "boolean", default: false },
-                maxStudents: { type: "string", default: "1" }
+                maxStudents: { type: "string", default: "1" },
+                video: { type: "string", format: "binary", description: "Session video file" },
+                slides: { type: "string", format: "binary", description: "Session slides file" },
+                pdf: { type: "string", format: "binary", description: "Session PDF file" }
               }
             }
           }
@@ -81,7 +82,7 @@ export const schedulesPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               required: ["teacherId", "courseId", "link", "startTime", "days", "startDate", "endDate", "notification_Time"],
@@ -106,11 +107,13 @@ export const schedulesPaths = {
                 endDate: { type: "string", format: "date" },
                 notification_Time: { type: "string", example: "15m" },
                 language: { type: "string", enum: ["en", "ar", "fr"], default: "en" },
-                videoUrl: { type: "string" },
                 studentId: { type: "string" },
                 studentIds: { type: "array", items: { type: "string" } },
                 isGroup: { type: "boolean", default: false },
-                maxStudents: { type: "string", default: "1" }
+                maxStudents: { type: "string", default: "1" },
+                video: { type: "string", format: "binary" },
+                slides: { type: "string", format: "binary" },
+                pdf: { type: "string", format: "binary" }
               }
             }
           }
@@ -139,7 +142,7 @@ export const schedulesPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               properties: {
@@ -152,10 +155,11 @@ export const schedulesPaths = {
                 start_time: { type: "string", format: "date-time" },
                 type: { type: "string" },
                 language: { type: "string", enum: ["en", "ar", "fr"] },
-                videoUrl: { type: "string" },
-                slidesUrl: { type: "string" },
                 notification_Time: { type: "string" },
-                instractor: { type: "string" }
+                instractor: { type: "string" },
+                video: { type: "string", format: "binary" },
+                slides: { type: "string", format: "binary" },
+                pdf: { type: "string", format: "binary" }
               }
             }
           }

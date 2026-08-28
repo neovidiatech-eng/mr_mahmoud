@@ -27,7 +27,7 @@ export const createStudentSchema = {
     startingCourseId: generalFields.id,
     startingLectureId: generalFields.id,
     type: generalFields.studentType.required(),
-    
+    image: Joi.string().optional().allow("", null),
     timezone: generalFields.timezone, // optional — fallback to default
   })
     .and("startingCourseId", "startingLectureId")
@@ -57,6 +57,7 @@ export const updateStudentSchema = {
       stageId: generalFields.id,
       timezone: generalFields.timezone,
       type: generalFields.studentType,
+      image: Joi.string().optional().allow("", null),
       regenerateQr: Joi.boolean(),
       qrActive: Joi.boolean(),
     })

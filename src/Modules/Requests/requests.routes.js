@@ -7,8 +7,15 @@ import * as requestsController from "./requests.controller.js";
 import * as schema from "./requests.validation.js";
 import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
+import { fileValidation, localMulterUpload } from "../../Utils/Multer/local.multer.js";
+
 const router = Router();
 const requestsResource = "requests";
+
+const attachmentsUploader = localMulterUpload({
+  customPath: "requests/attachments",
+  validation: [...fileValidation.image, ...fileValidation.pdf],
+}).array("attachments");
 
 router.use(authentication);
 
@@ -26,6 +33,7 @@ router.get(
 
 router.post(
   "/",
+  attachmentsUploader,
   authorize(PERMISSIONS_V2.REQUESTS.CREATE),
   validation(schema.createRequest),
   requestsController.createRequest,

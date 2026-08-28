@@ -7,12 +7,18 @@ import { authorize } from "../../../Middlewares/Authorize.js";
 import * as schema from "./ranks.validation.js";
 import { PERMISSIONS_V2 } from "../../../Constants/permissions.constants.js";
 
+import { fileValidation, localMulterUpload } from "../../../Utils/Multer/local.multer.js";
+
 const router = Router();
 const ranksResource = "ranks";
 
+const iconUploader = localMulterUpload({
+  customPath: "ranks",
+  validation: fileValidation.image,
+}).single("icon");
+
 router.get(
   "/",
-  
   controller.getRanks,
 );
 
@@ -27,6 +33,7 @@ router.get(
 router.post(
   "/create",
   authentication,
+  iconUploader,
   authorizeResource(ranksResource),
   validation(schema.createRank),
   controller.addRank,
@@ -35,6 +42,7 @@ router.post(
 router.patch(
   "/:id",
   authentication,
+  iconUploader,
   authorizeResource(ranksResource),
   validation(schema.updateRank),
   controller.updateRank,

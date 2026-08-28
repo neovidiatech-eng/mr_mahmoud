@@ -21,7 +21,7 @@ export const studentsPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               required: ["name", "email", "password", "phone", "phone_code", "parentNumber", "country", "planId", "gender", "active", "type"],
@@ -43,7 +43,8 @@ export const studentsPaths = {
                 startingCourseId: { type: "string", format: "uuid" },
                 startingLectureId: { type: "string", format: "uuid" },
                 type: { type: "string", enum: ["online", "onsite"], default: "online", example: "online" },
-                timezone: { type: "string", example: "Africa/Cairo" }
+                timezone: { type: "string", example: "Africa/Cairo" },
+                image: { type: "string", format: "binary", description: "Profile picture image file" }
               }
             }
           }
@@ -83,7 +84,7 @@ export const studentsPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               properties: {
@@ -103,6 +104,7 @@ export const studentsPaths = {
                 stageId: { type: "string", format: "uuid" },
                 type: { type: "string", enum: ["online", "onsite"] },
                 timezone: { type: "string" },
+                image: { type: "string", format: "binary", description: "Profile picture image file" },
                 regenerateQr: { type: "boolean", example: false, description: "Regenerate QR token" },
                 qrActive: { type: "boolean", example: true, description: "Activate/Deactivate QR code" }
               }

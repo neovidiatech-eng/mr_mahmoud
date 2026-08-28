@@ -18,12 +18,7 @@ export const createRank = {
         "string.base": "COLOR_STRING",
       })
       .required(),
-    ageRange: generalFields.ageRange
-      .messages({
-        "any.required": "AGE_RANGE_REQUIRED",
-      })
-      .required(),
-    
+    icon: joi.string().optional().allow("", null),
   }),
 };
 
@@ -42,7 +37,7 @@ export const updateRank = {
         "string.base": "COLOR_STRING",
       })
       .optional(),
-    ageRange: generalFields.ageRange.optional(),
+    icon: joi.string().optional().allow("", null),
   }),
   params: joi.object({
     id: generalFields.id.required(),

@@ -117,22 +117,22 @@ export const materialsPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
-              required: ["title_ar", "content_ar", "videoUrl", "slidesUrl", "pdfUrl", "order", "courseId"],
+              required: ["title_ar", "content_ar", "courseId"],
               properties: {
                 title_ar: { type: "string", example: "المحاضرة الأولى: قوانين نيوتن" },
                 title_en: { type: "string", example: "Lecture 1: Newton's Laws" },
                 content_ar: { type: "string", example: "شرح كامل لقوانين نيوتن للحركة" },
                 content_en: { type: "string", example: "Full explanation of Newton's laws of motion" },
-                videoUrl: { type: "string", example: "https://vimeo.com/123456" },
-                slidesUrl: { type: "string", example: "https://example.com/slides.pdf" },
-                pdfUrl: { type: "string", example: "https://example.com/notes.pdf" },
-                order: { type: "number", example: 1 },
                 courseId: { type: "string" },
+                order: { type: "number", example: 1 },
                 duration: { type: "string", example: "01:00:00" },
-                date: { type: "string", format: "date-time" }
+                date: { type: "string", format: "date-time" },
+                video: { type: "string", format: "binary", description: "Lecture video file" },
+                slides: { type: "string", format: "binary", description: "Lecture slides file" },
+                pdf: { type: "string", format: "binary", description: "Lecture PDF notes file" }
               }
             }
           }
@@ -160,7 +160,7 @@ export const materialsPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               properties: {
@@ -168,13 +168,13 @@ export const materialsPaths = {
                 title_en: { type: "string" },
                 content_ar: { type: "string" },
                 content_en: { type: "string" },
-                videoUrl: { type: "string" },
-                slidesUrl: { type: "string" },
-                pdfUrl: { type: "string" },
                 order: { type: "number" },
                 courseId: { type: "string" },
                 duration: { type: "string" },
-                date: { type: "string", format: "date-time" }
+                date: { type: "string", format: "date-time" },
+                video: { type: "string", format: "binary" },
+                slides: { type: "string", format: "binary" },
+                pdf: { type: "string", format: "binary" }
               }
             }
           }
@@ -324,15 +324,15 @@ export const materialsPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
-              required: ["name_ar", "color", "ageRange"],
+              required: ["name_ar", "color"],
               properties: {
                 name_ar: { type: "string", example: "الصف الثالث الثانوي" },
                 name_en: { type: "string", example: "Grade 12 Senior" },
                 color: { type: "string", example: "#3357FF" },
-                ageRange: { type: "string", example: "17-18" }
+                icon: { type: "string", format: "binary", description: "Rank icon image" }
               }
             }
           }
@@ -361,14 +361,14 @@ export const materialsPaths = {
       requestBody: {
         required: true,
         content: {
-          "application/json": {
+          "multipart/form-data": {
             schema: {
               type: "object",
               properties: {
                 name_ar: { type: "string" },
                 name_en: { type: "string" },
                 color: { type: "string" },
-                ageRange: { type: "string" }
+                icon: { type: "string", format: "binary" }
               }
             }
           }
