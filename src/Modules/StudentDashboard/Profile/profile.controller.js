@@ -11,7 +11,6 @@ import {
 import * as db from "../../../database/dbService.js";
 import {
   createError,
-  findRankByAge,
   resolveStudentAge,
 } from "../../../Utils/Helpers.js";
 import { studentTypes } from "../../../Utils/Enums/index.js";
@@ -227,22 +226,10 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
 
   const hashedPassword = password ? await hash({ password }) : undefined;
   const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
-  const shouldResolveRank = age !== undefined || birth_date;
-  const studentAge = shouldResolveRank
+  const shouldCalculateAge = age !== undefined || birth_date;
+  const studentAge = shouldCalculateAge
     ? resolveStudentAge({ age, birthDate: birth_date })
     : null;
-  const autoRank = shouldResolveRank
-    ? await findRankByAge({ age: studentAge })
-    : null;
-
-  if (shouldResolveRank && !autoRank) {
-    return errorResponse({
-      req,
-      message: "AGE_RANK_NOT_FOUND",
-      next,
-      status: 400,
-    });
-  }
 
   let user_updated = student.user;
   if (
@@ -274,14 +261,13 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
     });
   }
 
-  if (country || birth_date || autoRank) {
+  if (country || birth_date) {
     await db.updateOne({
       model: "student",
       where: { id: student.id },
       data: {
         ...(country && { country }),
         ...(birth_date && { birth_date: new Date(birth_date) }),
-        ...(autoRank && { rank: { connect: { id: autoRank.id } } }),
       },
     });
   }

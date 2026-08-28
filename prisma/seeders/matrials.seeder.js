@@ -14,7 +14,6 @@ export const matrialsData = [
     name: "SILVER",
     slug: "silver",
     color: "#C0C0C0",
-    ageRange: { minAge: 5, maxAge: 10 },
     courses: [
       {
         title: "Introduction to English",
@@ -38,7 +37,6 @@ export const matrialsData = [
     name: "GOLD",
     slug: "gold",
     color: "#FFD700",
-    ageRange: { minAge: 11, maxAge: 15 },
     courses: [
       {
         title: "Intermediate English",
@@ -54,7 +52,6 @@ export const matrialsData = [
     name: "PLATINUM",
     slug: "platinum",
     color: "#E5E4E2",
-    ageRange: { minAge: 16, maxAge: 18 },
     courses: [
       {
         title: "Advanced Science",
@@ -69,7 +66,6 @@ export const matrialsData = [
     name: "TITAN",
     slug: "titan",
     color: "#000080",
-    ageRange: { minAge: 18, maxAge: 99 },
     courses: [
       {
         title: "Data Structures",
@@ -101,14 +97,12 @@ export async function seedMatrials() {
         name_ar: rank.name,
         name_en: rank.name,
         color: rank.color,
-        ageRange: rank.ageRange,
       },
       create: {
         name_ar: rank.name,
         name_en: rank.name,
         slug: rank.slug,
         color: rank.color,
-        ageRange: rank.ageRange,
       },
     });
 

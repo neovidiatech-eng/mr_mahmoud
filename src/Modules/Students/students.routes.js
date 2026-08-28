@@ -8,10 +8,15 @@ import {
   studentIdSchema,
 } from "./students.validation.js";
 import * as studentController from "../Students/students.controller.js";
-import { localMulterUpload } from "../../Utils/Multer/local.multer.js";
+import { fileValidation, localMulterUpload } from "../../Utils/Multer/local.multer.js";
 
 const router = Router();
 const studentResource = "users"; // Students are users
+
+const imageUploader = localMulterUpload({
+  customPath: "users/students",
+  fileValidation: fileValidation.image,
+}).single("image");
 
 router.use(authentication);
 
@@ -19,6 +24,7 @@ router.get("/", authorizeResource(studentResource), studentController.getAllStud
 
 router.post(
   "/create",
+  imageUploader,
   authorizeResource(studentResource),
   validation(createStudentSchema),
   studentController.createStudent,
@@ -33,6 +39,7 @@ router.get(
 
 router.patch(
   "/update/:id",
+  imageUploader,
   authorizeResource(studentResource),
   validation(updateStudentSchema),
   studentController.updateStudent,

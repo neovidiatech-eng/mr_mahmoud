@@ -6,7 +6,14 @@ import * as controller from "./posts.controller.js";
 import * as schema from "./posts.validation.js";
 import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
+import { fileValidation, localMulterUpload } from "../../Utils/Multer/local.multer.js";
+
 const router = Router();
+
+const coverUploader = localMulterUpload({
+  customPath: "posts/covers",
+  validation: fileValidation.image,
+}).single("coverImage");
 
 // ─── Public routes (website: blog/news listing + article page) ─────────────
 router.get("/", validation(schema.getPostsSchema), controller.getPosts);
@@ -24,6 +31,7 @@ router.get(
 router.post(
   "/",
   authentication,
+  coverUploader,
   authorize(PERMISSIONS_V2.BLOG.MANAGE),
   validation(schema.createPostSchema),
   controller.createPost,
@@ -32,6 +40,7 @@ router.post(
 router.patch(
   "/:id",
   authentication,
+  coverUploader,
   authorize(PERMISSIONS_V2.BLOG.MANAGE),
   validation(schema.updatePostSchema),
   controller.updatePost,

@@ -25,7 +25,7 @@ export const createPostSchema = {
       "any.required": "CONTENT_REQUIRED",
     }).required(),
     content_en: Joi.string().min(1).allow("").optional(),
-    coverImage: generalFields.url.optional().allow(null, ""),
+    coverImage: Joi.string().optional().allow(null, ""),
     published: Joi.boolean().optional(),
   }).required(),
 };
@@ -45,7 +45,7 @@ export const updatePostSchema = {
       "string.empty": "CONTENT_REQUIRED",
     }),
     content_en: Joi.string().min(1).allow("").optional(),
-    coverImage: generalFields.url.optional().allow(null, ""),
+    coverImage: Joi.string().optional().allow(null, ""),
     published: Joi.boolean().optional(),
   }).required(),
   params: Joi.object({

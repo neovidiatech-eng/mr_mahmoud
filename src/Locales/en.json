@@ -417,7 +417,6 @@
   "MAX_AGE_NUMBER": "Maximum age must be a number",
   "MAX_AGE_POSITIVE": "Maximum age must be a positive number",
   "MAX_AGE_REQUIRED": "Maximum age is required",
-  "AGE_RANGE_REQUIRED": "Age range is required",
   "WELCOME_MESSAGE": "Welcome to the API",
   "POST_NOT_FOUND": "Post not found",
   "SLUG_EXISTS": "A post with this slug already exists",

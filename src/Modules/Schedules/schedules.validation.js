@@ -68,8 +68,12 @@ export const createSchedule = {
         .required(),
       type: generalFields.type.required(),
       language: Joi.string().valid("en", "ar", "fr").default("en"),
-      videoUrl: Joi.string().uri().allow(null, ""),
-      slidesUrl: Joi.string().uri().allow(null, ""),
+      videoUrl: Joi.string().allow(null, ""),
+      slidesUrl: Joi.string().allow(null, ""),
+      pdfUrl: Joi.string().allow(null, ""),
+      video_path: Joi.string().allow(null, ""),
+      slides_path: Joi.string().allow(null, ""),
+      pdf_path: Joi.string().allow(null, ""),
       notification_Time: Joi.string()
         .valid(...Object.values(notificationType))
         .required()
@@ -139,7 +143,12 @@ export const createRecurringSchedule = {
         .valid(...Object.values(notificationType))
         .required(),
       language: Joi.string().valid("en", "ar", "fr").default("en"),
-      videoUrl: Joi.string().uri().allow(null, ""),
+      videoUrl: Joi.string().allow(null, ""),
+      slidesUrl: Joi.string().allow(null, ""),
+      pdfUrl: Joi.string().allow(null, ""),
+      video_path: Joi.string().allow(null, ""),
+      slides_path: Joi.string().allow(null, ""),
+      pdf_path: Joi.string().allow(null, ""),
     })
     .required(),
 };
@@ -156,8 +165,12 @@ export const updateSchedule = {
       start_time: Joi.date().greater("now"),
       type: generalFields.type,
       language: Joi.string().valid("en", "ar", "fr"),
-      videoUrl: Joi.string().uri().allow(null, ""),
-      slidesUrl: Joi.string().uri().allow(null, ""),
+      videoUrl: Joi.string().allow(null, ""),
+      slidesUrl: Joi.string().allow(null, ""),
+      pdfUrl: Joi.string().allow(null, ""),
+      video_path: Joi.string().allow(null, ""),
+      slides_path: Joi.string().allow(null, ""),
+      pdf_path: Joi.string().allow(null, ""),
       notification_Time: Joi.string().valid(...Object.values(notificationType)),
       instractor:generalFields.id.optional().messages({
         "string.empty": "INSTRACTOR_ID_REQUIRED",

@@ -12,7 +12,6 @@ const lecturesInclude = {
       name_en: true,
       slug: true,
       color: true,
-      ageRange: true,
       stageName_ar: true,
       stageName_en: true,
     },

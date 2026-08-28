@@ -19,34 +19,13 @@ export const createLectureSchema = {
       })
       .required(),
     content_en: generalFields.description.optional().allow(""),
-    videoUrl: generalFields.url
-      .messages({
-        "string.base": "LINK_INVALID",
-        "string.empty": "LINK_INVALID",
-        "any.required": "LINK_REQUIRED",
-      })
-      .required(),
-    slidesUrl: generalFields.url
-      .messages({
-        "string.base": "LINK_INVALID",
-        "string.empty": "LINK_INVALID",
-        "any.required": "LINK_REQUIRED",
-      })
-      .required(),
-    pdfUrl: generalFields.url
-      .messages({
-        "string.base": "LINK_INVALID",
-        "string.empty": "LINK_INVALID",
-        "any.required": "LINK_REQUIRED",
-      })
-      .required(),
-    order: generalFields.number
-      .messages({
-        "number.base": "ORDER_INVALID",
-        "number.empty": "ORDER_REQUIRED",
-        "any.required": "ORDER_REQUIRED",
-      })
-      .required(),
+    videoUrl: Joi.string().allow("", null).optional(),
+    slidesUrl: Joi.string().allow("", null).optional(),
+    pdfUrl: Joi.string().allow("", null).optional(),
+    video_path: Joi.string().allow("", null).optional(),
+    slides_path: Joi.string().allow("", null).optional(),
+    pdf_path: Joi.string().allow("", null).optional(),
+    order: generalFields.number.optional(),
     courseId: generalFields.id.required(),
     duration: Joi.string().optional(),
     date: Joi.date().optional(),
@@ -59,13 +38,16 @@ export const updateLectureSchema = {
     title_en: generalFields.name.optional().allow(""),
     content_ar: generalFields.description,
     content_en: generalFields.description.optional().allow(""),
-    videoUrl: generalFields.url,
+    videoUrl: Joi.string().allow("", null).optional(),
+    slidesUrl: Joi.string().allow("", null).optional(),
+    pdfUrl: Joi.string().allow("", null).optional(),
+    video_path: Joi.string().allow("", null).optional(),
+    slides_path: Joi.string().allow("", null).optional(),
+    pdf_path: Joi.string().allow("", null).optional(),
     order: generalFields.number,
     courseId: generalFields.id,
     duration: Joi.string().optional(),
     date: Joi.date().optional(),
-    pdfUrl: generalFields.url.optional(),
-    slidesUrl: generalFields.url.optional(),
   }).required(),
   params: Joi.object({
     id: generalFields.id.required(),

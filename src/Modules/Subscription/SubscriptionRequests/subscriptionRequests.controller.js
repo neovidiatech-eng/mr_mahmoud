@@ -9,7 +9,6 @@ import { decryptText } from "../../../Utils/Security/index.js";
 import { ensureExists } from "../../../database/genericService.js";
 import {
   convertAmount,
-  findRankByAge,
   resolveStudentAge,
 } from "../../../Utils/Helpers.js";
 
@@ -111,10 +110,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       birthDate: parsedStudentData?.birth_date,
     });
 
-    selectedRank =
-      studentAge !== null ? await findRankByAge({ age: studentAge }) : null;
-
-    if (!selectedRank && rankId) {
+    if (rankId) {
       selectedRank = await ensureExists({
         model: "ranks",
         where: { id: rankId },
@@ -126,11 +122,8 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       return errorResponse({
         next,
         req,
-        message:
-          studentAge === null
-            ? "AGE_OR_BIRTH_DATE_REQUIRED"
-            : "AGE_RANK_NOT_FOUND",
-        status: 400,
+        message: "RANK_NOT_FOUND",
+        status: 404,
       });
     }
   }

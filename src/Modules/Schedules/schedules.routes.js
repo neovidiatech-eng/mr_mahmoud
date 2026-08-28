@@ -6,11 +6,25 @@ import * as schema from "./schedules.validation.js";
 import { authorizeResource } from "../../Middlewares/AuthorizeResource.js";
 import { authorize } from "../../Middlewares/Authorize.js";
 import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
+import { fileValidation, localMulterUpload } from "../../Utils/Multer/local.multer.js";
 
 const router = Router();
 
 // Base Resource: sessions
 const sessionsResource = "sessions";
+
+const sessionFilesUploader = localMulterUpload({
+  customPath: "schedules/materials",
+  validation: [
+    ...fileValidation.video,
+    ...fileValidation.pdf,
+    ...fileValidation.document,
+  ],
+}).fields([
+  { name: "video", maxCount: 1 },
+  { name: "slides", maxCount: 1 },
+  { name: "pdf", maxCount: 1 },
+]);
 
 router.get(
   "/",
@@ -51,6 +65,7 @@ router.get(
 router.post(
   "/create-one",
   authentication,
+  sessionFilesUploader,
   authorize(PERMISSIONS_V2.SESSIONS.CREATE),
   validation(schema.createSchedule),
   scheduleController.createSchedule,
@@ -59,6 +74,7 @@ router.post(
 router.post(
   "/create-recurring",
   authentication,
+  sessionFilesUploader,
   authorize(PERMISSIONS_V2.SESSIONS.CREATE),
   validation(schema.createRecurringSchedule),
   scheduleController.createRecurringSchedule,
@@ -83,6 +99,7 @@ router.delete(
 router.patch(
   "/:id",
   authentication,
+  sessionFilesUploader,
   authorizeResource(sessionsResource),
   validation(schema.updateSchedule),
   scheduleController.updateSchedule,

@@ -328,19 +328,4 @@ export const generalFields = {
     "number.base": "RESCHEDULE_COUNT_NUMBER",
     "number.positive": "RESCHEDULE_COUNT_POSITIVE",
   }),
-
-  ageRange: Joi.object({
-    minAge: Joi.number().positive().messages({
-      "number.base": "MIN_AGE_NUMBER",
-      "number.positive": "MIN_AGE_POSITIVE",
-      "any.required": "MIN_AGE_REQUIRED",
-    }),
-    maxAge: Joi.number().positive().messages({
-      "number.base": "MAX_AGE_NUMBER",
-      "number.positive": "MAX_AGE_POSITIVE",
-      "any.required": "MAX_AGE_REQUIRED",
-    }),
-  }).messages({
-    "any.required": "AGE_RANGE_REQUIRED",
-  }),
 };

@@ -6,10 +6,32 @@ import { authorizeResource } from "../../../Middlewares/AuthorizeResource.js";
 import { authorize } from "../../../Middlewares/Authorize.js";
 import * as lecturesValidation from "./lectures.validation.js";
 import { PERMISSIONS_V2 } from "../../../Constants/permissions.constants.js";
+import {
+  fileValidation,
+  localMulterUpload,
+} from "../../../Utils/Multer/local.multer.js";
 
 const router = Router();
 const lecturesResource = "lectures";
+const uploader = localMulterUpload({
+  customPath: (req) =>
+    req.body?.title_en
+      ? `matrials/lectures/${req.body.title_en
+          .toLowerCase()
+          .replaceAll("@", "_")
+          .replaceAll(".", "_")}`
+      : "matrials/lectures/",
 
+  validation: [
+    ...fileValidation.video,
+    ...fileValidation.pdf,
+    ...fileValidation.document,
+  ],
+}).fields([
+  { name: "video", maxCount: 1 },
+  { name: "slides", maxCount: 1 },
+  { name: "pdf", maxCount: 1 },
+]);
 router.get("/", lecturesController.getAllLectures);
 
 router.get(
@@ -21,6 +43,7 @@ router.get(
 router.post(
   "/",
   authentication,
+  uploader,
   authorizeResource(lecturesResource),
   validation(lecturesValidation.createLectureSchema),
   lecturesController.createLecture,
@@ -29,6 +52,7 @@ router.post(
 router.patch(
   "/:id",
   authentication,
+  uploader,
   authorizeResource(lecturesResource),
   validation(lecturesValidation.updateLectureSchema),
   lecturesController.updateLecture,

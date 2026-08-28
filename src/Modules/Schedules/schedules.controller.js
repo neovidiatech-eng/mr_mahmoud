@@ -403,6 +403,10 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     });
   }
 
+  const video_path = req.files?.video?.[0]?.finalPath || req.files?.video?.[0]?.path || req.body.video_path || req.body.videoUrl || course.lectures[0]?.video_path || null;
+  const slides_path = req.files?.slides?.[0]?.finalPath || req.files?.slides?.[0]?.path || req.body.slides_path || req.body.slidesUrl || course.lectures[0]?.slides_path || null;
+  const pdf_path = req.files?.pdf?.[0]?.finalPath || req.files?.pdf?.[0]?.path || req.body.pdf_path || req.body.pdfUrl || course.lectures[0]?.pdf_path || null;
+
   // Atomically create the schedule and deduct the session
   let newSchedule;
   await db.transaction(async (tx) => {
@@ -424,8 +428,9 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
         end_time: endTime,
         type,
         language,
-        videoUrl: videoUrl || course.lectures[0]?.videoUrl || null,
-        slidesUrl,
+        video_path,
+        slides_path,
+        pdf_path,
         isGroup,
         maxStudents: isGroup ? normalizedMaxStudents : "1",
       },
@@ -654,6 +659,10 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       schedulesToCreate.length % (course.lectures.length || 1);
     const currentLecture = course.lectures[lectureIndex];
 
+    const video_path = req.files?.video?.[0]?.finalPath || req.files?.video?.[0]?.path || req.body.video_path || req.body.videoUrl || currentLecture?.video_path || null;
+    const slides_path = req.files?.slides?.[0]?.finalPath || req.files?.slides?.[0]?.path || req.body.slides_path || req.body.slidesUrl || currentLecture?.slides_path || null;
+    const pdf_path = req.files?.pdf?.[0]?.finalPath || req.files?.pdf?.[0]?.path || req.body.pdf_path || req.body.pdfUrl || currentLecture?.pdf_path || null;
+
     schedulesToCreate.push({
       studentId: isGroup ? null : primaryStudentId,
       order: currentLecture?.order || 0,
@@ -661,7 +670,9 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       title: currentLecture?.title || title,
       description,
       link,
-      pdfUrl: currentLecture?.pdfUrl || null,
+      pdf_path,
+      slides_path,
+      video_path,
       notes,
       start_time,
       end_time,
@@ -674,8 +685,6 @@ export const createRecurringSchedule = asyncHandler(async (req, res, next) => {
       day_of_week: date.toLocaleDateString("en-US", { weekday: "long" }),
       parent_recurring_id: parentRecurringId,
       language,
-      videoUrl: currentLecture?.videoUrl || videoUrl || null,
-      slidesUrl: currentLecture?.slidesUrl || slidesUrl || null,
     });
 
     notificationJobs.push({ start_time, notification_Time });
@@ -1059,7 +1068,16 @@ export const updateSchedule = asyncHandler(async (req, res, next) => {
   let sessionType = schedule.type;
   let scheduleUpdated = false;
 
-  const updateData = { ...otherData };
+  const video_path = req.files?.video?.[0]?.finalPath || req.files?.video?.[0]?.path || req.body.video_path || req.body.videoUrl;
+  const slides_path = req.files?.slides?.[0]?.finalPath || req.files?.slides?.[0]?.path || req.body.slides_path || req.body.slidesUrl;
+  const pdf_path = req.files?.pdf?.[0]?.finalPath || req.files?.pdf?.[0]?.path || req.body.pdf_path || req.body.pdfUrl;
+
+  const updateData = {
+    ...otherData,
+    ...(video_path !== undefined && { video_path }),
+    ...(slides_path !== undefined && { slides_path }),
+    ...(pdf_path !== undefined && { pdf_path }),
+  };
 
   // If time or type changes, recalculate end time and check conflicts
   if (start_time || type) {

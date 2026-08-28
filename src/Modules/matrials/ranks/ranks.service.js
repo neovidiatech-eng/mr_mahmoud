@@ -42,7 +42,8 @@ export const getRanks = async (req, res, next) => {
    ADD RANK
 ----------------------------- */
 export const addRank = async (req, res, next) => {
-  const { name_ar, name_en, color, ageRange } = req.body || {};
+  const { name_ar, name_en, color } = req.body || {};
+  const icon = req.file?.finalPath || req.file?.path || req.body?.icon || null;
   
   const slugSource = name_en || name_ar;
   if (!slugSource) {
@@ -80,8 +81,7 @@ export const addRank = async (req, res, next) => {
       ...(name_en !== undefined && { name_en }),
       slug,
       color,
-      ageRange,
-      
+      icon,
     },
   });
 };
@@ -112,7 +112,7 @@ export const getRank = async (req, res, next) => {
 ----------------------------- */
 export const updateRank = async (req, res, next) => {
   const { id } = req.params;
-  const { name_ar, name_en, color, ageRange } = req.body;
+  const { name_ar, name_en, color } = req.body;
 
   const rank = await db.findFirst({
     model: "ranks",
@@ -197,7 +197,8 @@ export const updateRank = async (req, res, next) => {
   }
 
   if (color) updateData.color = color;
-  if (ageRange) updateData.ageRange = ageRange;
+  const icon = req.file?.finalPath || req.file?.path || req.body?.icon;
+  if (icon !== undefined) updateData.icon = icon;
 
   return await db.updateOne({
     model: "ranks",

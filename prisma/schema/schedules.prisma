@@ -7,10 +7,10 @@ model schedule {
   createdAt           DateTime               @default(now())
   updatedAt           DateTime               @updatedAt
   notes               String?
-  pdfUrl              String?
+  pdf_path            String?
   description         String?
-  videoUrl            String?
-  slidesUrl           String?
+  video_path            String?
+  slides_path           String?
   link                String
   title               String
   platform            String?                @default("zoom")

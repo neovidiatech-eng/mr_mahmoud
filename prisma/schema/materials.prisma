@@ -4,7 +4,7 @@ model ranks {
   name_en           String?
   slug              String              @unique
   color             String?
-  ageRange          Json
+  icon              String? 
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   students          student[]
@@ -116,9 +116,9 @@ model lectures {
   title_en   String?
   content_ar String?
   content_en String?
-  videoUrl   String?
-  pdfUrl     String?
-  slidesUrl  String?
+  video_path   String?
+  pdf_path     String?
+  slides_path  String?
   date       DateTime?
   order      Int
   courseId   String
