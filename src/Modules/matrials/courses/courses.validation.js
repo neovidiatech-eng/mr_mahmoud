@@ -26,6 +26,7 @@ export const createCourseSchema = {
         "any.required": "RANK_ID_REQUIRED",
       })
       .required(),
+    stageId: generalFields.id.optional(),
     categoryId: generalFields.id.optional(),
     price: Joi.number().min(0).optional(),
     keywords: Joi.array().items(Joi.string().max(32)).max(20).optional(),
@@ -35,6 +36,7 @@ export const createCourseSchema = {
 export const getCoursesSchema = {
   query: Joi.object({
     rankId: generalFields.id.optional(),
+    stageId: generalFields.id.allow(null).optional(),
     categoryId: generalFields.id.optional(),
     title: Joi.string().optional(),
     search: generalFields.search.optional(),
@@ -62,6 +64,7 @@ export const updateCourseSchema = {
       "string.base": "RANK_ID_REQUIRED",
       "string.empty": "RANK_ID_REQUIRED",
     }),
+    stageId: generalFields.id.allow(null).optional(),
     categoryId: generalFields.id.optional(),
     price: Joi.number().min(0).optional(),
     keywords: Joi.array().items(Joi.string().max(32)).max(20).optional(),

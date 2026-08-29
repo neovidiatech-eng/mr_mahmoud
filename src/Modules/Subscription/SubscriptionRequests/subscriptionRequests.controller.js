@@ -65,7 +65,7 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
 
 export const changeStatus = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { status, rankId } = req.body;
+  const { status } = req.body;
 
   const subscriptionRequest = await ensureExists({
     model: "subscription_requests",
@@ -103,29 +103,45 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
   }
 
   let studentAge = null;
-  let selectedRank = null;
   if (status === "approved") {
     studentAge = resolveStudentAge({
       age: parsedStudentData?.age,
       birthDate: parsedStudentData?.birth_date,
     });
 
-    if (rankId) {
-      selectedRank = await ensureExists({
-        model: "ranks",
-        where: { id: rankId },
-        message: "RANK_NOT_FOUND",
-      });
-    }
-
-    if (!selectedRank) {
+    if(!parsedStudentData?.rankId){
       return errorResponse({
         next,
         req,
-        message: "RANK_NOT_FOUND",
-        status: 404,
-      });
+        message:"RANK_NOT_FOUND",
+        status:404,
+      })
     }
+
+    if(!parsedStudentData?.stageId){
+      return errorResponse({
+        next,
+        req,
+        message:"STAGE_NOT_FOUND",
+        status:404,
+      })
+    }
+    const selectStage =await ensureExists({
+      model:"stage",
+      where:{
+        id:parsedStudentData.stageId,
+      },
+      message:"STAGE_NOT_FOUND"
+    });
+    if(selectStage.rankId !== parsedStudentData.rankId){
+      return errorResponse({
+        next,
+        req,
+        message:"STAGE_NOT_BELONG_TO_RANK",
+        status:404,
+      })
+    }
+
   }
 
   const studentRole = await db.findFirst({
@@ -222,7 +238,8 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
           sessions_remaining: subscriptionRequest.plan?.sessionsCount || 0,
           status: "approved",
           active: true,
-          rank: { connect: { id: selectedRank.id } },
+          rank: { connect: { id: parsedStudentData.rankId } },
+          stage: { connect: { id: parsedStudentData.stageId } },
         },
       });
 

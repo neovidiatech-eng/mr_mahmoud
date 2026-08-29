@@ -108,8 +108,6 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
           },
         },
         plan: true,
-        parentNumber:true,
-
         stage: {
       select: {
         id: true,
@@ -551,7 +549,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     image_path
   ) {
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
-    const encryptedParentNumber = parentNumber ? encryptText({ text: parentNumber }) : undefined;
+    
     await db.updateOne({
       model: "user",
       where: { id: student.user_id },
@@ -565,10 +563,10 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         ...(phone_code && { code_country: phone_code }),
         ...(image_path && { image: image_path }),
         ...(timezone && { timezone }),
-        ...(stageId && { stage: { connect: { id: stageId } } })
       },
     });
   }
+  const encryptedParentNumber = parentNumber ? encryptText({ text: parentNumber }) : undefined;
 
   let newQrToken;
   if (regenerateQr || (type === "onsite" && !student.qrToken)) {
@@ -587,11 +585,8 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(qrActive !== undefined && { qrActive }),
       ...(encryptedParentNumber && { parentNumber: encryptedParentNumber }),
       ...(newQrToken && { qrToken: newQrToken, qrActive: true }),
-      ...(autoRank
-        ? { rank: { connect: { id: autoRank.id } } }
-        : rankId
-          ? { rank: { connect: { id: rankId } } }
-          : {}),
+      ...(rankId && { rank: { connect: { id: rankId } } }),
+      ...(stageId && { stage: { connect: { id: stageId } } })
     },
     include: { user: true, plan: true },
   });
