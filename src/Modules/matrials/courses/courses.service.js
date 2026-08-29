@@ -12,9 +12,14 @@ const lecturesInclude = {
       name_en: true,
       slug: true,
       color: true,
-      stageName_ar: true,
-      stageName_en: true,
     },
+  },
+  stage:{
+    select:{
+      id:true,
+      name_ar:true,
+      name_en:true,
+    }
   },
   category: true,
   lectures: {
@@ -26,7 +31,7 @@ const lecturesInclude = {
    CREATE COURSE
 ----------------------------- */
 export const createCourse = async ({ req, res, next }) => {
-  const { rankId, title_ar, title_en, description_ar, description_en, categoryId, price, keywords } = req.body;
+  const { rankId,stageId, title_ar, title_en, description_ar, description_en, categoryId, price, keywords } = req.body;
 
   if (!rankId) {
     const error = createError({
@@ -60,6 +65,30 @@ export const createCourse = async ({ req, res, next }) => {
     });
     throw error;
   }
+  // check stage exists
+  let stage =null;
+  if(stageId){
+    stage = await db.findFirst({
+      model:"stage",
+      where:{id:stageId}
+    })
+    if(!stage){
+      const error = createError({
+        message: "STAGE_NOT_FOUND",
+        status: 404,
+        next,
+      });
+      throw error;
+    }
+    if(stage.rankId !== rankId){
+      const error = createError({
+        message: "STAGE_NOT_BELONG_TO_RANK",
+        status: 400,
+        next,
+      });
+      throw error;
+    }
+  }
 
   // check title exists
   const courseTitle = await db.findFirst({
@@ -84,6 +113,7 @@ export const createCourse = async ({ req, res, next }) => {
     model: "courses",
     data: {
       rankId,
+      ...(stageId && {stageId:stage.id}),
       title_ar,
       ...(title_en !== undefined && { title_en }),
       description_ar,
@@ -178,7 +208,7 @@ export const getCourseById = async (id) => {
    UPDATE COURSE
 ----------------------------- */
 export const updateCourse = async ({ req, res, next }) => {
-  const { title_ar, title_en, description_ar, description_en, rankId, categoryId, price, keywords } = req.body;
+  const { title_ar, title_en, description_ar, description_en, rankId,stageId, categoryId, price, keywords } = req.body;
   const { id } = req.params;
 
   // validate title if exists
@@ -211,6 +241,7 @@ export const updateCourse = async ({ req, res, next }) => {
     });
     throw error;
   }
+  
 
   // validate rank change if exists
   if (rankId && rankId !== course.rankId) {
@@ -228,6 +259,32 @@ export const updateCourse = async ({ req, res, next }) => {
       throw error;
     }
   }
+  let stage;
+  if(stageId !== undefined && stageId !== null && stageId !== course.stageId){
+    stage = await db.findFirst({
+      model:"stage",
+      where:{id:stageId}
+    });
+
+    if(!stage){
+      const error = createError({
+        message:"STAGE_NOT_FOUND",
+        status:404,
+        next,
+      });
+      throw error;
+    }
+    const effectiveRankId = rankId !== undefined ? rankId:course.rankId;
+    if(stage.rankId !== effectiveRankId){
+      const error = createError({
+        message:"STAGE_NOT_BELONG_TO_RANK",
+        status:400,
+        next,
+      });
+      throw error;
+    }
+
+  }
 
   return await db.updateOne({
     model: "courses",
@@ -238,6 +295,7 @@ export const updateCourse = async ({ req, res, next }) => {
       ...(description_ar !== undefined && { description_ar }),
       ...(description_en !== undefined && { description_en }),
       ...(rankId !== undefined && { rankId }),
+      ...(stageId !== undefined && {stageId}),
       ...(categoryId !== undefined && { categoryId }),
       ...(price !== undefined && { price: Number(price) }),
       ...(keywords !== undefined && { keywords }),

@@ -38,14 +38,16 @@ export const register = asyncHandler(async (req, res, next) => {
     country,
     parentNumber,
     timezone,
+    rankId,
     stageId
   } = req.body;
 
   // 1. Initial validations (Check existence outside transaction to keep it short)
-  const [checkUserByEmail, settings, existStadge] = await Promise.all([
+  const [checkUserByEmail, settings, existStage,existRank] = await Promise.all([
     db.findFirst({ model: "user", where: { email } }),
     db.findFirst({ model: "settings" }),
     db.findFirst({ model: "stage", where: { id: stageId } }),
+    db.findFirst({model:"ranks",where:{id:rankId}})
   ]);
   const image_path = req.file?.finalPath || req.file?.path;
 
@@ -54,7 +56,11 @@ export const register = asyncHandler(async (req, res, next) => {
     where: { name: "student" },
   });
 
-  if (!existStadge) {
+  if(!existRank) {
+    return errorResponse({ req, next, message: "RANK_NOT_FOUND", status: 404 });
+  }
+
+  if (!existStage) {
     return errorResponse({ req, next, message: "STAGE_NOT_FOUND", status: 404 });
   }
 
@@ -64,6 +70,9 @@ export const register = asyncHandler(async (req, res, next) => {
 
   if (checkUserByEmail) {
     return errorResponse({ req, next, message: "EMAIL_EXISTS", status: 400 });
+  }
+  if(existStage.rankId !== rankId){
+    return errorResponse({ req, next, message: "STAGE_NOT_BELONG_TO_RANK", status: 404 })
   }
 
   if (plan_id) {
@@ -143,7 +152,8 @@ export const register = asyncHandler(async (req, res, next) => {
         country,
         timezone: req.timezone || DEFAULT_TIMEZONE,
         user_id: user.id,
-        stadgeId: existStadge.id,
+        stageId: existStage.id,
+        rankId: existRank.id,
         parentNumber: encryptedParentNumber || null,
       }),
     );

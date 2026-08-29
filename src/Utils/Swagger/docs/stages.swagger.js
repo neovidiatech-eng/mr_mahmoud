@@ -1,3 +1,4 @@
+
 export const stagesPaths = {
   "/materials/stages": {
     get: {

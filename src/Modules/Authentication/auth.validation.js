@@ -12,6 +12,12 @@ export const registeritonSchema = {
         "string.pattern.base": "STAGE_ID_MUST_BE_VALID_ID",
         "any.required": "STAGE_ID_REQUIRED",
       }).required(),
+      rankId: generalFields.id.messages({
+        "string.base": "RANK_ID_MUST_BE_STRING",
+        "string.empty": "RANK_ID_CANNOT_BE_EMPTY",
+        "string.pattern.base": "RANK_ID_MUST_BE_VALID_ID",
+        "any.required": "RANK_ID_REQUIRED",
+      }).required(),
       password: generalFields.password.required(),
       codeCountry: generalFields.codeCountry.required(),
       age: generalFields.studentAge,
