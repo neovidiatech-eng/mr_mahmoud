@@ -265,6 +265,9 @@ export const deleteSection = async ({ req }) => {
   const existingSection = await db.findOne({
     model: "sections",
     where: { id },
+    include:{
+      section_items:true,
+    }
   });
 
   if (!existingSection) {
@@ -274,9 +277,26 @@ export const deleteSection = async ({ req }) => {
     throw error;
   }
 
-  await db.deleteOne({
-    model: "sections",
-    where: { id },
+  await db.transaction(async (tx) => {
+    for (const item of existingSection.section_items) {
+      if (item.item_type === "QUIZ") {
+        await tx.deleteOne({
+          model: "quiz",
+          where: { id: item.item_id },
+        });
+      }
+
+      if (item.item_type === "LECTURE") {
+        await tx.deleteOne({
+          model: "lectures",
+          where: { id: item.item_id },
+        });
+      }
+    }
+    await tx.deleteOne({
+      model: "sections",
+      where: { id },
+    });
   });
 
   return { id };
