@@ -4,7 +4,7 @@ import { localizeResponse } from "../../Utils/Localize/index.js";
 import slugify from "slugify";
 
 export const getQuizzes = async ({ req, res, next }) => {
-  const { page = 1, limit = 10 } = req.query;
+  const { page = 1, limit = 10 ,courseId } = req.query;
   let canReadAnswers = false;
   if (
     req.user?.role?.name === "admin" ||
@@ -16,7 +16,7 @@ export const getQuizzes = async ({ req, res, next }) => {
 
   const result = await db.findManyWithPaginationAndCount({
     model: "quiz",
-    where: {},
+    where: courseId?{courseId}:{},
     page,
     limit,
     include: {
@@ -64,6 +64,13 @@ export const getQuiz = async ({ req, res, next }) => {
     model: "quiz",
     where: { id: id },
     include: {
+      course:{
+        select:{
+          id:true,
+          title_ar:true,
+          title_en:true
+        }
+      },
       questions: {
         orderBy: { order: "asc" },
         include: {
@@ -109,12 +116,14 @@ export const createQuiz = async ({ req, res, next }) => {
     pass_points,
     duration_min,
     courseId,
+    order,
     questions,
   } = req.body;
   const slugSource = title_en || title_ar;
   const slug =
     slugify(slugSource, { lower: true, replacement: "-", trim: true }) ||
     `quiz-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+
 
   const exitingQuiz = await db.findOne({
     model: "quiz",
@@ -124,6 +133,18 @@ export const createQuiz = async ({ req, res, next }) => {
   if (exitingQuiz) {
     const error = new Error("QUIZ_EXISTS");
     error.status = 400;
+    error.isMessageKey = true;
+    throw error;
+  }
+  
+  const course = await db.findOne({
+    model:"courses",
+    where:{id:courseId}
+  })
+
+  if(!course){
+    const error = new Error("COURSE_NOT_FOUND");
+    error.status = 404;
     error.isMessageKey = true;
     throw error;
   }
@@ -139,6 +160,7 @@ export const createQuiz = async ({ req, res, next }) => {
       total_points,
       pass_points,
       duration_min,
+      order,
       course: {
         connect: {
           id: courseId,
@@ -178,6 +200,7 @@ export const updateQuiz = async ({ req, res, next }) => {
     pass_points,
     duration_min,
     questions,
+    order,
   } = req.body;
 
   const existingQuiz = await db.findOne({
@@ -221,6 +244,8 @@ export const updateQuiz = async ({ req, res, next }) => {
     ...(total_points !== undefined && { total_points }),
     ...(pass_points !== undefined && { pass_points }),
     ...(duration_min !== undefined && { duration_min }),
+    ...(order !== undefined && { order }),
+    
   };
 
   if (Array.isArray(questions)) {

@@ -27,6 +27,7 @@ export const createQuizSchema = {
   body: Joi.object({
     title_ar: Joi.string().trim().required(),
     title_en: Joi.string().trim().allow("", null).optional(),
+    order: Joi.number().integer().min(0).required(),
     description_ar: Joi.string().trim().allow("", null).optional(),
     description_en: Joi.string().trim().allow("", null).optional(),
     total_points: Joi.number().integer().min(1).required(),
@@ -50,6 +51,7 @@ export const updateQuizSchema = {
   body: Joi.object({
     title_ar: Joi.string().trim().optional(),
     title_en: Joi.string().trim().allow("", null).optional(),
+    order: Joi.number().integer().min(0).optional,
     description_ar: Joi.string().trim().optional(),
     description_en: Joi.string().trim().allow("", null).optional(),
     total_points: Joi.number().integer().min(1).optional(),
