@@ -30,7 +30,7 @@ export const createQuizSchema = {
     description_ar: Joi.string().trim().allow("", null).optional(),
     description_en: Joi.string().trim().allow("", null).optional(),
     total_points: Joi.number().integer().min(1).required(),
-    courseId: generalFields.id.required(),
+    courseId: generalFields.id.optional().allow("", null),
     pass_points: Joi.number().integer().min(0).required(),
     duration_min: Joi.number().integer().min(1).required(),
     questions: Joi.array().items(questionSchema).min(1).required(),
