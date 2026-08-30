@@ -103,6 +103,9 @@ model quiz {
   slug           String?       @unique
   description_ar String        @default("")
   description_en String?       @default("")
+  order          Int           
+  courseId       String
+  course         courses       @relation(fields: [courseId], references: [id], onDelete: Cascade)
   total_points   Int           @default(0)
   pass_points    Int           @default(0)
   duration_min   Int           @default(30)
@@ -111,6 +114,8 @@ model quiz {
   updatedAt      DateTime      @default(now())
   studentQuizs   studentQuiz[]
 
+  @@unique([courseId, order])
+  @@index([courseId])
   @@index([title_ar])
   @@index([title_en])
   @@index([slug])

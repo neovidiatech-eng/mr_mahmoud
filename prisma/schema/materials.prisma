@@ -69,10 +69,12 @@ model courses {
   schedules        schedule[]
   purchaseRequests course_purchase_request[]
   purchases        CoursePurchase[]
+  quizzes          quiz[]
 
   @@index([rankId])
   @@index([categoryId])
   @@index([title_ar])
+  
 }
 
 model course_purchase_request {

@@ -108,6 +108,7 @@ export const createQuiz = async ({ req, res, next }) => {
     total_points,
     pass_points,
     duration_min,
+    courseId,
     questions,
   } = req.body;
   const slugSource = title_en || title_ar;
@@ -138,6 +139,11 @@ export const createQuiz = async ({ req, res, next }) => {
       total_points,
       pass_points,
       duration_min,
+      course: {
+        connect: {
+          id: courseId,
+        },
+      },
       questions: {
         create: questions?.map((question, index) => ({
           question_ar: question.question_ar,
