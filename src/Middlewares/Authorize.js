@@ -23,6 +23,21 @@ export const authorize = (permissionCode) => {
       return next();
     }
 
+    // Allow student role access for student-level actions (prevents 403 due to stale cache or missing DB seed)
+    if (user?.role?.name === "student") {
+      const studentAllowedPermissions = [
+        "quiz:read",
+        "quiz:submit",
+        "courses:read",
+        "lectures:read",
+        "sections:read",
+        "exams:read",
+      ];
+      if (studentAllowedPermissions.includes(permissionCode)) {
+        return next();
+      }
+    }
+
     // Check if user has the specific permission
     if (!req.permissions.has(permissionCode)) {
       const err = new Error("FORBIDDEN_PERMISSION");

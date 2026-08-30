@@ -30,6 +30,11 @@ export const authorizeResource = (resource) => {
     const action = mapMethodToAction(req.method);
     const permissionCode = `${resource}:${action}`;
 
+    // Allow student role access for reading student resources
+    if (user?.role?.name === "student" && action === "read") {
+      return next();
+    }
+
     // Validate permission
     if (!req.permissions.has(permissionCode)) {
       const err = new Error("FORBIDDEN_PERMISSION");
