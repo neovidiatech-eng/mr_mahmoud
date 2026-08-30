@@ -619,7 +619,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(planId && { plan: { connect: { id: planId } } }),
       ...(birth_date && { birth_date: new Date(birth_date) }),
       ...(type && { type }),
-      ...(activeValue !== undefined && { active }),
+      ...(activeValue !== undefined && { active: activeValue }),
       ...(qrActive !== undefined && { qrActive }),
       ...(encryptedParentNumber && { parentNumber: encryptedParentNumber }),
       ...(newQrToken && { qrToken: newQrToken, qrActive: true }),
