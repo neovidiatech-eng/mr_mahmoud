@@ -157,6 +157,11 @@ export const create = ({ model, data, include, select }) => {
     ...(select ? { select } : {}),
   });
 };
+export const createMany = ({ model, data }) => {
+  return getClient(model).createMany({
+    data,
+  });
+};
 
 export const findOne = ({ model, where, include, select }) => {
   return getClient(model).findUnique({
