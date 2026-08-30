@@ -131,10 +131,10 @@ export const createQuiz = async ({ req, res, next }) => {
     model: "quiz",
     data: {
       title_ar,
-      title_en,
+      title_en: title_en || "",
       slug,
-      description_ar,
-      description_en,
+      description_ar: description_ar || "",
+      description_en: description_en || "",
       total_points,
       pass_points,
       duration_min,

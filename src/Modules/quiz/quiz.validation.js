@@ -27,7 +27,7 @@ export const createQuizSchema = {
   body: Joi.object({
     title_ar: Joi.string().trim().required(),
     title_en: Joi.string().trim().allow("", null).optional(),
-    description_ar: Joi.string().trim().required(),
+    description_ar: Joi.string().trim().allow("", null).optional(),
     description_en: Joi.string().trim().allow("", null).optional(),
     total_points: Joi.number().integer().min(1).required(),
     pass_points: Joi.number().integer().min(0).required(),

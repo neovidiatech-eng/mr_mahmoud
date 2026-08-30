@@ -3,7 +3,7 @@ import * as db from "../../../database/dbService.js";
 /**
  * Helper to populate lecture/quiz details for section items
  */
-const populateSectionItems = async (sectionsList) => {
+export const populateSectionItems = async (sectionsList) => {
   if (!sectionsList || sectionsList.length === 0) return sectionsList;
 
   const lectureIds = new Set();

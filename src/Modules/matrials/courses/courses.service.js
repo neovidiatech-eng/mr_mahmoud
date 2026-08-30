@@ -1,5 +1,6 @@
 import * as db from "../../../database/dbService.js";
 import { createError } from "../../../Utils/Helpers.js";
+import { populateSectionItems } from "../sections/sections.service.js";
 
 /* -----------------------------
    Shared Includes
@@ -337,13 +338,21 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
   const { id } = req.params; // courseId
   const userId = req.user.id;
 
-  // 1. Get course and lectures
+  // 1. Get course with lectures and sections
   const course = await db.findFirst({
     model: "courses",
     where: { id },
     include: {
       lectures: {
         orderBy: { order: "asc" },
+      },
+      sections: {
+        orderBy: { createdAt: "asc" },
+        include: {
+          section_items: {
+            orderBy: { order: "asc" },
+          },
+        },
       },
     },
   });
@@ -357,7 +366,16 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     throw error;
   }
 
-  // 2. Get user's progress for these lectures
+  // Populate section_items details (lectures / quiz)
+  const populatedSections = await populateSectionItems(course.sections || []);
+
+  // 2. Get student profile & user's progress for lectures & quizzes
+  const student = await db.findFirst({
+    model: "student",
+    where: { user_id: userId },
+    include: { plan: true },
+  });
+
   const userLectures = await db.findMany({
     model: "user_lectures",
     where: {
@@ -366,15 +384,16 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     },
   });
 
-  // Check if student has a free trial / 1 session plan
-  const student = await db.findFirst({
-    model: "student",
-    where: { user_id: userId },
-    include: { plan: true },
-  });
+  const studentQuizAttempts = student
+    ? await db.findMany({
+        model: "studentQuiz",
+        where: {
+          student_id: student.id,
+        },
+      })
+    : [];
 
-  // Course-level access: matching rank subscription OR a direct course purchase.
-  // Admins/teachers always pass (this endpoint is student-focused but stays permissive for them).
+  // Check course access
   let hasCourseAccess = true;
   if (student) {
     const matchesRank = student.active && student.rankId === course.rankId;
@@ -391,11 +410,12 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
   let bookedSchedule = null;
 
   if (student) {
-    isFreeTrial = student.sessions === 1 ||
-                  student.plan?.price === "0" ||
-                  student.plan?.name?.toLowerCase().includes("free") ||
-                  student.plan?.name?.toLowerCase().includes("trial") ||
-                  student.plan?.sessionsCount === 1;
+    isFreeTrial =
+      student.sessions === 1 ||
+      student.plan?.price === "0" ||
+      student.plan?.name?.toLowerCase().includes("free") ||
+      student.plan?.name?.toLowerCase().includes("trial") ||
+      student.plan?.sessionsCount === 1;
 
     if (isFreeTrial) {
       bookedSchedule = await db.findFirst({
@@ -408,28 +428,112 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     }
   }
 
-  // 3. Map lectures to include status
+  // 3. Process Section Gating Progression
+  let prevSectionPassed = true;
+
+  const sectionsWithStatus = populatedSections.map((sec, secIdx) => {
+    let isLocked = false;
+
+    if (!hasCourseAccess) {
+      isLocked = true;
+    } else if (isFreeTrial) {
+      isLocked = secIdx > 0 || !bookedSchedule;
+    } else {
+      isLocked = secIdx > 0 && !prevSectionPassed;
+    }
+
+    let sectionAllLecturesCompleted = true;
+    let sectionAllQuizzesPassed = true;
+
+    const itemsWithStatus = (sec.section_items || []).map((item) => {
+      const type = (item.item_type || "").toUpperCase();
+
+      if (type === "LECTURE") {
+        const userLect = userLectures.find((ul) => ul.lectureId === item.item_id);
+        const isCompleted = userLect?.status === "completed";
+        if (!isCompleted) sectionAllLecturesCompleted = false;
+
+        let itemStatus = "Locked";
+        if (!isLocked) {
+          itemStatus = isCompleted ? "Completed" : "Pending";
+        }
+
+        return {
+          ...item,
+          status: itemStatus,
+          lastPosition: userLect?.lastPosition ?? 0,
+          details:
+            itemStatus === "Locked" && item.details
+              ? {
+                  ...item.details,
+                  video_path: null,
+                  pdf_path: null,
+                  slides_path: null,
+                  content_ar: null,
+                  content_en: null,
+                }
+              : item.details,
+        };
+      } else if (type === "QUIZ") {
+        const attempts = studentQuizAttempts.filter((sq) => sq.quiz_id === item.item_id);
+        const bestAttempt = attempts.find((sq) => sq.passed) || attempts[0];
+        const isPassed = attempts.some((sq) => sq.passed);
+
+        if (!isPassed) sectionAllQuizzesPassed = false;
+
+        let itemStatus = "Locked";
+        if (!isLocked) {
+          if (isPassed) {
+            itemStatus = "Passed";
+          } else if (attempts.length > 0) {
+            itemStatus = "Failed";
+          } else {
+            itemStatus = "Available";
+          }
+        }
+
+        return {
+          ...item,
+          status: itemStatus,
+          attempt: bestAttempt
+            ? {
+                score: bestAttempt.score,
+                total_points: bestAttempt.total_points,
+                pass_points: bestAttempt.pass_points,
+                passed: bestAttempt.passed,
+                submittedAt: bestAttempt.submittedAt,
+              }
+            : null,
+        };
+      }
+
+      return item;
+    });
+
+    const secCompleted = sectionAllLecturesCompleted && sectionAllQuizzesPassed;
+    prevSectionPassed = secCompleted;
+
+    return {
+      ...sec,
+      isLocked,
+      isCompleted: secCompleted,
+      section_items: itemsWithStatus,
+    };
+  });
+
+  // Flat lectures fallback for backward compatibility
   let foundFirstNonCompleted = false;
   const lecturesWithStatus = course.lectures.map((lecture, index) => {
     const userLecture = userLectures.find((ul) => ul.lectureId === lecture.id);
     let status = "Locked";
 
     if (!hasCourseAccess) {
-      // No rank match and no direct purchase — the whole course stays locked
-      // regardless of per-lecture progression.
+      status = "Locked";
     } else if (isFreeTrial) {
-      // Free trial user logic:
-      // - Must have booked a schedule in this course
-      // - Only the first lecture (index 0) can be unlocked
       if (bookedSchedule && index === 0) {
-        if (userLecture && userLecture.status === "completed") {
-          status = "Completed";
-        } else {
-          status = "Pending";
-        }
+        status = userLecture?.status === "completed" ? "Completed" : "Pending";
       }
     } else {
-      // Normal progression logic:
       if (userLecture && userLecture.status === "completed") {
         status = "Completed";
       } else if (!foundFirstNonCompleted) {
@@ -443,9 +547,9 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
       status,
       lastPosition: userLecture?.lastPosition ?? 0,
       ...(status === "Locked" && {
-        videoUrl: null,
-        pdfUrl: null,
-        slidesUrl: null,
+        video_path: null,
+        pdf_path: null,
+        slides_path: null,
         content_ar: null,
         content_en: null,
       }),
@@ -455,6 +559,7 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
   return {
     ...course,
     hasCourseAccess,
+    sections: sectionsWithStatus,
     lectures: lecturesWithStatus,
   };
 };
