@@ -20,7 +20,7 @@ export const quizPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["title_ar", "description_ar", "total_points", "pass_points", "duration_min", "questions"],
+              required: ["title_ar", "total_points", "pass_points", "duration_min", "questions"],
               properties: {
                 title_ar: { type: "string", example: "اختبار تجريبي في الرياضيات" },
                 title_en: { type: "string", example: "Sample Mathematics Quiz" },
@@ -150,7 +150,33 @@ export const quizPaths = {
                 description_en: { type: "string", example: "Updated description" },
                 total_points: { type: "integer", example: 100 },
                 pass_points: { type: "integer", example: 70 },
-                duration_min: { type: "integer", example: 45 }
+                duration_min: { type: "integer", example: 45 },
+                questions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      id: { type: "string", format: "uuid" },
+                      question_ar: { type: "string" },
+                      question_en: { type: "string" },
+                      type: { type: "string", enum: ["MCQ", "TRUE_FALSE"] },
+                      points: { type: "integer" },
+                      order: { type: "integer" },
+                      options: {
+                        type: "array",
+                        items: {
+                          type: "object",
+                          properties: {
+                            id: { type: "string", format: "uuid" },
+                            option_text_ar: { type: "string" },
+                            option_text_en: { type: "string" },
+                            is_correct: { type: "boolean" }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }

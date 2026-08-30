@@ -2,10 +2,9 @@ export const sectionsPaths = {
   "/materials/sections": {
     get: {
       tags: ["Educational Materials - Sections"],
-      summary: "Get all sections with optional course filter and search",
-      security: [{ bearerAuth: [] }],
+      summary: "Get all sections with optional course filter and search (Public)",
       parameters: [
-        { name: "course_id", in: "query", schema: { type: "string" }, description: "Filter sections by course ID" },
+        { name: "course_id", in: "query", schema: { type: "string", format: "uuid" }, description: "Filter sections by course ID" },
         { name: "search", in: "query", schema: { type: "string" }, description: "Search section name in Arabic or English" },
         { name: "page", in: "query", schema: { type: "integer", minimum: 1, default: 1 } },
         { name: "limit", in: "query", schema: { type: "integer", minimum: 1, default: 20 } }
@@ -54,10 +53,9 @@ export const sectionsPaths = {
   "/materials/sections/{id}": {
     get: {
       tags: ["Educational Materials - Sections"],
-      summary: "Get section details by ID with populated items (lectures & quizzes)",
-      security: [{ bearerAuth: [] }],
+      summary: "Get section details by ID with populated items (Public)",
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
       responses: {
         200: { description: "Section details retrieved successfully." },

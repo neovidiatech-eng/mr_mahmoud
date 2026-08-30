@@ -2,15 +2,15 @@ export const materialsPaths = {
   "/materials/courses": {
     get: {
       tags: ["Educational Materials - Courses"],
-      summary: "Get all courses with optional filters",
-      security: [{ bearerAuth: [] }],
+      summary: "Get all courses with optional filters (Public)",
       parameters: [
-        { name: "rankId", in: "query", schema: { type: "string" } },
-        { name: "categoryId", in: "query", schema: { type: "string" } },
+        { name: "rankId", in: "query", schema: { type: "string", format: "uuid" }, description: "Filter by rank ID" },
+        { name: "stageId", in: "query", schema: { type: "string", format: "uuid" }, description: "Filter by stage ID" },
+        { name: "categoryId", in: "query", schema: { type: "string", format: "uuid" }, description: "Filter by category ID" },
         { name: "title", in: "query", schema: { type: "string" } },
         { name: "search", in: "query", schema: { type: "string" } },
-        { name: "page", in: "query", schema: { type: "integer", minimum: 1 } },
-        { name: "limit", in: "query", schema: { type: "integer", minimum: 1 } },
+        { name: "page", in: "query", schema: { type: "integer", minimum: 1, default: 1 } },
+        { name: "limit", in: "query", schema: { type: "integer", minimum: 1, default: 10 } },
         { name: "sort", in: "query", schema: { type: "string", enum: ["asc", "desc"] } },
         { name: "sortBy", in: "query", schema: { type: "string", enum: ["rankId", "createdAt", "title_ar"] } }
       ],
@@ -32,9 +32,11 @@ export const materialsPaths = {
                 title_en: { type: "string", example: "Physics - Chapter 1" },
                 description_ar: { type: "string", example: "أساسيات الحركة والطاقة" },
                 description_en: { type: "string", example: "Fundamentals of Motion and Energy" },
-                rankId: { type: "string" },
-                categoryId: { type: "string" },
+                rankId: { type: "string", format: "uuid" },
+                stageId: { type: "string", format: "uuid" },
+                categoryId: { type: "string", format: "uuid" },
                 price: { type: "number", example: 199.99 },
+                keywords: { type: "array", items: { type: "string" }, description: "Search keywords (max 20)" },
                 image: { type: "string", format: "binary" }
               }
             }
@@ -47,10 +49,9 @@ export const materialsPaths = {
   "/materials/courses/{id}": {
     get: {
       tags: ["Educational Materials - Courses"],
-      summary: "Get course details by ID",
-      security: [{ bearerAuth: [] }],
+      summary: "Get course details by ID (Public)",
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
       responses: { 200: { description: "Course details retrieved." } }
     },
@@ -59,7 +60,7 @@ export const materialsPaths = {
       summary: "Update course details",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
       requestBody: {
         required: true,
@@ -72,9 +73,11 @@ export const materialsPaths = {
                 title_en: { type: "string" },
                 description_ar: { type: "string" },
                 description_en: { type: "string" },
-                rankId: { type: "string" },
-                categoryId: { type: "string" },
+                rankId: { type: "string", format: "uuid" },
+                stageId: { type: "string", format: "uuid" },
+                categoryId: { type: "string", format: "uuid" },
                 price: { type: "number" },
+                keywords: { type: "array", items: { type: "string" } },
                 image: { type: "string", format: "binary" }
               }
             }
@@ -88,7 +91,7 @@ export const materialsPaths = {
       summary: "Delete course",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
       responses: { 200: { description: "Course deleted." } }
     }
@@ -96,23 +99,24 @@ export const materialsPaths = {
   "/materials/courses/{id}/student-progress": {
     get: {
       tags: ["Educational Materials - Courses"],
-      summary: "Get student progress in course lectures",
+      summary: "Get student progress in course with section gating & progression",
+      description: "Returns course details with section-by-section gating progression (`sections` with `section_items` and item status: `Completed`, `Pending`, `Passed`, `Failed`, `Available`, `Locked`) as well as flat `lectures` with watch status.",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
-      responses: { 200: { description: "Course progress retrieved." } }
+      responses: { 200: { description: "Course progress and section gating progression retrieved." } }
     }
   },
   "/materials/lectures": {
     get: {
       tags: ["Educational Materials - Lectures"],
-      summary: "Get all lectures",
+      summary: "Get all lectures (Public)",
       responses: { 200: { description: "Lectures list retrieved." } }
     },
     post: {
       tags: ["Educational Materials - Lectures"],
-      summary: "Create lecture",
+      summary: "Create lecture (with file uploads or paths)",
       security: [{ bearerAuth: [] }],
       requestBody: {
         required: true,
@@ -126,13 +130,19 @@ export const materialsPaths = {
                 title_en: { type: "string", example: "Lecture 1: Newton's Laws" },
                 content_ar: { type: "string", example: "شرح كامل لقوانين نيوتن للحركة" },
                 content_en: { type: "string", example: "Full explanation of Newton's laws of motion" },
-                courseId: { type: "string" },
+                courseId: { type: "string", format: "uuid" },
                 order: { type: "number", example: 1 },
                 duration: { type: "string", example: "01:00:00" },
                 date: { type: "string", format: "date-time" },
-                video: { type: "string", format: "binary", description: "Lecture video file" },
-                slides: { type: "string", format: "binary", description: "Lecture slides file" },
-                pdf: { type: "string", format: "binary", description: "Lecture PDF notes file" }
+                video: { type: "string", format: "binary", description: "Lecture video file upload" },
+                slides: { type: "string", format: "binary", description: "Lecture slides file upload" },
+                pdf: { type: "string", format: "binary", description: "Lecture PDF notes file upload" },
+                video_path: { type: "string", description: "Direct video file path" },
+                slides_path: { type: "string", description: "Direct slides file path" },
+                pdf_path: { type: "string", description: "Direct PDF file path" },
+                videoUrl: { type: "string", description: "External video URL" },
+                slidesUrl: { type: "string", description: "External slides URL" },
+                pdfUrl: { type: "string", description: "External PDF URL" }
               }
             }
           }
@@ -144,9 +154,9 @@ export const materialsPaths = {
   "/materials/lectures/{id}": {
     get: {
       tags: ["Educational Materials - Lectures"],
-      summary: "Get lecture by ID",
+      summary: "Get lecture by ID (Public)",
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
       responses: { 200: { description: "Lecture details retrieved." } }
     },
@@ -155,7 +165,7 @@ export const materialsPaths = {
       summary: "Update lecture",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
       requestBody: {
         required: true,
@@ -169,12 +179,18 @@ export const materialsPaths = {
                 content_ar: { type: "string" },
                 content_en: { type: "string" },
                 order: { type: "number" },
-                courseId: { type: "string" },
+                courseId: { type: "string", format: "uuid" },
                 duration: { type: "string" },
                 date: { type: "string", format: "date-time" },
                 video: { type: "string", format: "binary" },
                 slides: { type: "string", format: "binary" },
-                pdf: { type: "string", format: "binary" }
+                pdf: { type: "string", format: "binary" },
+                video_path: { type: "string" },
+                slides_path: { type: "string" },
+                pdf_path: { type: "string" },
+                videoUrl: { type: "string" },
+                slidesUrl: { type: "string" },
+                pdfUrl: { type: "string" }
               }
             }
           }
@@ -187,7 +203,7 @@ export const materialsPaths = {
       summary: "Delete lecture",
       security: [{ bearerAuth: [] }],
       parameters: [
-        { name: "id", in: "path", required: true, schema: { type: "string" } }
+        { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
       responses: { 200: { description: "Lecture deleted." } }
     }

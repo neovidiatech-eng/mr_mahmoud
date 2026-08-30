@@ -157,7 +157,14 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
     status: 200,
   });
 });
+const parseBoolean = (value) => {
+  if (typeof value === "boolean") return value;
 
+  if (value === "true") return true;
+  if (value === "false") return false;
+
+  return undefined;
+};
 export const createStudent = asyncHandler(async (req, res, next) => {
   const {
     name,
@@ -178,6 +185,8 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     startingLectureId,
     type,
   } = req.body;
+
+  const activeValue = parseBoolean(active);
 
   const studentAge = resolveStudentAge({ age, birthDate: birth_date });
 
@@ -224,6 +233,32 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     });
 
   const effectiveRankId = rank.id;
+  let stage = null;
+
+if (stageId) {
+  stage = await db.findOne({
+    model: "stage",
+    where: { id: stageId },
+  });
+
+  if (!stage) {
+    return errorResponse({
+      req,
+      next,
+      message: "STAGE_NOT_FOUND",
+      status: 404,
+    });
+  }
+
+  if (stage.rankId !== effectiveRankId) {
+    return errorResponse({
+      req,
+      next,
+      message: "STAGE_DOES_NOT_BELONG_TO_RANK",
+      status: 400,
+    });
+  }
+}
   const completedLectureIds = await getStartingPointLectureIds({
     rankId: effectiveRankId,
     startingCourseId,
@@ -259,6 +294,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
 
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
     const encryptedParentNumber = parentNumber ? encryptText({ text: parentNumber }) : undefined;
+    
     const image_path = req.file?.finalPath || req.file?.path || req.body.image;
 
     const user = await tx.create({
@@ -293,7 +329,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         country,
         plan: { connect: { id: planId } },
         ...(birth_date && { birth_date: new Date(birth_date) }),
-        active: active ?? false,
+        active: activeValue ?? false,
         status: "approved",
         sessions: checkPlan.sessionsCount,
         sessions_attended: 0,
@@ -449,6 +485,8 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     qrActive,
   } = req.body;
 
+  const activeValue = parseBoolean(active)
+
   const student = await ensureExists({
     model: "student",
     where: { id },
@@ -581,7 +619,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(planId && { plan: { connect: { id: planId } } }),
       ...(birth_date && { birth_date: new Date(birth_date) }),
       ...(type && { type }),
-      ...(active !== undefined && { active }),
+      ...(activeValue !== undefined && { active: activeValue }),
       ...(qrActive !== undefined && { qrActive }),
       ...(encryptedParentNumber && { parentNumber: encryptedParentNumber }),
       ...(newQrToken && { qrToken: newQrToken, qrActive: true }),
