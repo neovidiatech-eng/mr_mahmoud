@@ -69,7 +69,6 @@ router.delete(
 router.post(
   "/:id/complete",
   authentication,
-  authorizeResource(lecturesResource),
   validation(lecturesValidation.lectureIdSchema),
   lecturesController.completeLecture,
 );
