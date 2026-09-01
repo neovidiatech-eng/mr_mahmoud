@@ -6,9 +6,14 @@ export const quizPaths = {
       security: [{ bearerAuth: [] }],
       parameters: [
         { name: "page", in: "query", schema: { type: "integer", default: 1 } },
-        { name: "limit", in: "query", schema: { type: "integer", default: 10 } }
+        { name: "limit", in: "query", schema: { type: "integer", default: 10 } },
+        { name: "courseId", in: "query", schema: { type: "string", format: "uuid" } }
       ],
-      responses: { 200: { description: "Quizzes list retrieved successfully." } }
+      responses: { 
+        200: { description: "Quizzes list retrieved successfully." },
+        400: { description: "Invalid parameters." },
+        401: { description: "Unauthorized." }
+      }
     },
     post: {
       tags: ["Quizzes"],
@@ -29,6 +34,8 @@ export const quizPaths = {
                 total_points: { type: "integer", example: 100 },
                 pass_points: { type: "integer", example: 60 },
                 duration_min: { type: "integer", example: 30 },
+                courseId: { type: "string", format: "uuid", example: "859bf2dd-38f1-4d3e-9608-ca7ca4699ce2", description: "Optional course UUID to attach the quiz to" },
+                order: { type: "integer", example: 1, description: "Quiz display order within the course" },
                 questions: {
                   type: "array",
                   items: {
@@ -60,7 +67,11 @@ export const quizPaths = {
           }
         }
       },
-      responses: { 201: { description: "Quiz created successfully." } }
+      responses: { 
+        201: { description: "Quiz created successfully." },
+        400: { description: "Validation error." },
+        401: { description: "Unauthorized." }
+      }
     }
   },
   "/quiz/submit": {
@@ -93,20 +104,34 @@ export const quizPaths = {
           }
         }
       },
-      responses: { 201: { description: "Quiz submitted successfully." } }
+      responses: { 
+        201: { description: "Quiz submitted successfully." },
+        400: { description: "Invalid submission data." },
+        404: { description: "Quiz not found." }
+      }
     }
   },
   "/quiz/history": {
     get: {
       tags: ["Quizzes"],
       summary: "Get student quiz attempt history",
+      description: "Returns paginated quiz attempts for the authenticated student. Requires a linked student profile. Filter by quiz using UUID or slug.",
       security: [{ bearerAuth: [] }],
       parameters: [
         { name: "page", in: "query", schema: { type: "integer", default: 1 } },
         { name: "limit", in: "query", schema: { type: "integer", default: 10 } },
-        { name: "quiz_id", in: "query", schema: { type: "string", format: "uuid" } }
+        {
+          name: "quiz_id",
+          in: "query",
+          description: "Filter by quiz — accepts UUID or slug (e.g. 'sample-math-quiz')",
+          schema: { type: "string", example: "sample-math-quiz" }
+        }
       ],
-      responses: { 200: { description: "Quiz attempt history retrieved successfully." } }
+      responses: { 
+        200: { description: "Quiz attempt history retrieved successfully." },
+        404: { description: "STUDENT_NOT_FOUND — user has no linked student profile | QUIZ_NOT_FOUND — no quiz matches the provided quiz_id or slug" },
+        401: { description: "Unauthorized." }
+      }
     }
   },
   "/quiz/history/{id}": {
@@ -117,7 +142,10 @@ export const quizPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
-      responses: { 200: { description: "Quiz attempt details retrieved successfully." } }
+      responses: { 
+        200: { description: "Quiz attempt details retrieved successfully." },
+        404: { description: "Attempt not found." }
+      }
     }
   },
   "/quiz/{id}": {
@@ -128,7 +156,10 @@ export const quizPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
-      responses: { 200: { description: "Quiz details retrieved successfully." } }
+      responses: { 
+        200: { description: "Quiz details retrieved successfully." },
+        404: { description: "Quiz not found." }
+      }
     },
     patch: {
       tags: ["Quizzes"],
@@ -182,7 +213,11 @@ export const quizPaths = {
           }
         }
       },
-      responses: { 200: { description: "Quiz updated successfully." } }
+      responses: { 
+        200: { description: "Quiz updated successfully." },
+        400: { description: "Validation error." },
+        404: { description: "Quiz not found." }
+      }
     },
     delete: {
       tags: ["Quizzes"],
@@ -191,7 +226,10 @@ export const quizPaths = {
       parameters: [
         { name: "id", in: "path", required: true, schema: { type: "string", format: "uuid" } }
       ],
-      responses: { 200: { description: "Quiz deleted successfully." } }
+      responses: { 
+        200: { description: "Quiz deleted successfully." },
+        404: { description: "Quiz not found." }
+      }
     }
   }
 };
