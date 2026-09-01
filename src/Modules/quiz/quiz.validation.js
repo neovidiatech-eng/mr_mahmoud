@@ -78,7 +78,7 @@ export const getQuizHistorySchema = {
   query: Joi.object({
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).default(10),
-    quiz_id: Joi.string().uuid().optional(),
+    quiz_id: Joi.string().optional(), // يقبل UUID أو slug
   }),
 };
 

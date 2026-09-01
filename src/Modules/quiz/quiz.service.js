@@ -443,12 +443,32 @@ export const getQuizHistory = async ({ req, res, next }) => {
     where: { user_id: req.user.id },
   });
 
-  const whereClause = {};
-  if (student) {
-    whereClause.student_id = student.id;
+  if (!student) {
+    const error = new Error("STUDENT_NOT_FOUND");
+    error.status = 404;
+    error.isMessageKey = true;
+    throw error;
   }
+
+  const whereClause = { student_id: student.id };
+
   if (quiz_id) {
-    whereClause.quiz_id = quiz_id;
+    // يدور بالـ id (UUID) أو الـ slug
+    const quiz = await db.findFirst({
+      model: "quiz",
+      where: {
+        OR: [{ id: quiz_id }, { slug: quiz_id }],
+      },
+    });
+
+    if (!quiz) {
+      const error = new Error("QUIZ_NOT_FOUND");
+      error.status = 404;
+      error.isMessageKey = true;
+      throw error;
+    }
+
+    whereClause.quiz_id = quiz.id;
   }
 
   const result = await db.findManyWithPaginationAndCount({
