@@ -11,6 +11,7 @@ import { resolveStudentAge } from "../../Utils/Helpers.js";
 import { nanoid } from "nanoid";
 import crypto from "crypto";
 import { studentTypes } from "../../Utils/Enums/studentTypes.js";
+import { title } from "process";
 
 const getStartingPointLectureIds = async ({
   rankId,
@@ -123,6 +124,29 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
         },
       },
     },
+    stuentQuizzes:{
+      orderBy:{
+        createdAt:"desc"
+      },
+      include:{
+        quiz:{
+          select:{
+            id:true,
+            title_ar:true,
+            title_en:true,
+            slug:true,
+            total_points:true,
+            pass_points:true,
+            duration_min:true,
+            
+
+            
+          }
+        }
+      }
+      
+    }
+
         
       },
     });
