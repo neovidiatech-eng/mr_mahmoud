@@ -117,16 +117,7 @@ export const quizPaths = {
       summary: "Get student quiz attempt history",
       description: "Returns paginated quiz attempts for the authenticated student. Requires a linked student profile. Filter by quiz using UUID or slug.",
       security: [{ bearerAuth: [] }],
-      parameters: [
-        { name: "page", in: "query", schema: { type: "integer", default: 1 } },
-        { name: "limit", in: "query", schema: { type: "integer", default: 10 } },
-        {
-          name: "quiz_id",
-          in: "query",
-          description: "Filter by quiz — accepts UUID or slug (e.g. 'sample-math-quiz')",
-          schema: { type: "string", example: "sample-math-quiz" }
-        }
-      ],
+      parameters: [ { name: "page", in: "query", required: false, schema: { type: "integer", minimum: 1, default: 1 } }, { name: "limit", in: "query", required: false, schema: { type: "integer", minimum: 1, default: 10 } }, { name: "student_id", in: "query", required: false, description: "Filter quiz attempts by student UUID.", schema: { type: "string", format: "uuid", example: "550e8400-e29b-41d4-a716-446655440000" } }, { name: "quiz_id", in: "query", required: false, description: "Filter quiz attempts by quiz UUID.", schema: { type: "string", format: "uuid", example: "550e8400-e29b-41d4-a716-446655440001" } } ],
       responses: { 
         200: { description: "Quiz attempt history retrieved successfully." },
         404: { description: "STUDENT_NOT_FOUND — user has no linked student profile | QUIZ_NOT_FOUND — no quiz matches the provided quiz_id or slug" },
