@@ -127,7 +127,7 @@ export async function seedMatrials() {
       });
 
       for (const lecture of lectures) {
-        const { title, content, ...rest } = lecture;
+        const { title, content, videoUrl, pdfUrl, ...rest } = lecture;
         await prisma.lectures.upsert({
           where: {
             courseId_order: {
@@ -140,8 +140,8 @@ export async function seedMatrials() {
             title_en: title,
             content_ar: content,
             content_en: content,
-            videoUrl: lecture.videoUrl,
-            pdfUrl: lecture.pdfUrl,
+            video_path: videoUrl,
+            pdf_path: pdfUrl,
             duration: lecture.duration,
             date: lecture.date,
           },
@@ -151,6 +151,8 @@ export async function seedMatrials() {
             title_en: title,
             content_ar: content,
             content_en: content,
+            video_path: videoUrl,
+            pdf_path: pdfUrl,
             courseId: seededCourse.id,
           },
         });

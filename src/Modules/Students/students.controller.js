@@ -110,78 +110,70 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
         },
         plan: true,
         stage: {
-      select: {
-        id: true,
-        name_ar: true,
-        name_en: true,
-        slug: true,
-        rank: {
           select: {
             id: true,
             name_ar: true,
             name_en: true,
+            slug: true,
+            rank: {
+              select: {
+                id: true,
+                name_ar: true,
+                name_en: true,
+              },
+            },
           },
         },
-      },
-    },
-    studentQuizzes:{
-      include:{
-        quiz:{
-          select:{
-            id:true,
-            title_ar:true,
-            title_en:true,
-            slug:true,
-            course:{
-              select:{
-                id:true,
-                name_ar:true,
-                name_en:true,
-                slug:true,
-              }
-            }
-          }
-        }
-      },
-      orderBy:{
-        createdAt:"desc"
-      },
-      include:{
-        quiz:{
-          select:{
-            id:true,
-            title_ar:true,
-            title_en:true,
-            slug:true,
-            total_points:true,
-            pass_points:true,
-            duration_min:true,
-            
-
-            
-          }
-        }
-      }
-      
-    }
-
-        
+        studentQuizzes: {
+          orderBy: {
+            createdAt: "desc",
+          },
+          include: {
+            quiz: {
+              select: {
+                id: true,
+                title_ar: true,
+                title_en: true,
+                slug: true,
+                total_points: true,
+                pass_points: true,
+                duration_min: true,
+                course: {
+                  select: {
+                    title_ar: true,
+                    title_en: true,
+                    createdAt: true,
+                    description_ar: true,
+                    description_en: true,
+                    keywords: true,
+                    rankId: true,
+                    stageId: true,
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     });
   const studentsData = await Promise.all(
     students.map(async (student) => {
-      const phone = student.user.phone ? await decryptText({ text: student.user.phone }) : undefined
+      const phone = student.user.phone
+        ? await decryptText({ text: student.user.phone })
+        : undefined;
       const decryptedPassword = student.user.password
         ? await decryptText({ text: student.user.password })
         : undefined;
-      const parentNumber = student.parentNumber ? await decryptText({ text: student.parentNumber }) : undefined
+      const parentNumber = student.parentNumber
+        ? await decryptText({ text: student.parentNumber })
+        : undefined;
       return {
         ...student,
         user: {
           ...student.user,
           phone: phone,
           ...(decryptedPassword && { password: decryptedPassword }),
-          ...(parentNumber && {parentNumber:parentNumber})
+          ...(parentNumber && { parentNumber: parentNumber }),
         },
       };
     }),
@@ -277,30 +269,30 @@ export const createStudent = asyncHandler(async (req, res, next) => {
   const effectiveRankId = rank.id;
   let stage = null;
 
-if (stageId) {
-  stage = await db.findOne({
-    model: "stage",
-    where: { id: stageId },
-  });
-
-  if (!stage) {
-    return errorResponse({
-      req,
-      next,
-      message: "STAGE_NOT_FOUND",
-      status: 404,
+  if (stageId) {
+    stage = await db.findOne({
+      model: "stage",
+      where: { id: stageId },
     });
-  }
 
-  if (stage.rankId !== effectiveRankId) {
-    return errorResponse({
-      req,
-      next,
-      message: "STAGE_DOES_NOT_BELONG_TO_RANK",
-      status: 400,
-    });
+    if (!stage) {
+      return errorResponse({
+        req,
+        next,
+        message: "STAGE_NOT_FOUND",
+        status: 404,
+      });
+    }
+
+    if (stage.rankId !== effectiveRankId) {
+      return errorResponse({
+        req,
+        next,
+        message: "STAGE_DOES_NOT_BELONG_TO_RANK",
+        status: 400,
+      });
+    }
   }
-}
   const completedLectureIds = await getStartingPointLectureIds({
     rankId: effectiveRankId,
     startingCourseId,
@@ -335,8 +327,10 @@ if (stageId) {
     const username = `${name.trim().replace(/\s+/g, "-")}_${nanoid(3)}_${prefix}`;
 
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
-    const encryptedParentNumber = parentNumber ? encryptText({ text: parentNumber }) : undefined;
-    
+    const encryptedParentNumber = parentNumber
+      ? encryptText({ text: parentNumber })
+      : undefined;
+
     const image_path = req.file?.finalPath || req.file?.path || req.body.image;
 
     const user = await tx.create({
@@ -380,7 +374,6 @@ if (stageId) {
         stage: { connect: { id: stageId } },
         ...(qrToken && { qrToken, qrActive: true }),
         type,
-
       },
       include: {
         user: true,
@@ -527,7 +520,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     qrActive,
   } = req.body;
 
-  const activeValue = parseBoolean(active)
+  const activeValue = parseBoolean(active);
 
   const student = await ensureExists({
     model: "student",
@@ -629,7 +622,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     image_path
   ) {
     const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
-    
+
     await db.updateOne({
       model: "user",
       where: { id: student.user_id },
@@ -646,7 +639,9 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       },
     });
   }
-  const encryptedParentNumber = parentNumber ? encryptText({ text: parentNumber }) : undefined;
+  const encryptedParentNumber = parentNumber
+    ? encryptText({ text: parentNumber })
+    : undefined;
 
   let newQrToken;
   if (regenerateQr || (type === "onsite" && !student.qrToken)) {
@@ -666,7 +661,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(encryptedParentNumber && { parentNumber: encryptedParentNumber }),
       ...(newQrToken && { qrToken: newQrToken, qrActive: true }),
       ...(rankId && { rank: { connect: { id: rankId } } }),
-      ...(stageId && { stage: { connect: { id: stageId } } })
+      ...(stageId && { stage: { connect: { id: stageId } } }),
     },
     include: { user: true, plan: true },
   });

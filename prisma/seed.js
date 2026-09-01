@@ -22,6 +22,7 @@ import { seedSupport } from "./seeders/support.seeder.js";
 import { seedHomework } from "./seeders/homework.seeder.js";
 import { seedExams } from "./seeders/exams.seeder.js";
 import { seedQuizzes } from "./seeders/quiz.seeder.js";
+import { seedStudentQuizzes } from "./seeders/studentQuiz.seeder.js";
 import { seedSections } from "./seeders/sections.seeder.js";
 import { seedChat } from "./seeders/chat.seeder.js";
 import { seedWeeklyReports } from "./seeders/weeklyReports.seeder.js";
@@ -60,6 +61,7 @@ async function main() {
   await seedHomework();
   await seedExams();
   await seedQuizzes();
+  await seedStudentQuizzes();
   await seedSections();
   await seedChat();
   await seedWeeklyReports();
