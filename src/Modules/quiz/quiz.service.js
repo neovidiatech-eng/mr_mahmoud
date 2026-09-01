@@ -436,11 +436,11 @@ export const submitQuiz = async ({ req, res, next }) => {
 };
 
 export const getQuizHistory = async ({ req, res, next }) => {
-  const { page = 1, limit = 10, quiz_id } = req.query;
+  const { page = 1, limit = 10, quiz_id ,student_id} = req.query;
 
   const student = await db.findOne({
     model: "student",
-    where: { user_id: req.user.id },
+    where: { user_id: req.user.id||student_id },
   });
 
   if (!student) {

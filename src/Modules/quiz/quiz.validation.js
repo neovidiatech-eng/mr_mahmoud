@@ -78,7 +78,16 @@ export const getQuizHistorySchema = {
   query: Joi.object({
     page: Joi.number().integer().min(1).default(1),
     limit: Joi.number().integer().min(1).default(10),
-    quiz_id: Joi.string().optional(), // يقبل UUID أو slug
+    quiz_id: generalFields.id.messages({
+      'any.required': 'Quiz ID is required',
+      'string.empty': 'Quiz ID is required',
+      'string.uuid': 'Quiz ID must be a valid UUID',
+    }), // يقبل UUID أو slug
+    student_id: generalFields.id.messages({
+      'any.required': 'Student ID is required',
+      'string.empty': 'Student ID is required',
+      'string.uuid': 'Student ID must be a valid UUID',
+    })
   }),
 };
 
