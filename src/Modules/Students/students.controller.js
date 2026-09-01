@@ -126,12 +126,20 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
     },
     studentQuizzes:{
       include:{
-        course:{
+        quiz:{
           select:{
             id:true,
-            name_ar:true,
-            name_en:true,
+            title_ar:true,
+            title_en:true,
             slug:true,
+            course:{
+              select:{
+                id:true,
+                name_ar:true,
+                name_en:true,
+                slug:true,
+              }
+            }
           }
         }
       },
