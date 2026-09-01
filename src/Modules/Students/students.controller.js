@@ -125,6 +125,16 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
       },
     },
     studentQuizzes:{
+      include:{
+        course:{
+          select:{
+            id:true,
+            name_ar:true,
+            name_en:true,
+            slug:true,
+          }
+        }
+      },
       orderBy:{
         createdAt:"desc"
       },
