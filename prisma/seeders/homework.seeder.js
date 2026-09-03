@@ -5,7 +5,10 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const pool = new pg.Pool({ connectionString: process.env.DATABASE_URL });
+const pool = new pg.Pool({
+  connectionString: process.env.DATABASE_URL,
+});
+
 const adapter = new PrismaPg(pool);
 const prisma = new PrismaClient({ adapter });
 
@@ -30,18 +33,20 @@ export async function seedHomework() {
       status: "pending",
       dueDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000),
       studentId: student.id,
-      teacherId: teacher.id,
+      userId: teacher.user_id,
       subjectId: subject?.id || null,
     },
     {
       title_ar: "Physics Newton Laws",
       title_en: "Physics Newton Laws",
-      description_ar: "Complete exercises on Newton's First and Second laws of motion.",
-      description_en: "Complete exercises on Newton's First and Second laws of motion.",
+      description_ar:
+        "Complete exercises on Newton's First and Second laws of motion.",
+      description_en:
+        "Complete exercises on Newton's First and Second laws of motion.",
       status: "graded",
       dueDate: new Date(Date.now() - 2 * 24 * 60 * 60 * 1000),
       studentId: student.id,
-      teacherId: teacher.id,
+      userId: teacher.user_id,
       subjectId: subject?.id || null,
       grade: 95.0,
       feedback: "Excellent work! Accurate calculations.",
@@ -50,11 +55,16 @@ export async function seedHomework() {
 
   for (const hw of sampleHomeworks) {
     const existing = await prisma.homework.findFirst({
-      where: { title_ar: hw.title_ar, studentId: hw.studentId },
+      where: {
+        title_ar: hw.title_ar,
+        studentId: hw.studentId,
+      },
     });
 
     if (!existing) {
-      await prisma.homework.create({ data: hw });
+      await prisma.homework.create({
+        data: hw,
+      });
     }
   }
 

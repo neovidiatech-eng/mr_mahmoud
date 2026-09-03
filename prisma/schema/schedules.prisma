@@ -9,8 +9,8 @@ model schedule {
   notes               String?
   pdf_path            String?
   description         String?
-  video_path            String?
-  slides_path           String?
+  video_path          String?
+  slides_path         String?
   link                String
   title               String
   platform            String?                @default("zoom")

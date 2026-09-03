@@ -4,7 +4,7 @@ model ranks {
   name_en           String?
   slug              String              @unique
   color             String?
-  icon              String? 
+  icon              String?
   createdAt         DateTime            @default(now())
   updatedAt         DateTime            @updatedAt
   students          student[]
@@ -27,6 +27,7 @@ model stage {
   offlineGroups offlineGroup[]
   students      student[]
   courses       courses[]
+  liveSessions  liveSession[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -70,11 +71,11 @@ model courses {
   purchaseRequests course_purchase_request[]
   purchases        CoursePurchase[]
   quizzes          quiz[]
+  liveSessions     liveSession[]
 
   @@index([rankId])
   @@index([categoryId])
   @@index([title_ar])
-  
 }
 
 model course_purchase_request {
@@ -113,25 +114,24 @@ model CoursePurchase {
 }
 
 model lectures {
-  id         String    @id @default(uuid())
-  title_ar   String    @default("")
-  title_en   String?
-  content_ar String?
-  content_en String?
-  video_path   String?
-  pdf_path     String?
-  slides_path  String?
-  date       DateTime?
-  order      Int
-  courseId   String
-  course     courses   @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  duration   String?
-  createdAt  DateTime  @default(now())
-  updatedAt  DateTime  @updatedAt
+  id          String    @id @default(uuid())
+  title_ar    String    @default("")
+  title_en    String?
+  content_ar  String?
+  content_en  String?
+  video_path  String?
+  pdf_path    String?
+  slides_path String?
+  date        DateTime?
+  order       Int
+  courseId    String
+  course      courses   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  duration    String?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
 
   userLectures user_lectures[]
   schedules    schedule[]
-
 
   @@unique([courseId, order])
   @@index([courseId])
@@ -183,4 +183,26 @@ model offlineGroupCourses {
   @@unique([groupId, courseId])
   @@index([groupId])
   @@index([courseId])
+}
+
+model liveSession {
+  id String @id @default(uuid())
+
+  courseId String
+  stageId  String
+  userId   String
+
+  roomName String @unique
+
+  startAt DateTime
+  endAt   DateTime?
+
+  status String @default("scheduled")
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  course courses @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  user   user    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  stage  stage   @relation(fields: [stageId], references: [id], onDelete: Cascade)
 }
