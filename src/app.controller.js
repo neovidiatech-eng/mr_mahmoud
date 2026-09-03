@@ -46,6 +46,8 @@ const bootstrap = async () => {
     "http://127.0.0.1:5500",
     "https://dashboard.mr-mahmoud.com",
     "https://mr-mahmoud.vercel.app",
+    "https://mr-dashboard-lyart.vercel.app",
+    "https://mr-mahmoud-front.vercel.app",
     "https://copy.agro-plus.net",
   ];
 
@@ -55,24 +57,46 @@ const bootstrap = async () => {
         .filter(Boolean)
     : defaultOrigins.map((o) => o.replace(/\/+$/, ""));
 
-  app.use(
-    cors({
-      origin: (origin, callback) => {
-        // Allow requests with no origin (mobile apps, curl, Postman)
-        if (!origin) return callback(null, true);
+  const corsOptions = {
+    origin: (origin, callback) => {
+      // Allow requests with no origin (mobile apps, curl, Postman)
+      if (!origin) return callback(null, true);
 
-        const normalizedOrigin = origin.replace(/\/+$/, "");
+      const normalizedOrigin = origin.replace(/\/+$/, "");
+
+      try {
+        const url = new URL(normalizedOrigin);
+        const isVercel = url.hostname.endsWith(".vercel.app");
+        const isLocal = url.hostname === "localhost" || url.hostname === "127.0.0.1";
+        const isAgroPlus = url.hostname.endsWith("agro-plus.net");
+        const isMrMahmoud = url.hostname.endsWith("mr-mahmoud.com");
+
+        if (
+          allowedOrigins.includes(normalizedOrigin) ||
+          isVercel ||
+          isLocal ||
+          isAgroPlus ||
+          isMrMahmoud
+        ) {
+          return callback(null, true);
+        }
+      } catch (err) {
         if (allowedOrigins.includes(normalizedOrigin)) {
           return callback(null, true);
         }
+      }
 
-        // Return false to reject CORS gracefully without throwing Express 500 error
-        return callback(null, false);
-      },
-      credentials: true,
-      optionsSuccessStatus: 200,
-    }),
-  );
+      // Return false to reject CORS gracefully without throwing Express 500 error
+      return callback(null, false);
+    },
+    credentials: true,
+    methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
+    allowedHeaders: ["Content-Type", "Authorization", "Accept-Language", "X-Requested-With", "timezone"],
+    optionsSuccessStatus: 200,
+  };
+
+  app.use(cors(corsOptions));
+  app.options("*", cors(corsOptions));
   app.use(morgan("dev"));
   app.use(globalRateLimiter);
   app.use(express.json());
