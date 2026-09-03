@@ -98,7 +98,7 @@ const bootstrap = async () => {
   };
 
   app.use(cors(corsOptions));
-  app.options("*", cors(corsOptions));
+  app.options("/{*splat}", cors(corsOptions));
   app.use(morgan("dev"));
   app.use(globalRateLimiter);
   app.use(express.json());
