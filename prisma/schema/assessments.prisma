@@ -7,7 +7,7 @@ model homework {
   status         String   @default("pending")
   dueDate        DateTime
   studentId      String
-  teacherId      String
+  userId         String
   subjectId      String?
   grade          Float?
   feedback       String?
@@ -15,10 +15,10 @@ model homework {
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
   student        student  @relation(fields: [studentId], references: [id], onDelete: Cascade)
-  teacher        teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+  user           user     @relation(fields: [userId], references: [id], onDelete: Cascade)
   subject        subject? @relation(fields: [subjectId], references: [id])
 
-  @@index([teacherId])
+  @@index([userId])
   @@index([studentId])
   @@index([subjectId])
 }

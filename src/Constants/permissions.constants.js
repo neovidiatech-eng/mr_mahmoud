@@ -213,4 +213,13 @@ export const PERMISSIONS_V2 = {
     UPDATE: "sections:update",
     DELETE: "sections:delete",
   },
+
+  LIVESESSION :{
+    READ: "livesession:read",
+    CREATE: "livesession:create",
+    UPDATE: "livesession:update",
+    DELETE: "livesession:delete",
+  }
+
+
 };

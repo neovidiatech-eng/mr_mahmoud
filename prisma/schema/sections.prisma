@@ -1,11 +1,11 @@
 model sections {
-  id        String   @id @default(uuid())
-  name_ar   String
-  name_en   String
-  course_id String?
-  course    courses? @relation(fields: [course_id], references: [id], onDelete: Cascade)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id            String          @id @default(uuid())
+  name_ar       String
+  name_en       String
+  course_id     String?
+  course        courses?        @relation(fields: [course_id], references: [id], onDelete: Cascade)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   section_items section_items[]
 
   @@index([name_ar])
@@ -14,8 +14,8 @@ model sections {
 }
 
 model section_items {
-  id String @id @default(uuid())
-  order Int @default(0)
+  id    String @id @default(uuid())
+  order Int    @default(0)
 
   section_id String
   section    sections @relation(fields: [section_id], references: [id], onDelete: Cascade)

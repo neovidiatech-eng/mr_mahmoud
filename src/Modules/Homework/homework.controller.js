@@ -13,7 +13,7 @@ const isHomeworkManagementUser = (user) =>
 export const createHomework = asyncHandler(async (req, res, next) => {
   const { title_ar, title_en, description_ar, description_en, dueDate, studentId, subjectId, status } = req.body;
 
-  const teacher = req.user.teacher;
+  const userId = req.user.userId;
   const student = await db.findOne({
     model: "student",
     where: {
@@ -30,14 +30,13 @@ export const createHomework = asyncHandler(async (req, res, next) => {
     });
   }
 
-  // If teacher, assign automatically, if admin we might need teacherId passed.
-  const assignedTeacherId = teacher?.id || req.body.teacherId;
+  const assignedUserId = userId || req.body.userId;
 
-  if (!assignedTeacherId) {
+  if (!assignedUserId) {
     return errorResponse({
       req,
       next,
-      message: "MISSING_TEACHER_ID",
+      message: "MISSING_USER_ID",
       status: 400,
     });
   }
@@ -53,7 +52,7 @@ export const createHomework = asyncHandler(async (req, res, next) => {
       studentId,
       ...(subjectId && { subjectId }),
       status: status || "pending",
-      teacherId: assignedTeacherId,
+      userId: assignedUserId,
     },
   });
 
@@ -85,22 +84,6 @@ export const updateHomework = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const isManagement = isHomeworkManagementUser(req.user);
-  const isTeacher = !!req.user.teacher;
-
-  // Check permissions: Teacher can update only their own homework.
-  if (
-    isTeacher &&
-    !isManagement &&
-    homeworkExists.teacherId !== req.user.teacher?.id
-  ) {
-    return errorResponse({
-      req,
-      next,
-      message: "UNAUTHORIZED_UPDATE",
-      status: 403,
-    });
-  }
 
   let finalDueDate = dueDate;
   if (dueDate) {
@@ -154,22 +137,7 @@ export const deleteHomework = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const isManagement = isHomeworkManagementUser(req.user);
-  const isTeacher = !!req.user.teacher;
-
-  // Teacher can only delete their own homework; admin/super_admin can delete any
-  if (
-    isTeacher &&
-    !isManagement &&
-    homeworkExists.teacherId !== req.user.teacher?.id
-  ) {
-    return errorResponse({
-      req,
-      next,
-      message: "UNAUTHORIZED_DELETE",
-      status: 403,
-    });
-  }
+  
 
   await db.deleteOne({
     model: "homework",
@@ -192,7 +160,6 @@ export const getHomework = asyncHandler(async (req, res, next) => {
     where: { id },
     include: {
       student: { include: { user: true } },
-      teacher: { include: { user: true } },
     },
   });
 
@@ -205,22 +172,6 @@ export const getHomework = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const isManagement = isHomeworkManagementUser(req.user);
-  if (!isManagement) {
-    const canStudentAccess =
-      req.user.student && homework.studentId === req.user.student.id;
-    const canTeacherAccess =
-      req.user.teacher && homework.teacherId === req.user.teacher.id;
-
-    if (!canStudentAccess && !canTeacherAccess) {
-      return errorResponse({
-        req,
-        next,
-        message: "UNAUTHORIZED_ACCESS",
-        status: 403,
-      });
-    }
-  }
 
   return successResponse({
     res,
@@ -247,7 +198,6 @@ export const getStudentHomework = asyncHandler(async (req, res, next) => {
     where: { studentId: student?.id },
     include: {
       student: { include: { user: true } },
-      teacher: { include: { user: true } },
     },
   });
 
@@ -270,23 +220,19 @@ export const getStudentHomework = asyncHandler(async (req, res, next) => {
 });
 
 export const getAllHomework = asyncHandler(async (req, res, next) => {
-  const { studentId, teacherId, status, page, limit } = req.query;
+  const { studentId, status, page, limit } = req.query;
 
   const condition = {};
 
   if (studentId) condition.studentId = studentId;
-  if (teacherId) condition.teacherId = teacherId;
   if (status) condition.status = status;
 
   const isManagement = isHomeworkManagementUser(req.user);
 
-  if (!isManagement) {
-    if (req.user.student) {
-      condition.studentId = req.user.student.id;
-    } else if (req.user.teacher) {
-      condition.teacherId = req.user.teacher.id;
-    }
+  if (!isManagement && req.user.student) {
+    condition.studentId = req.user.student.id;
   }
+
 
   const { items, pagination } = await db.findManyWithPaginationAndCount({
     model: "homework",
@@ -295,7 +241,6 @@ export const getAllHomework = asyncHandler(async (req, res, next) => {
     limit: parseInt(limit) || 10,
     include: {
       student: { include: { user: { select: { name: true, email: true } } } },
-      teacher: { include: { user: { select: { name: true, email: true } } } },
     },
     orderBy: { createdAt: "desc" },
   });
