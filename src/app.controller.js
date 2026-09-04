@@ -86,8 +86,6 @@ const bootstrap = async () => {
         }
       }
 
-
-      
       // Return false to reject CORS gracefully without throwing Express 500 error
       return callback(null, false);
     },
