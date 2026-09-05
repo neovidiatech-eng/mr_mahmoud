@@ -60,3 +60,25 @@ export const createLiveSession = async ({courseId,userId,stageId,startAt})=>{
     return liveSession
     
 } 
+
+export const joinLiveSession = async ({liveSessionId , userId})=>{
+    const liveSession = await db.findFirst({
+        model:"liveSession",
+        where:{
+            id:liveSessionId
+        }
+    })
+    if(!liveSession){
+        const error = new Error("LIVE_SESSION_NOT_FOUND")
+        error.isMessageKey = true
+        throw error
+    }
+
+    if(liveSession.status != "scheduled"){
+        const error = new Error("LIVE_SESSION_NOT_SCHEDULED")
+        error.isMessageKey = true
+        throw error
+    }
+    
+
+}
