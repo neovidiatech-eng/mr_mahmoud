@@ -15,6 +15,7 @@ import { seedSubscriptions } from "./seeders/subscriptions.seeder.js";
 import { seedSystemWallet } from "./seeders/systemWallet.seeder.js";
 import { seedRequests } from "./seeders/requests.seeder.js";
 import { seedMatrials } from "./seeders/matrials.seeder.js";
+import { seedStages } from "./seeders/stages.seeder.js";
 import { seedSettings } from "./seeders/settings.seeder.js";
 import { seedPolicies } from "./seeders/policies.seeder.js";
 import { seedProgress } from "./seeders/progress.seeder.js";
@@ -43,6 +44,7 @@ async function main() {
   await seedCurrencies();
   await seedSettings();
   await seedMatrials();
+  await seedStages();
   await seedPlans();
   await seedPermissions();
   await seedStuff();

@@ -39,13 +39,67 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
       page,
       limit,
       include: {
-        user: true,
+        user: {
+          include: {
+            student: {
+              include: {
+                stage: true,
+                rank: true,
+              },
+            },
+          },
+        },
         plan: true,
       },
     });
 
+  const requests = await Promise.all(
+    subscriptionRequests.map(async (s) => {
+      if (!s.user) return s;
+
+      const redisKey = s.user.email ? `${s.user.email}_Student_data` : null;
+      const studentDataJson = redisKey ? await redis.get(redisKey) : null;
+
+      let parsedStudentData = null;
+      if (studentDataJson) {
+        try {
+          parsedStudentData = JSON.parse(studentDataJson);
+        } catch (err) {
+          console.error("[Redis JSON Parse Error]:", err);
+        }
+      }
+
+      const stageId = parsedStudentData?.stageId || s.user.student?.stageId || null;
+      const rankId = parsedStudentData?.rankId || s.user.student?.rankId || null;
+      const parentNumber = parsedStudentData?.parentNumber || s.user.student?.parentNumber || null;
+
+      let stageObj = s.user.student?.stage || null;
+      let rankObj = s.user.student?.rank || null;
+
+      if (!stageObj && stageId) {
+        stageObj = await db.findOne({ model: "stage", where: { id: stageId } });
+      }
+
+      if (!rankObj && rankId) {
+        rankObj = await db.findOne({ model: "ranks", where: { id: rankId } });
+      }
+
+      return {
+        ...s,
+        user: {
+          ...s.user,
+          parentNumber,
+          stageId,
+          rankId,
+          stage: stageObj,
+          rank: rankObj,
+        },
+      };
+    })
+  );
+
   // Decrypt phone numbers and passwords for display
-  for (const s of subscriptionRequests) {
+  for (const s of requests) {
     if (s.user && s.user.phone && s.user.phone !== "null") {
       s.user.phone = await decryptText({ text: s.user.phone });
     }
@@ -59,9 +113,10 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
     req,
     message: "FETCH_SUCCESS",
     status: 200,
-    data: { subscriptionRequests, pagination },
+    data: { subscriptionRequests: requests, pagination },
   });
 });
+
 
 export const changeStatus = asyncHandler(async (req, res, next) => {
   const { id } = req.params;

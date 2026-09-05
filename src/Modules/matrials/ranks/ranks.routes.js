@@ -10,7 +10,6 @@ import { PERMISSIONS_V2 } from "../../../Constants/permissions.constants.js";
 import { fileValidation, localMulterUpload } from "../../../Utils/Multer/local.multer.js";
 
 const router = Router();
-const ranksResource = "ranks";
 
 const iconUploader = localMulterUpload({
   customPath: "ranks",
@@ -34,7 +33,7 @@ router.post(
   "/create",
   authentication,
   iconUploader,
-  authorizeResource(ranksResource),
+  authorize(PERMISSIONS_V2.RANKS.CREATE),
   validation(schema.createRank),
   controller.addRank,
 );
@@ -43,7 +42,7 @@ router.patch(
   "/:id",
   authentication,
   iconUploader,
-  authorizeResource(ranksResource),
+  authorize(PERMISSIONS_V2.RANKS.UPDATE),
   validation(schema.updateRank),
   controller.updateRank,
 );
@@ -51,7 +50,7 @@ router.patch(
 router.delete(
   "/:id",
   authentication,
-  authorizeResource(ranksResource),
+  authorize(PERMISSIONS_V2.RANKS.DELETE),
   validation(schema.deleteRank),
   controller.deleteRank,
 );
