@@ -1,3 +1,4 @@
+import { customAlphabet } from "nanoid";
 import * as db from "../../../database/dbService.js";
 import slugify from "slugify";
 
@@ -16,8 +17,7 @@ export const createStage = async ({ name_ar, name_en, rankId }) => {
     error.isMessageKey = true;
     throw error;
   }
-  const slug = slugify(slugSource, { lower: true, replacement: "-", trim: true }) 
-               || `stage-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
+  const slug = `${slugify(slugSource, { lower: true, replacement: "-", trim: true })}-${customAlphabet(`abcdefghijklmnopqrstuvwxyz`,3)()} ` 
  
  
   const existingStage = await db.findFirst({
