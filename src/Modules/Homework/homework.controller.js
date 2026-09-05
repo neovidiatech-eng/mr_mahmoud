@@ -13,7 +13,7 @@ const isHomeworkManagementUser = (user) =>
 export const createHomework = asyncHandler(async (req, res, next) => {
   const { title_ar, title_en, description_ar, description_en, dueDate, studentId, subjectId, status } = req.body;
 
-  const userId = req.user.userId;
+  const userId = req.user.id;
   const student = await db.findOne({
     model: "student",
     where: {
