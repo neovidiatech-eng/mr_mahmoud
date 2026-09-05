@@ -228,7 +228,7 @@ export const deleteRank = async (req, res, next) => {
   const [coursesCount, studentsCount,stagesCount] = await Promise.all([
     db.count({ model: "courses", where: { rankId: id } }),
     db.count({ model: "student", where: { rankId: id } }),
-    db.count({ model: "stages", where: { rankId: id } }),
+    db.count({ model: "stage", where: { rankId: id } }),
   ]);
 
   if (coursesCount > 0 || studentsCount > 0 || stagesCount > 0) {

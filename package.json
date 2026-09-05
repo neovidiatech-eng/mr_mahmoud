@@ -19,6 +19,7 @@
     "seed:expenses": "node prisma/seeders/expenses.seeder.js",
     "seed:system-wallet": "node prisma/seeders/systemWallet.seeder.js",
     "seed:matrials": "node prisma/seeders/matrials.seeder.js",
+    "seed:stages": "node prisma/seeders/stages.seeder.js",
     "seed:attendance": "node prisma/seeders/attendance.seeder.js",
     "seed:quiz": "node prisma/seeders/quiz.seeder.js",
     "seed:student-quiz": "node prisma/seeders/studentQuiz.seeder.js",

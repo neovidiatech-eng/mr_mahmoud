@@ -817,7 +817,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"واجب الرياضيات 1\",\n  \"title_en\": \"Math Homework 1\",\n  \"description_ar\": \"حل التمارين من الصفحة 10 إلى 15\",\n  \"description_en\": \"Solve exercises from page 10 to 15\",\n  \"dueDate\": \"2026-09-01T10:40:35.125Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\"\n}",
+              "raw": "{\n  \"title_ar\": \"واجب الرياضيات 1\",\n  \"title_en\": \"Math Homework 1\",\n  \"description_ar\": \"حل التمارين من الصفحة 10 إلى 15\",\n  \"description_en\": \"Solve exercises from page 10 to 15\",\n  \"dueDate\": \"2026-09-05T10:20:45.873Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -921,7 +921,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"dueDate\": \"2026-09-01T10:40:35.126Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"grade\": 1,\n  \"feedback\": \"string\",\n  \"status\": \"pending\"\n}",
+              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"dueDate\": \"2026-09-05T10:20:45.873Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"grade\": 1,\n  \"feedback\": \"string\",\n  \"status\": \"pending\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1104,7 +1104,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"امتحان منتصف الفصل في الفيزياء\",\n  \"title_en\": \"Midterm Physics Exam\",\n  \"subject\": \"Physics\",\n  \"dueDate\": \"2026-09-01T10:40:35.126Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\",\n  \"totalMarks\": 100,\n  \"duration\": 60\n}",
+              "raw": "{\n  \"title_ar\": \"امتحان منتصف الفصل في الفيزياء\",\n  \"title_en\": \"Midterm Physics Exam\",\n  \"subject\": \"Physics\",\n  \"dueDate\": \"2026-09-05T10:20:45.873Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\",\n  \"totalMarks\": 100,\n  \"duration\": 60\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1208,7 +1208,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"subject\": \"string\",\n  \"dueDate\": \"2026-09-01T10:40:35.126Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"totalMarks\": 1,\n  \"duration\": 1,\n  \"status\": \"pending\"\n}",
+              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"subject\": \"string\",\n  \"dueDate\": \"2026-09-05T10:20:45.873Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"totalMarks\": 1,\n  \"duration\": 1,\n  \"status\": \"pending\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4140,7 +4140,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Server hosting fee\",\n  \"currencyId\": \"EGP\",\n  \"amount\": 150,\n  \"payment_type\": \"bank_transfer\",\n  \"type\": \"general\",\n  \"status\": \"paid\",\n  \"date\": \"2026-09-01T10:40:35.126Z\"\n}",
+              "raw": "{\n  \"title\": \"Server hosting fee\",\n  \"currencyId\": \"EGP\",\n  \"amount\": 150,\n  \"payment_type\": \"bank_transfer\",\n  \"type\": \"general\",\n  \"status\": \"paid\",\n  \"date\": \"2026-09-05T10:20:45.873Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4217,7 +4217,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"string\",\n  \"currencyId\": \"string\",\n  \"amount\": 1,\n  \"payment_type\": \"string\",\n  \"type\": \"salary\",\n  \"status\": \"paid\",\n  \"date\": \"2026-09-01T10:40:35.126Z\"\n}",
+              "raw": "{\n  \"title\": \"string\",\n  \"currencyId\": \"string\",\n  \"amount\": 1,\n  \"payment_type\": \"string\",\n  \"type\": \"salary\",\n  \"status\": \"paid\",\n  \"date\": \"2026-09-05T10:20:45.873Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6286,7 +6286,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"weekStarting\": \"2026-09-01T10:40:35.126Z\",\n  \"weekEnding\": \"2026-09-01T10:40:35.126Z\",\n  \"totalClasses\": 10,\n  \"studentsTaught\": 25,\n  \"avgSessionDuration\": 60,\n  \"materialsUploaded\": 3,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 4.5\n}",
+              "raw": "{\n  \"weekStarting\": \"2026-09-05T10:20:45.873Z\",\n  \"weekEnding\": \"2026-09-05T10:20:45.873Z\",\n  \"totalClasses\": 10,\n  \"studentsTaught\": 25,\n  \"avgSessionDuration\": 60,\n  \"materialsUploaded\": 3,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 4.5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6429,7 +6429,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"weekStarting\": \"2026-09-01T10:40:35.126Z\",\n  \"weekEnding\": \"2026-09-01T10:40:35.126Z\",\n  \"totalClasses\": 1,\n  \"studentsTaught\": 1,\n  \"avgSessionDuration\": 1,\n  \"materialsUploaded\": 1,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 1\n}",
+              "raw": "{\n  \"weekStarting\": \"2026-09-05T10:20:45.873Z\",\n  \"weekEnding\": \"2026-09-05T10:20:45.873Z\",\n  \"totalClasses\": 1,\n  \"studentsTaught\": 1,\n  \"avgSessionDuration\": 1,\n  \"materialsUploaded\": 1,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6544,7 +6544,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"سياسة الخصوصية\",\n  \"title_en\": \"Privacy Policy\",\n  \"description_ar\": \"تفاصيل سياسة الخصوصية...\",\n  \"description_en\": \"Privacy policy details...\",\n  \"icon\": \"shield\",\n  \"color\": \"#4CAF50\",\n  \"lastUpdated\": \"2026-09-01T10:40:35.126Z\",\n  \"active\": true\n}",
+              "raw": "{\n  \"title_ar\": \"سياسة الخصوصية\",\n  \"title_en\": \"Privacy Policy\",\n  \"description_ar\": \"تفاصيل سياسة الخصوصية...\",\n  \"description_en\": \"Privacy policy details...\",\n  \"icon\": \"shield\",\n  \"color\": \"#4CAF50\",\n  \"lastUpdated\": \"2026-09-05T10:20:45.873Z\",\n  \"active\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6653,7 +6653,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"icon\": \"string\",\n  \"color\": \"string\",\n  \"lastUpdated\": \"2026-09-01T10:40:35.126Z\",\n  \"active\": true\n}",
+              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"icon\": \"string\",\n  \"color\": \"string\",\n  \"lastUpdated\": \"2026-09-05T10:20:45.873Z\",\n  \"active\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
