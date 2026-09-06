@@ -23,12 +23,10 @@ const uploader = localMulterUpload({
       : "matrials/lectures/",
 
   validation: [
-    ...fileValidation.video,
     ...fileValidation.pdf,
     ...fileValidation.document,
   ],
 }).fields([
-  { name: "video", maxCount: 1 },
   { name: "slides", maxCount: 1 },
   { name: "pdf", maxCount: 1 },
 ]);

@@ -80,5 +80,22 @@ export const joinLiveSession = async ({liveSessionId , userId})=>{
         throw error
     }
     
+    if(liveSession.status == "ended"){
+        const error = new Error("LIVE_SESSION_ENDED")
+        error.isMessageKey = true
+        throw error
+    }
+
+    let isModerator = false;
+
+    if(isTeacher){
+        if(liveSession.userId !== userId){
+            const error = new Error("YOU_ARE_NOT_AUTHORIZED_TO_JOIN_THIS_LIVE_SESSION")
+            error.isMessageKey = true
+            throw error
+        }
+        isModerator = true
+    }
+    
 
 }

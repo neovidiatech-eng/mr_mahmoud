@@ -19,10 +19,7 @@ export const createLectureSchema = {
       })
       .required(),
     content_en: generalFields.description.optional().allow(""),
-    videoUrl: Joi.string().allow("", null).optional(),
-    slidesUrl: Joi.string().allow("", null).optional(),
-    pdfUrl: Joi.string().allow("", null).optional(),
-    video_path: Joi.string().allow("", null).optional(),
+    video_path: Joi.string().allow("", null).required(),
     slides_path: Joi.string().allow("", null).optional(),
     pdf_path: Joi.string().allow("", null).optional(),
     order: generalFields.number.optional(),
