@@ -219,6 +219,8 @@ export const PERMISSIONS_V2 = {
     CREATE: "livesession:create",
     UPDATE: "livesession:update",
     DELETE: "livesession:delete",
+    JOIN: "livesession:join",
+    
   }
 
 

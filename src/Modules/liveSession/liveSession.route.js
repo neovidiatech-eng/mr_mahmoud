@@ -8,7 +8,6 @@ import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 
 const router = Router();
 
-console.log("LIVE SESSION ROUTER LOADED");
 
 router.post("/",
     authentication,

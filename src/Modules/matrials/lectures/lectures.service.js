@@ -6,10 +6,9 @@ import { isAdmin } from "../../../Utils/Permissions/permissions.js";
    CREATE LECTURE
 ----------------------------- */
 export const createLecture = async ({ req, res, next }) => {
-  const { courseId, title_ar, title_en, content_ar, content_en, duration, date } = req.body;
+  const { courseId, title_ar, title_en, content_ar, content_en, duration, date, video_path } = req.body;
   let { order } = req.body;
 
-  const video_path = req.files?.video?.[0]?.finalPath || req.files?.video?.[0]?.path || req.body.video_path || req.body.videoUrl || null;
   const slides_path = req.files?.slides?.[0]?.finalPath || req.files?.slides?.[0]?.path || req.body.slides_path || req.body.slidesUrl || null;
   const pdf_path = req.files?.pdf?.[0]?.finalPath || req.files?.pdf?.[0]?.path || req.body.pdf_path || req.body.pdfUrl || null;
 
@@ -147,9 +146,9 @@ export const getLectureById = async (id, requestingUser) => {
   if (!hasAccess) {
     return {
       ...lecture,
-      videoUrl: null,
-      pdfUrl: null,
-      slidesUrl: null,
+      video_path: null,
+      pdf_path: null,
+      slides_path: null,
       hasAccess: false,
     };
   }
@@ -208,7 +207,7 @@ export const updateLecture = async ({ req, res, next }) => {
     where: { id },
   });
 
-  const video_path = req.files?.video?.[0]?.finalPath || req.files?.video?.[0]?.path || req.body.video_path || req.body.videoUrl;
+  const video_path = req.body.video_path || req.body.videoUrl;
   const slides_path = req.files?.slides?.[0]?.finalPath || req.files?.slides?.[0]?.path || req.body.slides_path || req.body.slidesUrl;
   const pdf_path = req.files?.pdf?.[0]?.finalPath || req.files?.pdf?.[0]?.path || req.body.pdf_path || req.body.pdfUrl;
 
