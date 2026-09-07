@@ -26,6 +26,7 @@ import { quizPaths } from "./docs/quiz.swagger.js";
 import { stagesPaths } from "./docs/stages.swagger.js";
 import { offlineGroupsPaths } from "./docs/offlineGroups.swagger.js";
 import { sectionsPaths } from "./docs/sections.swagger.js";
+import { liveSessionPaths } from "./docs/liveSession.swagger.js";
 
 export const swaggerSpec = {
   openapi: "3.0.0",
@@ -196,6 +197,10 @@ export const swaggerSpec = {
       name: "Quizzes",
       description: "Quizzes Management",
     },
+    {
+      name: "Live Sessions",
+      description: "Jitsi-powered Live Video Sessions — creation, joining & attendance tracking",
+    },
   ],
   paths: {
     ...authPaths,
@@ -226,5 +231,6 @@ export const swaggerSpec = {
     ...postsPaths,
     ...attendancePaths,
     ...quizPaths,
+    ...liveSessionPaths,
   },
 };
