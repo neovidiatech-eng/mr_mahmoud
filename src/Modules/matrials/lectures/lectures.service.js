@@ -217,7 +217,7 @@ export const updateLecture = async ({ req, res, next }) => {
     title_en,
     content_ar,
     content_en,
-    order,
+    order:parseInt(order),
     duration,
     date,
     video_path,

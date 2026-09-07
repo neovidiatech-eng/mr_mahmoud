@@ -9,11 +9,11 @@ export const createLiveSessionSchema = {
             "string.pattern.base":"STAGE_ID_MUST_BE_UUID",
             "any.required":"STAGE_ID_IS_REQUIRED"
         }).required(),
-        courseId:generalFields.id.messages({
-            "string.base": "COURSE_ID_MUST_BE_STRING",
-            "string.empty": "COURSE_ID_IS_REQUIRED",
-            "string.pattern.base":"COURSE_ID_MUST_BE_UUID",
-            "any.required":"COURSE_ID_IS_REQUIRED"
+        planId:generalFields.id.messages({
+            "string.base": "PLAN_ID_MUST_BE_STRING",
+            "string.empty": "PLAN_ID_IS_REQUIRED",
+            "string.pattern.base":"PLAN_ID_MUST_BE_UUID",
+            "any.required":"PLAN_ID_IS_REQUIRED"
         }).required(),
         startAt:joi.date().required().messages({
             "date.base":"START_AT_MUST_BE_DATE",

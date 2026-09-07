@@ -39,6 +39,7 @@ model student {
   sessions_remaining     Float                     @default(0)
   avgRating              Float                     @default(0)
   totalReviews           Int                       @default(0)
+  attendedLiveSessions   Int                       @default(0)
   parentNumber           String?
   rankId                 String?
   stageId                String?
@@ -59,6 +60,8 @@ model student {
   studentQuizzes         studentQuiz[]
 
   attendances Attendance[]
+
+  liveSessionAttendances liveSessionAttendances[]
 }
 
 model weekly_report {

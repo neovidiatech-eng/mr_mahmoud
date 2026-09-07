@@ -28,6 +28,7 @@ model plan {
   duration             Int
   features             Json?
   sessionsCount        Int                     @default(0)
+  liveSessionsCount    Int                     @default(0)
   rescheduleCount      Int                     @default(0)
   type                 String                  @default("quarterly") // annual or monthly
   isGroup              Boolean                 @default(false)
@@ -41,6 +42,7 @@ model plan {
   subscriptions        Subscription[]
   students             student[]
   subscriptionRequests subscription_requests[]
+  liveSessions     liveSession[] 
 
   @@index([name])
 }
