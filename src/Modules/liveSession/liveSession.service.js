@@ -1,14 +1,15 @@
 import * as db from "../../database/dbService.js";
+import { generateJitsiToken } from "../../Utils/Token/jitsiToken.js";
 
-export const createLiveSession = async ({courseId,userId,stageId,startAt})=>{
-    const course = await db.findFirst({
-        model:"courses",
+export const createLiveSession = async ({planId,userId,stageId,startAt})=>{
+    const plan = await db.findFirst({
+        model:"plan",
         where:{
-            id:courseId
+            id:planId
         }
     })
-    if(!course){
-        const error = new Error("COURSE_NOT_FOUND")
+    if(!plan){
+        const error = new Error("PLAN_NOT_FOUND")
         error.isMessageKey = true
         throw error
     }
@@ -25,30 +26,30 @@ export const createLiveSession = async ({courseId,userId,stageId,startAt})=>{
         throw error
     }
 
-    if(course.stageId != stageId){
-        const error = new Error ("COURSE_MUST_BE_IN_THE_SAME_STAGE_AS_THE_LIVE_SESSION")
-        error.isMessageKey = true
-        throw error
-    }
-    const overlapping = await db.findFirst({
+    const overLabing = await db.findFirst({
         model:"liveSession",
         where:{
-            courseId,
-            status:{in:["scheduled","live"]}
+            planId,
+            status:{
+                in:["scheduled","live"]
+            }
         }
     })
-    if(overlapping){
-        const error = new Error("COURSE_ALREADY_HAS_A_LIVE_SESSION")
+
+    if(overLabing){
+        const error = new Error("PLAN_ALREADY_HAS_A_LIVE_SESSION")
         error.isMessageKey = true
         throw error
     }
 
-    const roomName = `live-${course.id}-${stage.id}-${Date.now()}`
+    
+
+    const roomName = `live-${planId}-${stageId}-${Date.now()}`
     
     const liveSession = await db.create({
         model:"liveSession",
         data:{
-            courseId,
+            planId,
             userId,
             stageId,
             startAt,
@@ -61,41 +62,107 @@ export const createLiveSession = async ({courseId,userId,stageId,startAt})=>{
     
 } 
 
-export const joinLiveSession = async ({liveSessionId , userId})=>{
-    const liveSession = await db.findFirst({
-        model:"liveSession",
-        where:{
-            id:liveSessionId
-        }
-    })
-    if(!liveSession){
-        const error = new Error("LIVE_SESSION_NOT_FOUND")
-        error.isMessageKey = true
-        throw error
+export const joinLiveSession = async ({ liveSessionId, userId, isTeacher }) => {
+  const liveSession = await db.findFirst({
+    model: "liveSession",
+    where: { id: liveSessionId },
+  });
+  if (!liveSession) {
+    const error = new Error("LIVE_SESSION_NOT_FOUND");
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  if (liveSession.status === "ended" || liveSession.status === "cancelled") {
+    const error = new Error("LIVE_SESSION_ENDED");
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  let isModerator = false;
+  let studentRecord = null;
+
+  if (isTeacher) {
+    if (liveSession.userId !== userId) {
+      const error = new Error("YOU_ARE_NOT_AUTHORIZED_TO_JOIN_THIS_LIVE_SESSION");
+      error.isMessageKey = true;
+      throw error;
+    }
+    isModerator = true;
+  } else {
+    studentRecord = await db.findFirst({
+      model: "student",
+      where: {
+        user_id: userId,
+        planId: liveSession.planId,
+        stageId: liveSession.stageId,
+      },
+    });
+    if (!studentRecord) {
+      const error = new Error("YOU_ARE_NOT_AUTHORIZED_TO_JOIN_THIS_LIVE_SESSION");
+      error.isMessageKey = true;
+      throw error;
     }
 
-    if(liveSession.status != "scheduled"){
-        const error = new Error("LIVE_SESSION_NOT_SCHEDULED")
-        error.isMessageKey = true
-        throw error
-    }
-    
-    if(liveSession.status == "ended"){
-        const error = new Error("LIVE_SESSION_ENDED")
-        error.isMessageKey = true
-        throw error
-    }
+    const existingAttendance = await db.findFirst({
+      model: "liveSessionAttendances",
+      where: {
+        liveSessionId: liveSession.id,
+        studentId: studentRecord.id,
+      },
+    });
 
-    let isModerator = false;
+    if (!existingAttendance) {
+      const plan = await db.findFirst({
+        model: "plan",
+        where: { id: liveSession.planId },
+      });
+      if (!plan) {
+        const error = new Error("PLAN_NOT_FOUND");
+        error.isMessageKey = true;
+        throw error;
+      }
 
-    if(isTeacher){
-        if(liveSession.userId !== userId){
-            const error = new Error("YOU_ARE_NOT_AUTHORIZED_TO_JOIN_THIS_LIVE_SESSION")
-            error.isMessageKey = true
-            throw error
-        }
-        isModerator = true
+      if (studentRecord.attendedLiveSessions >= plan.liveSessionsCount) {
+        const error = new Error("LIVE_SESSIONS_LIMIT_REACHED");
+        error.isMessageKey = true;
+        throw error;
+      }
+
+      await db.create({
+        model: "liveSessionAttendances",
+        data: {
+          liveSessionId: liveSession.id,
+          studentId: studentRecord.id,
+        },
+      });
+
+      await db.updateOne({
+        model: "student",
+        where: { id: studentRecord.id },
+        data: { attendedLiveSessions: { increment: 1 } },
+      });
     }
-    
+  }
 
-}
+  const requester = await db.findFirst({
+    model: "user",
+    where: { id: userId },
+  });
+  if(!requester){
+    const error = new Error("USER_NOT_FOUND");
+    error.isMessageKey = true;
+    throw error;
+ 
+  }
+
+  const token = generateJitsiToken({
+    userId:requester.id,
+    roomName: liveSession.roomName,
+    userName: requester.name,
+    userEmail: requester.email,
+    isModerator,
+  });
+
+  return { token, roomName: liveSession.roomName };
+};

@@ -71,7 +71,6 @@ model courses {
   purchaseRequests course_purchase_request[]
   purchases        CoursePurchase[]
   quizzes          quiz[]
-  liveSessions     liveSession[]
 
   @@index([rankId])
   @@index([categoryId])
@@ -186,9 +185,9 @@ model offlineGroupCourses {
 }
 
 model liveSession {
-  id String @id @default(uuid())
+  id       String @id @default(uuid())
 
-  courseId String
+  planId   String
   stageId  String
   userId   String
 
@@ -202,7 +201,24 @@ model liveSession {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  course courses @relation(fields: [courseId], references: [id], onDelete: Cascade)
-  user   user    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  plan plan @relation(fields: [planId], references: [id], onDelete: Cascade)
+  user user    @relation(fields: [userId], references: [id], onDelete: Cascade)
   stage  stage   @relation(fields: [stageId], references: [id], onDelete: Cascade)
+
+  liveSessionAttendances liveSessionAttendances[]
+}
+
+model liveSessionAttendances{
+  id      String   @id @default(uuid())
+  liveSessionId  String
+  studentId   String
+
+  joinedAt  DateTime @default(now())
+  
+  liveSession liveSession @relation(fields: [liveSessionId], references: [id], onDelete: Cascade)
+  student     student        @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  @@unique([liveSessionId, studentId])
+  @@index([liveSessionId])
+  @@index([studentId])
 }
