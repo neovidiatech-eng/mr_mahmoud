@@ -32,6 +32,11 @@ export const liveSessionPaths = {
                   example: "2026-09-10T18:00:00.000Z",
                   description: "Scheduled start date/time of the live session (ISO 8601)",
                 },
+                title: {
+                  type: "string",
+                  example: "Math Revision — Chapter 5",
+                  description: "Optional human-readable title for the session",
+                },
               },
             },
           },
@@ -49,6 +54,7 @@ export const liveSessionPaths = {
                   planId: { type: "string", format: "uuid" },
                   stageId: { type: "string", format: "uuid" },
                   userId: { type: "string", format: "uuid" },
+                  title: { type: "string", example: "Math Revision — Chapter 5" },
                   roomName: { type: "string", example: "live-<planId>-<stageId>-<timestamp>" },
                   startAt: { type: "string", format: "date-time" },
                   status: {
@@ -69,6 +75,143 @@ export const liveSessionPaths = {
           description:
             "PLAN_ALREADY_HAS_A_LIVE_SESSION — the plan already has an active or scheduled live session.",
         },
+      },
+    },
+    get: {
+      tags: ["Live Sessions"],
+      summary: "Get all live sessions",
+      description:
+        "Returns a paginated list of all live sessions, optionally filtered by title. Requires READ permission on LIVESESSION.",
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: "page",
+          in: "query",
+          required: false,
+          description: "Page number (defaults to 1)",
+          schema: { type: "integer", example: 1 },
+        },
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          description: "Number of results per page (defaults to 10)",
+          schema: { type: "integer", example: 10 },
+        },
+        {
+          name: "search",
+          in: "query",
+          required: false,
+          description: "Filter sessions by title (case-insensitive partial match)",
+          schema: { type: "string", example: "Math" },
+        },
+      ],
+      responses: {
+        200: {
+          description: "Paginated list of live sessions.",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  data: {
+                    type: "array",
+                    items: {
+                      type: "object",
+                      properties: {
+                        id: { type: "string", format: "uuid" },
+                        title: { type: "string" },
+                        roomName: { type: "string" },
+                        startAt: { type: "string", format: "date-time" },
+                        status: {
+                          type: "string",
+                          enum: ["scheduled", "live", "ended", "cancelled"],
+                        },
+                        plan: { type: "object" },
+                        stage: { type: "object" },
+                      },
+                    },
+                  },
+                  total: { type: "integer", example: 42 },
+                  page: { type: "integer", example: 1 },
+                  limit: { type: "integer", example: 10 },
+                },
+              },
+            },
+          },
+        },
+        401: { description: "Unauthorized — missing or invalid token." },
+        403: { description: "Forbidden — insufficient permissions." },
+      },
+    },
+  },
+
+  "/livesessions/{id}": {
+    get: {
+      tags: ["Live Sessions"],
+      summary: "Get a single live session",
+      description:
+        "Retrieves the full details of a specific live session by its UUID, including its associated plan and stage. Requires READ permission on LIVESESSION.",
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          description: "UUID of the live session",
+          schema: { type: "string", format: "uuid", example: "550e8400-e29b-41d4-a716-446655440001" },
+        },
+      ],
+      responses: {
+        200: {
+          description: "Live session details.",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  id: { type: "string", format: "uuid" },
+                  title: { type: "string" },
+                  roomName: { type: "string" },
+                  startAt: { type: "string", format: "date-time" },
+                  status: {
+                    type: "string",
+                    enum: ["scheduled", "live", "ended", "cancelled"],
+                  },
+                  plan: { type: "object" },
+                  stage: { type: "object" },
+                },
+              },
+            },
+          },
+        },
+        400: { description: "Validation error — invalid session ID format." },
+        401: { description: "Unauthorized — missing or invalid token." },
+        403: { description: "Forbidden — insufficient permissions." },
+        404: { description: "LIVE_SESSION_NOT_FOUND" },
+      },
+    },
+    delete: {
+      tags: ["Live Sessions"],
+      summary: "Delete a live session",
+      description:
+        "Permanently deletes a live session. Sessions with status `scheduled` cannot be deleted. Requires DELETE permission on LIVESESSION.",
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          description: "UUID of the live session to delete",
+          schema: { type: "string", format: "uuid", example: "550e8400-e29b-41d4-a716-446655440001" },
+        },
+      ],
+      responses: {
+        200: { description: "Live session deleted successfully." },
+        400: { description: "Validation error — invalid session ID format." },
+        401: { description: "Unauthorized — missing or invalid token." },
+        403: { description: "Forbidden — insufficient permissions or LIVE_SESSION_CANNOT_BE_DELETED (status is `scheduled`)." },
+        404: { description: "LIVE_SESSION_NOT_FOUND" },
       },
     },
   },

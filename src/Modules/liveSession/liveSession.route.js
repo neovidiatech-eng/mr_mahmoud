@@ -24,9 +24,10 @@ router.patch("/:id/join",
     liveController.joinLiveSession
 
 )
-router.get("/",
+router.get("/:id",
     authentication,
     authorize(PERMISSIONS_V2.LIVESESSION.READ),
+    validation(schema.liveSessionIdSchema),
     liveController.getLiveSession
 )
 router.get("/",

@@ -64,6 +64,18 @@ export const joinLiveSession = async ({ liveSessionId, userId }) => {
     throw error;
   }
 
+    const requester = await db.findFirst({
+    model: "user",
+    where: { id: userId },
+  });
+  if(!requester){
+    const error = new Error("USER_NOT_FOUND");
+    error.isMessageKey = true;
+    throw error;
+ 
+  }
+
+  const isTeacher = requester.role === "teacher"
   let isModerator = false;
   let studentRecord = null;
 
@@ -130,16 +142,6 @@ export const joinLiveSession = async ({ liveSessionId, userId }) => {
     }
   }
 
-  const requester = await db.findFirst({
-    model: "user",
-    where: { id: userId },
-  });
-  if(!requester){
-    const error = new Error("USER_NOT_FOUND");
-    error.isMessageKey = true;
-    throw error;
- 
-  }
   
 
   const token = generateJitsiToken({
