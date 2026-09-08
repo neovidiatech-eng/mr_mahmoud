@@ -1,7 +1,5 @@
-import { error } from "node:console";
 import * as db from "../../database/dbService.js";
 import { generateJitsiToken } from "../../Utils/Token/jitsiToken.js";
-import { mode } from "crypto-js";
 
 export const createLiveSession = async ({planId,userId,stageId,startAt,title})=>{
     const plan = await db.findFirst({
@@ -49,7 +47,7 @@ export const createLiveSession = async ({planId,userId,stageId,startAt,title})=>
     
 } 
 
-export const joinLiveSession = async ({ liveSessionId, userId, isTeacher }) => {
+export const joinLiveSession = async ({ liveSessionId, userId }) => {
   const liveSession = await db.findFirst({
     model: "liveSession",
     where: { id: liveSessionId },
@@ -142,6 +140,7 @@ export const joinLiveSession = async ({ liveSessionId, userId, isTeacher }) => {
     throw error;
  
   }
+  
 
   const token = generateJitsiToken({
     userId:requester.id,
