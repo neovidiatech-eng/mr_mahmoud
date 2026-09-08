@@ -20,7 +20,10 @@ export const createLiveSessionSchema = {
             "date.empty":"START_AT_IS_REQUIRED",
             "any.required":"START_AT_IS_REQUIRED"
         }).required(),
-        
+        title:joi.string().optional().messages({
+            "string.base":"TITLE_MUST_BE_STRING",
+            "string.empty":"TITLE_CANNOT_BE_EMPTY"
+        })
     })
 }
 
