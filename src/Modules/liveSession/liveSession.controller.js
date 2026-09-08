@@ -2,12 +2,13 @@ import { asyncHandler, successResponse } from "../../Utils/Response.js";
 import * as liveservice from "./liveSession.service.js"
 
 export const createLiveSession = asyncHandler(async(req,res,next)=>{
-    const {stageId,planId,startAt} = req.body
+    const {stageId,planId,startAt,title} = req.body
     const userId =req.user.id
     const liveSession = await liveservice.createLiveSession({
         stageId,
         planId,
         startAt,
+        title,
         userId
     })
     return successResponse({
@@ -55,7 +56,7 @@ export const getLiveSession = asyncHandler(async(req,res,next)=>{
 })
 export const getAllLiveSessions = asyncHandler(async(req,res,next)=>{
     const {page,limit,search}= req.query
-    const liveSessions = await liveservice.getAllLiveSessions({page,limit})
+    const liveSessions = await liveservice.getAllLiveSessions({page,limit,search})
     return successResponse({
         req,
         res,

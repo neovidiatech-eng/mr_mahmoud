@@ -1,8 +1,9 @@
 import { error } from "node:console";
 import * as db from "../../database/dbService.js";
 import { generateJitsiToken } from "../../Utils/Token/jitsiToken.js";
+import { mode } from "crypto-js";
 
-export const createLiveSession = async ({planId,userId,stageId,startAt})=>{
+export const createLiveSession = async ({planId,userId,stageId,startAt,title})=>{
     const plan = await db.findFirst({
         model:"plan",
         where:{
@@ -39,6 +40,7 @@ export const createLiveSession = async ({planId,userId,stageId,startAt})=>{
             stageId,
             startAt,
             roomName,
+            title,
             status:"scheduled"
         }
     })
@@ -175,14 +177,18 @@ export const getLiveSession = async({liveSessionId})=>{
 export const getAllLiveSessions = async({page , limit,search })=>{
   const where ={}
   if(search){
-    where.OR = [
-      
-    ]
+    where.title = {
+      contains:search,
+      mode: "insensitive",
+    }
   }
   const result = await db.findManyWithPaginationAndCount({
     model:"liveSession",
-    page:page?page:1,
-    limit:limit?limit:10,
+    page:Number(page)||1,
+    limit:Number(limit)||10,
+    orderBy:{
+      startAt:"desc",
+    },
     include:{
       plan:true,
       stage:true
@@ -215,5 +221,7 @@ export const deleteLiveSession = async({liveSessionId})=>{
     }
   })
 }
+
+
 
   
