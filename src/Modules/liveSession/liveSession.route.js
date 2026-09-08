@@ -24,5 +24,15 @@ router.patch("/:id/join",
     liveController.joinLiveSession
 
 )
+router.get("/",
+    authentication,
+    authorize(PERMISSIONS_V2.LIVESESSION.READ),
+    liveController.getLiveSession
+)
+router.get("/",
+    authentication,
+    authorize(PERMISSIONS_V2.LIVESESSION.READ),
+    liveController.getAllLiveSessions
+)
 
-export default router
+export default router 

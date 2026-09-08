@@ -37,3 +37,30 @@ export const joinLiveSession = asyncHandler(async(req,res,next)=>{
         data:result
     })
 })
+
+export const getLiveSession = asyncHandler(async(req,res,next)=>{
+    const {id}= req.params;
+
+    const liveSession = await liveservice.getLiveSession({liveSessionId:id})
+
+    return successResponse({
+        req,
+        res,
+        status:200,
+        message:"FETCH_SUCCESS",
+        data:liveSession
+    })
+
+
+})
+export const getAllLiveSessions = asyncHandler(async(req,res,next)=>{
+    const {page,limit}= req.query
+    const liveSessions = await liveservice.getAllLiveSessions({page,limit})
+    return successResponse({
+        req,
+        res,
+        status:200,
+        message:"FETCH_SUCCESS",
+        data:liveSessions
+    })
+})
