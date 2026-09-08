@@ -1,4 +1,4 @@
-export const iveSessionsStatus = {
+export const liveSessionsStatus = {
   SCHEDULED: "scheduled",
   LIVE: "live",
   COMPLETED: "completed",

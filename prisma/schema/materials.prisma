@@ -190,6 +190,7 @@ model liveSession {
   planId   String
   stageId  String
   userId   String
+  title    String? @default("")
 
   roomName String @unique
 
@@ -211,7 +212,7 @@ model liveSession {
 model liveSessionAttendances{
   id      String   @id @default(uuid())
   liveSessionId  String
-  studentId   String
+  studentId   String  
 
   joinedAt  DateTime @default(now())
   
