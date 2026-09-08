@@ -166,3 +166,37 @@ export const joinLiveSession = async ({ liveSessionId, userId, isTeacher }) => {
 
   return { token, roomName: liveSession.roomName };
 };
+
+export const getLiveSession = async({liveSessionId})=>{
+  const liveSession = await db.findFirst({
+    model:"liveSession",
+    where:{
+      id:liveSessionId,
+    },
+    include:{
+      plan:true,
+      stage:true
+    }
+  });
+  if(!liveSession){
+    const error = new Error("LIVE_SESSION_NOT_FOUND")
+    error.isMessageKey=true
+    throw error
+  }
+
+  return liveSession
+}
+
+export const getAllLiveSessions = async({page , limit })=>{
+  const result = await db.findManyWithPaginationAndCount({
+    model:"liveSession",
+    page:page?page:1,
+    limit:limit?limit:10,
+    include:{
+      plan:true,
+      stage:true
+    }
+  })
+  return result
+}
+  
