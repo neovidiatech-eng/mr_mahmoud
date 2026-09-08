@@ -1,3 +1,4 @@
+import { error } from "node:console";
 import * as db from "../../database/dbService.js";
 import { generateJitsiToken } from "../../Utils/Token/jitsiToken.js";
 
@@ -22,22 +23,6 @@ export const createLiveSession = async ({planId,userId,stageId,startAt})=>{
     })
     if(!stage){
         const error = new Error("STAGE_NOT_FOUND")
-        error.isMessageKey = true
-        throw error
-    }
-
-    const overLabing = await db.findFirst({
-        model:"liveSession",
-        where:{
-            planId,
-            status:{
-                in:["scheduled","live"]
-            }
-        }
-    })
-
-    if(overLabing){
-        const error = new Error("PLAN_ALREADY_HAS_A_LIVE_SESSION")
         error.isMessageKey = true
         throw error
     }
@@ -187,7 +172,13 @@ export const getLiveSession = async({liveSessionId})=>{
   return liveSession
 }
 
-export const getAllLiveSessions = async({page , limit })=>{
+export const getAllLiveSessions = async({page , limit,search })=>{
+  const where ={}
+  if(search){
+    where.OR = [
+      
+    ]
+  }
   const result = await db.findManyWithPaginationAndCount({
     model:"liveSession",
     page:page?page:1,
@@ -199,4 +190,30 @@ export const getAllLiveSessions = async({page , limit })=>{
   })
   return result
 }
+
+export const deleteLiveSession = async({liveSessionId})=>{
+  const liveSession = await db.findFirst({
+    model:"liveSession",
+    where:{
+      id:liveSessionId
+    }
+  })
+  if(!liveSession){
+    const error = new Error ("LIVE_SESSION_NOT_FOUND")
+    error.isMessageKey = true
+    throw error
+  }
+  if(liveSession.status === "scheduled"){
+    const error = new Error ("LIVE_SESSION_CANNOT_BE_DELETED")
+    error.isMessageKey = true
+    throw error
+  }
+  return await db.deleteOne({
+    model:"liveSession",
+    where:{
+      id:liveSessionId
+    }
+  })
+}
+
   

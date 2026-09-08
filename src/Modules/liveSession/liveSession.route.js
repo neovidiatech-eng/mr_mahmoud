@@ -34,5 +34,11 @@ router.get("/",
     authorize(PERMISSIONS_V2.LIVESESSION.READ),
     liveController.getAllLiveSessions
 )
+router.delete("/:id",
+    authentication,
+    authorize(PERMISSIONS_V2.LIVESESSION.DELETE),
+    liveController.deleteLiveSession
+)
+
 
 export default router 

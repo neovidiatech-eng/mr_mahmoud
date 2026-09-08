@@ -54,7 +54,7 @@ export const getLiveSession = asyncHandler(async(req,res,next)=>{
 
 })
 export const getAllLiveSessions = asyncHandler(async(req,res,next)=>{
-    const {page,limit}= req.query
+    const {page,limit,search}= req.query
     const liveSessions = await liveservice.getAllLiveSessions({page,limit})
     return successResponse({
         req,
@@ -64,3 +64,23 @@ export const getAllLiveSessions = asyncHandler(async(req,res,next)=>{
         data:liveSessions
     })
 })
+
+export const deleteLiveSession = asyncHandler(async(req,res,next)=>{
+    const {id} = req.params;
+    await liveservice.deleteLiveSession({
+        liveSessionId:id,
+    })
+    return successResponse({
+        req,
+        res,
+        status:200,
+        message:"DELETE_SUCCESS"
+    })
+})
+
+
+
+export const updateLiveSession = asyncHandler(async(req,res,next)=>{
+
+})
+
