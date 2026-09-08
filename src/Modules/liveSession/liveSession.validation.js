@@ -22,8 +22,7 @@ export const createLiveSessionSchema = {
         }).required(),
         title:joi.string().optional().messages({
             "string.base":"TITLE_MUST_BE_STRING",
-            "string.empty":"TITLE_CANNOT_BE_EMPTY",
-            "any.required":"TITLE_REQUIRED"
+            "string.empty":"TITLE_CANNOT_BE_EMPTY"
         })
     })
 }
