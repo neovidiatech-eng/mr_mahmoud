@@ -23,12 +23,11 @@ export const createLiveSession = asyncHandler(async(req,res,next)=>{
 export const joinLiveSession = asyncHandler(async(req,res,next)=>{
     const {id} = req.params
     const userId = req.user.id
-    const isTeacher = req.user.role?.name === "teacher";
 
     const result = await liveservice.joinLiveSession({
         liveSessionId:id,
         userId,
-        isTeacher
+        
     })
     return successResponse({
         req,
