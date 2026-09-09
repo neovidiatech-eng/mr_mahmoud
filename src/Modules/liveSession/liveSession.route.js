@@ -47,6 +47,17 @@ router.patch("/:id/start",
     validation(schema.liveSessionIdSchema),
     liveController.startLiveSession
 )
-
+router.patch("/:id",
+    authentication,
+    authorize(PERMISSIONS_V2.LIVESESSION.UPDATE),
+    validation(schema.updateLiveSessionSchema),
+    liveController.updateLiveSession
+)
+router.patch("/:id/end",
+    authentication,
+    authorize(PERMISSIONS_V2.LIVESESSION.END),
+    validation(schema.liveSessionIdSchema),
+    liveController.endLiveSession
+)
 
 export default router 
