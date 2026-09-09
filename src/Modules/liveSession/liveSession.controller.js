@@ -119,3 +119,18 @@ export const updateLiveSession = asyncHandler(async(req,res,next)=>{
     })
     
 } )
+export const endLiveSession = asyncHandler(async(req,res,next)=>{
+    const {id} = req.params;
+    const userId = req.user.id;
+    const liveSession = await liveservice.endLiveSession({
+        liveSessionId:id,
+        userId
+    })
+    return successResponse({
+        req,
+        res,
+        status:200,
+        message:"LIVE_SESSION_END_SUCCESS",
+        data:liveSession
+    })
+})
