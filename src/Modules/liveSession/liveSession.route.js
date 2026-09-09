@@ -38,11 +38,13 @@ router.get("/",
 router.delete("/:id",
     authentication,
     authorize(PERMISSIONS_V2.LIVESESSION.DELETE),
+    validation(schema.liveSessionIdSchema),
     liveController.deleteLiveSession
 )
 router.patch("/:id/start",
     authentication,
     authorize(PERMISSIONS_V2.LIVESESSION.START),
+    validation(schema.liveSessionIdSchema),
     liveController.startLiveSession
 )
 
