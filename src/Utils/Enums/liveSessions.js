@@ -3,4 +3,5 @@ export const liveSessionsStatus = {
   LIVE: "live",
   COMPLETED: "completed",
   CANCELLED: "cancelled",
+  ENDED: "ended",
 };
