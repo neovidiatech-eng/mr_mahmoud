@@ -40,6 +40,11 @@ router.delete("/:id",
     authorize(PERMISSIONS_V2.LIVESESSION.DELETE),
     liveController.deleteLiveSession
 )
+router.patch("/:id/start",
+    authentication,
+    authorize(PERMISSIONS_V2.LIVESESSION.START),
+    liveController.startLiveSession
+)
 
 
 export default router 

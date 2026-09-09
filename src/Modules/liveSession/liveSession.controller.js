@@ -80,7 +80,42 @@ export const deleteLiveSession = asyncHandler(async(req,res,next)=>{
 
 
 
-export const updateLiveSession = asyncHandler(async(req,res,next)=>{
+export const startLiveSession = asyncHandler(async(req,res,next)=>{
+    const {id} = req.params;
+    const userId = req.user.id;
+    const liveSession = await liveservice.startLiveSession({
+        liveSessionId:id,
+        userId
+    })
+    return successResponse({
+        req,
+        res,
+        status:200,
+        message:"LIVE_SESSION_START_SUCCESS",
+        data:liveSession
+    })
 
 })
 
+export const updateLiveSession = asyncHandler(async(req,res,next)=>{
+    const {id} = req.params;
+    const userId = req.user.id;
+    const {planId,stageId,startAt,title} = req.body;
+
+    const liveSession = await liveservice.updateLiveSession({
+        liveSessionId:id,
+        userId,
+        planId,
+        stageId,
+        startAt,
+        title
+    })
+    return successResponse({
+        req,
+        res,
+        status:200,
+        message:"UPDATE_SUCCESS",
+        data:liveSession
+    })
+    
+} )
