@@ -1,5 +1,6 @@
 import joi from "joi";
 import { generalFields } from "../../Utils/GeneralFields/index.js";
+import { liveSessionsStatus } from "../../Utils/Enums/liveSessions.js";
 
 export const createLiveSessionSchema = {
     body:joi.object().keys({
@@ -62,6 +63,15 @@ export const updateLiveSessionSchema = {
         title:joi.string().optional().messages({
             "string.base":"TITLE_MUST_BE_STRING",
             "string.empty":"TITLE_CANNOT_BE_EMPTY"
-        })
+        }),
+        status: joi
+      .string()
+      .valid(...Object.values(liveSessionsStatus))
+      .optional()
+      .messages({
+        "string.base": "STATUS_MUST_BE_STRING",
+        "any.only": "INVALID_STATUS",
+      })
+
     })
 }
