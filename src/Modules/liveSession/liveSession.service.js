@@ -439,6 +439,7 @@ export const getStudentUpcomingLiveSessions = async ({ userId, page, limit, sear
   return result;
 };
 
+
 export const getStudentNextLiveSession = async ({ userId }) => {
   const student = await db.findFirst({
     model: "student",
@@ -457,11 +458,13 @@ export const getStudentNextLiveSession = async ({ userId }) => {
     throw error;
   }
 
-  const now = new Date();
+  const now = new Date()
+
   const nextLiveSession = await db.findFirst({
     model: "liveSession",
     where: {
       stageId: student.stageId,
+      planId:student.planId,
       startAt: { gte: now },
       status: {
         notIn: [liveSessionsStatus.CANCELLED, liveSessionsStatus.ENDED],
