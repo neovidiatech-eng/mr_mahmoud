@@ -221,9 +221,10 @@ export const PERMISSIONS_V2 = {
     DELETE: "livesession:delete",
     JOIN: "livesession:join",
     START:"livesession:start",
-    
-    
   }
+
+
+ 
 
 
 };
