@@ -80,7 +80,7 @@ export const joinLiveSession = async ({ liveSessionId, userId }) => {
  
   }
 
-  const isTeacher = requester.role === "teacher"
+  const isTeacher = requester.role.name === "teacher"
   let isModerator = false;
   let studentRecord = null;
 

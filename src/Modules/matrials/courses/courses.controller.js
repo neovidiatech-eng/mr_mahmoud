@@ -51,3 +51,9 @@ export const getCourseLecturesForStudent = asyncHandler(async (req, res, next) =
     const localized = localizeCourse(result, req.lang);
     return successResponse({ res, req, message: "FETCH_SUCCESS", data: localized });
 });
+
+export const getMyPurchasedCourses = asyncHandler(async (req, res, next) => {
+    const result = await coursesService.getPurchasedCourses({ req, res, next });
+    const items = result?.map((c) => localizeCourse(c, req.lang));
+    return successResponse({ res, req, message: "FETCH_SUCCESS", data: items });
+});

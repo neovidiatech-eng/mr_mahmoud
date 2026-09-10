@@ -19,6 +19,12 @@ router.get(
 );
 
 router.get(
+  "/my-courses",
+  authentication,
+  coursesController.getMyPurchasedCourses,
+);
+
+router.get(
   "/:id",
   validation(coursesValidation.courseIdSchema),
   coursesController.getCourse,
