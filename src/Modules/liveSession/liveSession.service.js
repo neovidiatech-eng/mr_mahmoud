@@ -375,7 +375,7 @@ export const endLiveSession = async ({liveSessionId,userId})=>{
     },
     data:{
       status:liveSessionsStatus.ENDED,
-      endedAt:new Date()
+      endAt:new Date()
     }
   })
   return updatedLiveSession

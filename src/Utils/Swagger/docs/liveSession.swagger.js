@@ -377,7 +377,7 @@ export const liveSessionPaths = {
                   title: { type: "string" },
                   roomName: { type: "string" },
                   startAt: { type: "string", format: "date-time" },
-                  endedAt: { type: "string", format: "date-time", description: "Timestamp when the session was ended" },
+                  endAt: { type: "string", format: "date-time", description: "Timestamp when the session was ended" },
                   status: {
                     type: "string",
                     enum: ["scheduled", "live", "ended", "cancelled"],
