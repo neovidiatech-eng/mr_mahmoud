@@ -146,6 +146,91 @@ export const liveSessionPaths = {
     },
   },
 
+  "/livesessions/student/upcoming": {
+    get: {
+      tags: ["Live Sessions"],
+      summary: "Get upcoming live sessions for the authenticated student",
+      description:
+        "Returns a paginated list of upcoming live sessions (where startAt >= current time) matching the student's stage resolved from their token.",
+      security: [{ bearerAuth: [] }],
+      parameters: [
+        {
+          name: "page",
+          in: "query",
+          required: false,
+          description: "Page number (defaults to 1)",
+          schema: { type: "integer", example: 1 },
+        },
+        {
+          name: "limit",
+          in: "query",
+          required: false,
+          description: "Number of results per page (defaults to 10)",
+          schema: { type: "integer", example: 10 },
+        },
+        {
+          name: "search",
+          in: "query",
+          required: false,
+          description: "Filter sessions by title (case-insensitive partial match)",
+          schema: { type: "string", example: "Physics" },
+        },
+      ],
+      responses: {
+        200: {
+          description: "Paginated list of upcoming live sessions for student's stage.",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  message: { type: "string", example: "FETCH_SUCCESS" },
+                  data: {
+                    type: "object",
+                    properties: {
+                      items: { type: "array", items: { type: "object" } },
+                      pagination: { type: "object" },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
+        401: { description: "Unauthorized — missing or invalid token." },
+        404: { description: "STUDENT_NOT_FOUND | STUDENT_HAS_NO_STAGE" },
+      },
+    },
+  },
+
+  "/livesessions/student/next": {
+    get: {
+      tags: ["Live Sessions"],
+      summary: "Get the immediate next upcoming live session for the authenticated student",
+      description:
+        "Returns the single next upcoming live session (where startAt >= current time) matching the student's stage resolved from their token.",
+      security: [{ bearerAuth: [] }],
+      responses: {
+        200: {
+          description: "Next upcoming live session object, or null if none.",
+          content: {
+            "application/json": {
+              schema: {
+                type: "object",
+                properties: {
+                  message: { type: "string", example: "FETCH_SUCCESS" },
+                  data: { type: "object", nullable: true },
+                },
+              },
+            },
+          },
+        },
+        401: { description: "Unauthorized — missing or invalid token." },
+        404: { description: "STUDENT_NOT_FOUND | STUDENT_HAS_NO_STAGE" },
+      },
+    },
+  },
+
   "/livesessions/{id}": {
     get: {
       tags: ["Live Sessions"],

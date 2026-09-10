@@ -32,6 +32,7 @@ export const authorize = (permissionCode) => {
         "lectures:read",
         "sections:read",
         "exams:read",
+        "livesession:read",
       ];
       if (studentAllowedPermissions.includes(permissionCode)) {
         return next();

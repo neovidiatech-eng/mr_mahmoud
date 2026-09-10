@@ -75,3 +75,11 @@ export const updateLiveSessionSchema = {
 
     })
 }
+
+export const getStudentUpcomingLiveSessionsSchema = {
+    query: joi.object().keys({
+        page: joi.number().integer().min(1).optional(),
+        limit: joi.number().integer().min(1).optional(),
+        search: joi.string().optional()
+    })
+}

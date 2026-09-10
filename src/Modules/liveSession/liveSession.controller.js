@@ -134,3 +134,39 @@ export const endLiveSession = asyncHandler(async(req,res,next)=>{
         data:liveSession
     })
 })
+
+export const getStudentUpcomingLiveSessions = asyncHandler(async (req, res, next) => {
+    const userId = req.user.id;
+    const { page, limit, search } = req.query;
+
+    const result = await liveservice.getStudentUpcomingLiveSessions({
+        userId,
+        page,
+        limit,
+        search
+    });
+
+    return successResponse({
+        req,
+        res,
+        status: 200,
+        message: "FETCH_SUCCESS",
+        data: result
+    });
+});
+
+export const getStudentNextLiveSession = asyncHandler(async (req, res, next) => {
+    const userId = req.user.id;
+
+    const result = await liveservice.getStudentNextLiveSession({
+        userId
+    });
+
+    return successResponse({
+        req,
+        res,
+        status: 200,
+        message: "FETCH_SUCCESS",
+        data: result
+    });
+});

@@ -380,3 +380,112 @@ export const endLiveSession = async ({liveSessionId,userId})=>{
   })
   return updatedLiveSession
 }
+
+export const getStudentUpcomingLiveSessions = async ({ userId, page, limit, search }) => {
+  const student = await db.findFirst({
+    model: "student",
+    where: { user_id: userId },
+  });
+
+  if (!student) {
+    const error = new Error("STUDENT_NOT_FOUND");
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  if (!student.stageId) {
+    const error = new Error("STUDENT_HAS_NO_STAGE");
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  const now = new Date();
+  const where = {
+    stageId: student.stageId,
+    startAt: { gte: now },
+    status: {
+      notIn: [liveSessionsStatus.CANCELLED, liveSessionsStatus.ENDED],
+    },
+  };
+
+  if (search) {
+    where.title = {
+      contains: search,
+      mode: "insensitive",
+    };
+  }
+
+  const result = await db.findManyWithPaginationAndCount({
+    model: "liveSession",
+    where,
+    page: Number(page) || 1,
+    limit: Number(limit) || 10,
+    orderBy: {
+      startAt: "asc",
+    },
+    include: {
+      plan: true,
+      stage: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          image: true,
+        },
+      },
+    },
+  });
+
+  return result;
+};
+
+export const getStudentNextLiveSession = async ({ userId }) => {
+  const student = await db.findFirst({
+    model: "student",
+    where: { user_id: userId },
+  });
+
+  if (!student) {
+    const error = new Error("STUDENT_NOT_FOUND");
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  if (!student.stageId) {
+    const error = new Error("STUDENT_HAS_NO_STAGE");
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  const now = new Date();
+  const nextLiveSession = await db.findFirst({
+    model: "liveSession",
+    where: {
+      stageId: student.stageId,
+      startAt: { gte: now },
+      status: {
+        notIn: [liveSessionsStatus.CANCELLED, liveSessionsStatus.ENDED],
+      },
+    },
+    orderBy: {
+      startAt: "asc",
+    },
+    include: {
+      plan: true,
+      stage: true,
+      user: {
+        select: {
+          id: true,
+          name: true,
+          email: true,
+          phone: true,
+          image: true,
+        },
+      },
+    },
+  });
+
+  return nextLiveSession;
+};
