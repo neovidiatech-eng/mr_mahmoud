@@ -269,6 +269,8 @@ export const updateLiveSession = async({liveSessionId,userId,planId,stageId,star
       id:liveSessionId
     }
   })
+  console.log({liveSession});
+
   if(!liveSession){
     const error = new Error("LIVE_SESSION_NOT_FOUND")
     error.isMessageKey=true
@@ -281,6 +283,7 @@ export const updateLiveSession = async({liveSessionId,userId,planId,stageId,star
   }
   
   if(liveSession.status !== liveSessionsStatus.SCHEDULED || liveSession.status !== liveSessionsStatus.LIVE || liveSession.status !== liveSessionsStatus.ENDED){
+     
     const error = new Error("LIVE_SESSION_CANNOT_BE_UPDATED")
     error.isMessageKey=true
     throw error
