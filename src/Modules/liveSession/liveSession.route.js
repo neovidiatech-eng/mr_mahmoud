@@ -20,6 +20,7 @@ router.post("/",
 router.patch("/:id/join",
     authentication,
     authorize(PERMISSIONS_V2.LIVESESSION.JOIN),
+    
     validation(schema.liveSessionIdSchema),
     liveController.joinLiveSession
 
