@@ -14,7 +14,7 @@ export const studentData = [
   {
     name: "John Doe",
     email: "john.doe@mr-mahmoud.com",
-    password: "Password@123",
+    password: "[PASSWORD]",
     phone: "9998887776",
     code_country: "+20",
     birth_date: new Date("2000-01-01T00:00:00Z"),

@@ -120,7 +120,7 @@ export const seedPermissions = async () => {
         PERMISSIONS_V2.COURSE_PURCHASE_REQUESTS.CREATE,
         PERMISSIONS_V2.QUIZ.READ,
         PERMISSIONS_V2.QUIZ.SUBMIT,
-        PERMISSIONS_V2.LIVESESSION.JOIN,
+        PERMISSIONS_V2.LIVESESSION.JOIN,  
       ];
       const pObjs = await prisma.permission.findMany({ where: { code: { in: studentCodes } } });
       permissionsToAssign = pObjs.map((p) => p.id);
