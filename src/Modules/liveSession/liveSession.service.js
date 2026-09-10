@@ -80,16 +80,11 @@ export const joinLiveSession = async ({ liveSessionId, userId }) => {
  
   }
 
-  const isTeacher = requester.role.name === "teacher"
+  const isOwner = liveSession.userId === userId
   let isModerator = false;
   let studentRecord = null;
 
-  if (isTeacher) {
-    if (liveSession.userId !== userId) {
-      const error = new Error("YOU_ARE_NOT_AUTHORIZED_TO_JOIN_THIS_LIVE_SESSION");
-      error.isMessageKey = true;
-      throw error;
-    }
+  if (isOwner) {
     isModerator = true;
   } else {
     studentRecord = await db.findFirst({
@@ -262,13 +257,12 @@ export const startLiveSession = async({liveSessionId,userId})=>{
     where:{id:liveSessionId},
     data:{
       status:liveSessionsStatus.LIVE,
-      startedAt:new Date()
     }
   })
   return updatedLiveSession
 }
 
-export const updateLiveSession = async({liveSessionId,userId,planId,stageId,startAt,title})=>{
+export const updateLiveSession = async({liveSessionId,userId,planId,stageId,startAt,title,status})=>{
   const liveSession = await db.findFirst({
     model:"liveSession",
     where:{
@@ -319,6 +313,21 @@ export const updateLiveSession = async({liveSessionId,userId,planId,stageId,star
       throw error
     } 
   }
+  if(status){
+    const allowedStatus = [
+      liveSessionsStatus.SCHEDULED,
+      liveSessionsStatus.CANCELLED,
+      liveSessionsStatus.LIVE,
+      liveSessionsStatus.COMPLETED
+    ]
+    if(!allowedStatus.includes(status)){
+      const error = new Error("INVALID_STATUS")
+      error.isMessageKey = true
+      throw error
+    }
+    
+
+  }
   const updatedLiveSession = await db.updateOne({
     model:"liveSession",
     where:{id:liveSessionId},
@@ -327,7 +336,7 @@ export const updateLiveSession = async({liveSessionId,userId,planId,stageId,star
       ...stageId && {stageId},
       ...startAt && {startAt},
       ...title && {title},
-      
+      ...status && {status}
     }
   })
   return updatedLiveSession
@@ -335,3 +344,39 @@ export const updateLiveSession = async({liveSessionId,userId,planId,stageId,star
 
 }
   
+export const endLiveSession = async ({liveSessionId,userId})=>{
+  const liveSession = await db.findFirst({
+    model:"liveSession",
+    where:{
+      id:liveSessionId
+    }
+    
+  })
+  if(!liveSession){
+    const error = new Error("LIVE_SESSION_NOT_FOUND")
+    error.isMessageKey = true
+    throw error
+  }
+  if(liveSession.userId !== userId){
+    const error = new Error("YOU_ARE_NOT_AUTHORIZED_TO_END_THIS_LIVE_SESSION")
+    error.isMessageKey = true
+    throw error
+  }
+  if(liveSession.status ===  liveSessionsStatus.ENDED || liveSession.status === liveSessionsStatus.CANCELLED){
+    const error = new Error("LIVE_SESSION_ALREADY_ENDED_OR_CANCELLED")
+    error.isMessageKey = true
+    throw error
+  }
+  
+  const updatedLiveSession = await db.updateOne({
+    model:"liveSession",
+    where:{
+      id:liveSessionId
+    },
+    data:{
+      status:liveSessionsStatus.ENDED,
+      endAt:new Date()
+    }
+  })
+  return updatedLiveSession
+}

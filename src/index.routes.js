@@ -26,7 +26,6 @@ import transactionsRouter from "./Modules/Transactions/Transactions/Transactions
 import withdrawalsRouter from "./Modules/Withdrawals/withdrawals.routes.js";
 import chatRouter from "./Modules/chat/chat.routes.js";
 import settingsRouter from "./Modules/Settings/settings.routes.js";
-import materialsRouter from "./Modules/matrials/matrials.routes.js";
 import weeklyReportsRouter from "./Modules/WeeklyReports/weeklyReports.routes.js";
 import policiesRouter from "./Modules/Policies/policies.routes.js";
 import supportRouter from "./Modules/Support/support.routes.js";
@@ -37,7 +36,7 @@ import liveSessionRouter from "./Modules/liveSession/liveSession.route.js";
 import attendanceRouter from "./Modules/Attendance/attendance.routes.js";
 import quizRouter from "./Modules/quiz/quiz.routes.js";
 import offlineGroupsRouter from "./Modules/OfflineGroups/offline.routes.js";
-
+import matRouter from "./Modules/matrials/matrials.routes.js"
 import { ROLES, ADMIN_ROLES } from "./Utils/Permissions/permissions.js";
 
 const rootRouter = Router();
@@ -52,6 +51,8 @@ rootRouter.use("/uploads", express.static(path.resolve("./src/uploads")));
 // routes internally, so it isn't wrapped in a blanket `authentication` here.
 rootRouter.use("/posts", postsRouter);
 
+
+rootRouter.use("/materials",matRouter)
 // ─── 2. Actor Dashboards (Prefix Protected) ──────────────────────────────────
 rootRouter.use("/student", authentication, authorization({ roles: [ROLES.STUDENT] }), studentDashboardRouter);
 rootRouter.use("/teacher", authentication, authorization({ roles: [ROLES.TEACHER] }), teacherDashboardRouter);
@@ -72,7 +73,7 @@ rootRouter.use("/system", authentication, systemRouter);
 rootRouter.use("/students", authentication, studentRouter);
 rootRouter.use("/teachers", authentication, teacherRouter);
 rootRouter.use("/finances", authentication, financesRouter);
-rootRouter.use("/materials", materialsRouter);
+
 rootRouter.use("/weekly-reports", authentication, weeklyReportsRouter);
 rootRouter.use("/policies", authentication, policiesRouter);
 rootRouter.use("/support", authentication, supportRouter);

@@ -16,4 +16,8 @@ router.use("/categories", categoriesRouter);
 router.use("/stages", stageRouter);
 router.use("/sections", sectionsRouter);
 
+router.get("/test",async (req,res,next)=>{
+    return res.json({message:"Success"})
+})
+
 export default router;
