@@ -24,6 +24,19 @@ router.patch("/:id/join",
     liveController.joinLiveSession
 
 )
+router.get("/student/upcoming",
+    authentication,
+    authorize(PERMISSIONS_V2.LIVESESSION.READ),
+    validation(schema.getStudentUpcomingLiveSessionsSchema),
+    liveController.getStudentUpcomingLiveSessions
+)
+
+router.get("/student/next",
+    authentication,
+    authorize(PERMISSIONS_V2.LIVESESSION.READ),
+    liveController.getStudentNextLiveSession
+)
+
 router.get("/:id",
     authentication,
     authorize(PERMISSIONS_V2.LIVESESSION.READ),
