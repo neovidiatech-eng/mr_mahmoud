@@ -27,7 +27,6 @@ export const joinLiveSession = asyncHandler(async(req,res,next)=>{
     const result = await liveservice.joinLiveSession({
         liveSessionId:id,
         userId,
-        
     })
     return successResponse({
         req,

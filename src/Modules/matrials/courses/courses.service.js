@@ -563,3 +563,56 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     lectures: lecturesWithStatus,
   };
 };
+
+export const getPurchasedCourses = async ({ req, res, next }) => {
+  const user = req.user;
+  const student = await db.findFirst({
+    model: "student",
+    where: { user_id: user.id },
+  });
+
+  if (!student) {
+    const error = createError({
+      message: "STUDENT_NOT_FOUND",
+      status: 404,
+      next,
+    });
+    throw error;
+  }
+
+  const purchases = await db.findMany({
+    model: "CoursePurchase",
+    where: { studentId: student.id },
+    include: {
+      course: {
+        include: {
+          rank: {
+            select: {
+              id: true,
+              name_ar: true,
+              name_en: true,
+              slug: true,
+              color: true,
+            },
+          },
+          stage: {
+            select: {
+              id: true,
+              name_ar: true,
+              name_en: true,
+            },
+          },
+          category: true,
+        },
+      },
+    },
+    orderBy: { purchasedAt: "desc" },
+  });
+
+  const purchasedCourses = purchases.map((p) => ({
+    ...p.course,
+    purchasedAt: p.purchasedAt,
+  }));
+
+  return purchasedCourses;
+};

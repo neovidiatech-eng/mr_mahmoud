@@ -7,14 +7,27 @@ import * as db from "../../database/dbService.js";
 import { isAdmin } from "../../Utils/Permissions/permissions.js";
 import fs from "node:fs";
 import path from "node:path";
+import { hash } from "../../Utils/Security/index.js";
 
 const requestInclude = {
   student: { include: { user: { select: { name: true, email: true, phone: true } } } },
   course: true,
 };
 
+const cleanUpUploadedFile = (file) => {
+  if (!file) return;
+  try {
+    const filePath = file.path || file.finalPath;
+    if (filePath && fs.existsSync(filePath)) {
+      fs.unlinkSync(filePath);
+    }
+  } catch (err) {
+    console.error("[Clean Up Uploaded Receipt Image Error]:", err);
+  }
+};
+
 export const createRequest = asyncHandler(async (req, res, next) => {
-  const { name, email, phone, rankId, courseId, courseIds, parentPhone, notes } = req.body;
+  const { name, email, phone, rankId, courseId, courseIds, parentPhone, notes, password } = req.body;
   const receipt_img = req.file?.finalPath || req.file?.path || null;
 
   const targetCourseIds = Array.isArray(courseIds) && courseIds.length > 0
@@ -22,6 +35,7 @@ export const createRequest = asyncHandler(async (req, res, next) => {
     : (courseId ? [courseId] : []);
 
   if (targetCourseIds.length === 0) {
+    cleanUpUploadedFile(req.file);
     return errorResponse({ req, next, message: "COURSE_ID_REQUIRED", status: 400 });
   }
 
@@ -42,53 +56,58 @@ export const createRequest = asyncHandler(async (req, res, next) => {
     });
 
     if (existingUser) {
-      if (existingUser.student) {
-        student = existingUser.student;
-      } else {
-        student = await db.create({
-          model: "student",
-          data: {
-            user_id: existingUser.id,
-            country: "Egypt",
-            status: "pending",
-            ...(parentPhone && { parentNumber: parentPhone }),
-            ...(rankId && { rankId }),
-          },
-        });
-      }
-    } else {
-      const studentRole = await db.findFirst({
-        model: "role",
-        where: { name: { equals: "student", mode: "insensitive" } },
-      });
-
-      const username = `${(name || "user").trim().replace(/\s+/g, "_").toLowerCase()}_${Date.now().toString().slice(-6)}`;
-
-      await db.transaction(async (tx) => {
-        const newUser = await tx.create({
-          model: "user",
-          data: {
-            name,
-            email,
-            phone,
-            username,
-            status: "pending",
-            ...(studentRole && { roleId: studentRole.id }),
-          },
-        });
-
-        student = await tx.create({
-          model: "student",
-          data: {
-            user_id: newUser.id,
-            country: "Egypt",
-            status: "pending",
-            ...(parentPhone && { parentNumber: parentPhone }),
-            ...(rankId && { rankId }),
-          },
-        });
+      cleanUpUploadedFile(req.file);
+      return errorResponse({
+        req,
+        next,
+        message: "EMAIL_OR_PHONE_ALREADY_REGISTERED_PLEASE_LOGIN",
+        status: 400,
       });
     }
+
+    if (!password) {
+      cleanUpUploadedFile(req.file);
+      return errorResponse({
+        req,
+        next,
+        message: "PASSWORD_REQUIRED",
+        status: 400,
+      });
+    }
+
+    const studentRole = await db.findFirst({
+      model: "role",
+      where: { name: { equals: "student", mode: "insensitive" } },
+    });
+
+    const username = `${(name || "user").trim().replace(/\s+/g, "_").toLowerCase()}_${Date.now().toString().slice(-6)}`;
+    const hashedPassword = await hash({password});
+
+    await db.transaction(async (tx) => {
+      const newUser = await tx.create({
+        model: "user",
+        data: {
+          name,
+          email,
+          phone,
+          username,
+          password: hashedPassword,
+          status: "pending",
+          ...(studentRole && { roleId: studentRole.id }),
+        },
+      });
+
+      student = await tx.create({
+        model: "student",
+        data: {
+          user_id: newUser.id,
+          country: "Egypt",
+          status: "pending",
+          ...(parentPhone && { parentNumber: parentPhone }),
+          ...(rankId && { rankId }),
+        },
+      });
+    });
   }
 
   // Update parentNumber / rankId on student if missing
@@ -154,6 +173,7 @@ export const createRequest = asyncHandler(async (req, res, next) => {
   }
 
   if (createdRequests.length === 0 && errors.length > 0) {
+    cleanUpUploadedFile(req.file);
     return errorResponse({
       req,
       next,
