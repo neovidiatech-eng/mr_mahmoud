@@ -110,21 +110,12 @@ export const joinLiveSession = async ({ liveSessionId, userId }) => {
     });
 
     if (!existingAttendance) {
-      const plan = await db.findFirst({
-        model: "plan",
-        where: { id: liveSession.planId },
-      });
-      if (!plan) {
-        const error = new Error("PLAN_NOT_FOUND");
-        error.isMessageKey = true;
-        throw error;
-      }
+      if(studentRecord.liveSessionsRemaining <= 0){
+        const error = new Error("LIVE_SESSIONS_LIMIT_REACHED")
+        error.isMessageKey=true
+        throw error
+      }}
 
-      if (studentRecord.attendedLiveSessions >= plan.liveSessionsCount) {
-        const error = new Error("LIVE_SESSIONS_LIMIT_REACHED");
-        error.isMessageKey = true;
-        throw error;
-      }
 
       await db.create({
         model: "liveSessionAttendances",
@@ -137,10 +128,10 @@ export const joinLiveSession = async ({ liveSessionId, userId }) => {
       await db.updateOne({
         model: "student",
         where: { id: studentRecord.id },
-        data: { attendedLiveSessions: { increment: 1 } },
+        data: { attendedLiveSessions: { increment: 1 },liveSessionsRemaining: { decrement: 1 } },
       });
     }
-  }
+  
 
   
 
