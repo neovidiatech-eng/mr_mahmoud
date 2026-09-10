@@ -56,6 +56,7 @@ export const createPlan = asyncHandler(async (req, res, next) => {
     isGroup,
     maxStudents,
     planType,
+    liveSessionsCount
   } = req.body;
 
   // 🔥 parallel queries
@@ -91,6 +92,7 @@ export const createPlan = asyncHandler(async (req, res, next) => {
       price: String(price),
       duration,
       sessionsCount: sessionsCount ?? 0,
+      liveSessionsCount: liveSessionsCount ?? 0,
       rescheduleCount: rescheduleCount ?? 0,
       active: active ?? false,
       isGroup: isGroup ?? false,
@@ -121,6 +123,7 @@ export const updatePlan = asyncHandler(async (req, res, next) => {
     price,
     duration,
     sessionsCount,
+    liveSessionsCount,
     rescheduleCount,
     description,
     active,
@@ -187,7 +190,8 @@ export const updatePlan = asyncHandler(async (req, res, next) => {
   if (description !== undefined) data.description = description;
   if (price !== undefined) data.price = String(price);
   if (duration !== undefined) data.duration = duration;
-  if (sessionsCount !== undefined) data.sessionsCount = sessionsCount;
+  if (sessionsCount !== undefined) data.sessionsCount = Number(sessionsCount);
+  if (liveSessionsCount !== undefined) data.liveSessionsCount = Number(liveSessionsCount);
   if (rescheduleCount !== undefined) data.rescheduleCount = rescheduleCount;
   if (active !== undefined) data.active = active;
   if (features !== undefined) data.features = features;
