@@ -27,7 +27,7 @@ export const generateJitsiToken = ({
     },
     aud:JITSI_AUDIENCE,
     iss:JITSI_APP_ID,
-    sub:"*",
+    sub:"meet.jitsi",
     room: roomName,
     exp:Math.floor(Date.now() / 1000) + 60 * 60 * 2,
   };
