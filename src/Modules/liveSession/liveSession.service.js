@@ -281,13 +281,17 @@ export const updateLiveSession = async({liveSessionId,userId,planId,stageId,star
     error.isMessageKey=true
     throw error
   }
-  
-  if(liveSession.status !== liveSessionsStatus.SCHEDULED || liveSession.status !== liveSessionsStatus.LIVE || liveSession.status !== liveSessionsStatus.ENDED){
-     
-    const error = new Error("LIVE_SESSION_CANNOT_BE_UPDATED")
-    error.isMessageKey=true
-    throw error
-  }
+const allowedStatuses = [
+  liveSessionsStatus.SCHEDULED,
+  liveSessionsStatus.LIVE,
+  liveSessionsStatus.ENDED,
+];
+
+if (!allowedStatuses.includes(liveSession.status)) {
+  const error = new Error("LIVE_SESSION_CANNOT_BE_UPDATED");
+  error.isMessageKey = true;
+  throw error;
+}
   if(planId){
     const plan = await db.findFirst({
       model:"plan",
