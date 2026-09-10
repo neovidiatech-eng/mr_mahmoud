@@ -16,6 +16,7 @@ export const createPlanSchema = {
     isGroup: Joi.boolean().optional().default(false),
     maxStudents: Joi.string().optional().default("1"),
     planType: Joi.string().valid("individual", "group").optional().default("individual"),
+    liveSessionsCount: Joi.number().integer().min(0).default(0),
   }),
 };
 
@@ -26,6 +27,7 @@ export const updatePlanSchema = {
     price: Joi.number().positive(),
     duration: Joi.number().integer().min(1),
     sessionsCount: Joi.number().integer().min(0),
+    liveSessionsCount: Joi.number().integer().min(0),
     rescheduleCount: Joi.number().integer().min(0),
     active: Joi.boolean(),
     features: Joi.array().items(Joi.string()),
@@ -34,6 +36,7 @@ export const updatePlanSchema = {
     isGroup: Joi.boolean().optional(),
     maxStudents: Joi.string().optional(),
     planType: Joi.string().valid("individual", "group").optional(),
+
   }),
 };
 export const deletePlanSchema = {
