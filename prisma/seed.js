@@ -31,6 +31,7 @@ import { seedWithdrawals } from "./seeders/withdrawals.seeder.js";
 import { seedCoursePurchaseRequests } from "./seeders/coursePurchaseRequests.seeder.js";
 import { seedTransactions } from "./seeders/transactions.seeder.js";
 import { seedAttendance } from "./seeders/attendance.seeder.js";
+import { seedLiveSessions } from "./seeders/liveSessions.seeder.js";
 
 dotenv.config();
 
@@ -54,6 +55,7 @@ async function main() {
   await seedSubscriptions();
   await seedSubscriptionRequests();
   await seedSchedules();
+  await seedLiveSessions();
   await seedExpenses();
   await seedSystemWallet();
   await seedRequests();

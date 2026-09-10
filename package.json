@@ -24,6 +24,7 @@
     "seed:quiz": "node prisma/seeders/quiz.seeder.js",
     "seed:student-quiz": "node prisma/seeders/studentQuiz.seeder.js",
     "seed:sections": "node prisma/seeders/sections.seeder.js",
+    "seed:live-sessions": "node prisma/seeders/liveSessions.seeder.js",
     "seed:all": "npx prisma db seed",
     "generate:postman": "node scripts/generatePostmanCollection.js"
   },
