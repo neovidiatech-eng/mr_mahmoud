@@ -95,6 +95,7 @@ services:
       JITSI_APP_ID: ${JITSI_APP_ID}
       JITSI_JWT_SECRET: ${JITSI_JWT_SECRET}
       JITSI_AUDIENCE: ${JITSI_AUDIENCE}
+      
     depends_on:
       postgres:
         condition: service_healthy

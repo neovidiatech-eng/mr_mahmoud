@@ -20,6 +20,7 @@ import {
   addNotificationJob,
   removeNotificationJob,
 } from "../../Utils/Workers/notifications.js";
+import { createNotification } from "../Notifications/notifications.service.js";
 import {
   getNowUTC,
   isBeforeAllowedJoinTime,
@@ -481,6 +482,38 @@ export const createSchedule = asyncHandler(async (req, res, next) => {
     });
   }
 
+  try {
+    const [studentRec, teacherRec] = await Promise.all([
+      db.findFirst({ model: "student", where: { id: studentId }, include: { user: true } }),
+      db.findFirst({ model: "teacher", where: { id: teacherId }, include: { user: true } }),
+    ]);
+
+    const titleStr = newSchedule.title || "Session";
+    if (studentRec?.user_id) {
+      await createNotification({
+        userId: studentRec.user_id,
+        type: "SESSION_BOOKED",
+        title_ar: `تم حجز جلسة جديدة`,
+        title_en: `New Session Booked`,
+        message_ar: `تمت جدولة الجلسة "${titleStr}".`,
+        message_en: `Session "${titleStr}" has been scheduled.`,
+      });
+    }
+
+    if (teacherRec?.user_id) {
+      await createNotification({
+        userId: teacherRec.user_id,
+        type: "SESSION_BOOKED",
+        title_ar: `تم حجز جلسة جديدة`,
+        title_en: `New Session Booked`,
+        message_ar: `تمت جدولة الجلسة "${titleStr}".`,
+        message_en: `Session "${titleStr}" has been scheduled.`,
+      });
+    }
+  } catch (err) {
+    console.error("Failed to send booking notification:", err);
+  }
+
   return successResponse({
     res,
     req,
@@ -933,6 +966,10 @@ export const deleteSchedule = asyncHandler(async (req, res, next) => {
   const schedule = await db.findFirst({
     model: "schedule",
     where: { id },
+    include: {
+      student: true,
+      teacher: true,
+    },
   });
 
   if (!schedule) {
@@ -946,6 +983,33 @@ export const deleteSchedule = asyncHandler(async (req, res, next) => {
 
   // Removal job from BullMQ
   await removeNotificationJob(id);
+
+  // Send cancellation notifications
+  try {
+    const titleStr = schedule.title || "Session";
+    if (schedule.student?.user_id) {
+      await createNotification({
+        userId: schedule.student.user_id,
+        type: "SESSION_CANCELLED",
+        title_ar: `إلغاء الجلسة`,
+        title_en: `Session Cancelled`,
+        message_ar: `تم إلغاء الجلسة "${titleStr}".`,
+        message_en: `Session "${titleStr}" has been cancelled.`,
+      });
+    }
+    if (schedule.teacher?.user_id) {
+      await createNotification({
+        userId: schedule.teacher.user_id,
+        type: "SESSION_CANCELLED",
+        title_ar: `إلغاء الجلسة`,
+        title_en: `Session Cancelled`,
+        message_ar: `تم إلغاء الجلسة "${titleStr}".`,
+        message_en: `Session "${titleStr}" has been cancelled.`,
+      });
+    }
+  } catch (err) {
+    console.error("Failed to send session cancellation notification:", err);
+  }
 
   // 🛡️ Use transaction to ensure refund and deletion happen together
   await db.transaction(async (tx) => {

@@ -3,6 +3,7 @@ model user {
   email                String?                 @unique
   username             String?                 @unique
   password             String?
+  fcmToken             String?
   name                 String?
   phone                String?
   createdAt            DateTime                @default(now())

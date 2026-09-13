@@ -2,6 +2,7 @@ import { connection, notificationQueue } from "../Radis/Connection.js";
 import { Worker } from "bullmq";
 import * as db from "../../database/dbService.js";
 import { sendEmail } from "../Mailer/SendEmail.js";
+import { createNotification } from "../../Modules/Notifications/notifications.service.js";
 
 export const addNotificationJob = async ({
   scheduleId,
@@ -59,9 +60,11 @@ const worker = new Worker(
       const title = schedule.title || "Session";
       const studentEmail = schedule.student?.user?.email;
       const studentName = schedule.student?.user?.name || "Student";
-      
+      const studentUserId = schedule.student?.user_id;
+
       const teacherEmail = schedule.teacher?.user?.email;
       const teacherName = schedule.teacher?.user?.name || "Teacher";
+      const teacherUserId = schedule.teacher?.user_id;
 
       const subject = `Reminder: Upcoming Session - ${title}`;
       const text = `This is a reminder that your session "${title}" is starting ${type}. Please be ready.`;
@@ -72,9 +75,20 @@ const worker = new Worker(
           subject,
           text,
           username: studentName,
-          variant: "reminder"
+          variant: "reminder",
         });
         console.log(`Email sent to student ${studentEmail}`);
+      }
+
+      if (studentUserId) {
+        await createNotification({
+          userId: studentUserId,
+          type: "SESSION_REMINDER",
+          title_ar: `تذكير بموعد الجلسة: ${title}`,
+          title_en: `Session Reminder: ${title}`,
+          message_ar: `تذكير بأن جلستك "${title}" تبدأ ${type}. يرجى الاستعداد.`,
+          message_en: `Reminder: Your session "${title}" is starting ${type}. Please be ready.`,
+        });
       }
 
       if (teacherEmail) {
@@ -83,9 +97,20 @@ const worker = new Worker(
           subject,
           text,
           username: teacherName,
-          variant: "reminder"
+          variant: "reminder",
         });
         console.log(`Email sent to teacher ${teacherEmail}`);
+      }
+
+      if (teacherUserId) {
+        await createNotification({
+          userId: teacherUserId,
+          type: "SESSION_REMINDER",
+          title_ar: `تذكير بموعد الجلسة: ${title}`,
+          title_en: `Session Reminder: ${title}`,
+          message_ar: `تذكير بأن جلستك "${title}" تبدأ ${type}. يرجى الاستعداد.`,
+          message_en: `Reminder: Your session "${title}" is starting ${type}. Please be ready.`,
+        });
       }
     } catch (error) {
       console.error("Failed to send notification email:", error);

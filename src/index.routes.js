@@ -37,6 +37,7 @@ import attendanceRouter from "./Modules/Attendance/attendance.routes.js";
 import quizRouter from "./Modules/quiz/quiz.routes.js";
 import offlineGroupsRouter from "./Modules/OfflineGroups/offline.routes.js";
 import matRouter from "./Modules/matrials/matrials.routes.js"
+import notificationsRouter from "./Modules/Notifications/notifications.routes.js";
 import { ROLES, ADMIN_ROLES } from "./Utils/Permissions/permissions.js";
 
 const rootRouter = Router();
@@ -59,6 +60,7 @@ rootRouter.use("/teacher", authentication, authorization({ roles: [ROLES.TEACHER
 
 // ─── 3. Shared Features (Root Level for Frontend) ───────────────────────────
 // These routers will handle their own internal role-based authorization
+rootRouter.use("/notifications", notificationsRouter);
 rootRouter.use("/requests", authentication, requestsRouter);
 rootRouter.use("/homework", authentication, homeworkRouter);
 rootRouter.use("/exams", authentication, examRouter);
