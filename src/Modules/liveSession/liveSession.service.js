@@ -2,6 +2,7 @@ import * as db from "../../database/dbService.js";
 import { getNowUTC } from "../../Utils/Date/time.js";
 import { liveSessionsStatus } from "../../Utils/Enums/liveSessions.js";
 import { generateJitsiToken } from "../../Utils/Token/jitsiToken.js";
+import { createNotification } from "../Notifications/notifications.service.js";
 
 export const createLiveSession = async ({
   planId,
@@ -50,6 +51,32 @@ export const createLiveSession = async ({
       status: liveSessionsStatus.SCHEDULED,
     },
   });
+
+  // Notify all students in target stage/plan
+  try {
+    const students = await db.findMany({
+      model: "student",
+      where: {
+        stageId,
+        ...(planId ? { planId } : {}),
+      },
+      select: { user_id: true },
+    });
+
+    const userIds = students.map((s) => s.user_id).filter(Boolean);
+    if (userIds.length > 0) {
+      await createNotification({
+        userIds,
+        type: "LIVE_SESSION_SCHEDULED",
+        title_ar: `جلسة مباشرة جديدة: ${title}`,
+        title_en: `New Live Session: ${title}`,
+        message_ar: `تمت إضافة جلسة جديدة "${title}".`,
+        message_en: `A new live session "${title}" has been scheduled.`,
+      });
+    }
+  } catch (err) {
+    console.error("Failed to send live session creation notification:", err);
+  }
 
   return liveSession;
 };
@@ -261,6 +288,32 @@ export const startLiveSession = async ({ liveSessionId, userId }) => {
       status: liveSessionsStatus.LIVE,
     },
   });
+
+  try {
+    const students = await db.findMany({
+      model: "student",
+      where: {
+        stageId: liveSession.stageId,
+        ...(liveSession.planId ? { planId: liveSession.planId } : {}),
+      },
+      select: { user_id: true },
+    });
+
+    const userIds = students.map((s) => s.user_id).filter(Boolean);
+    if (userIds.length > 0) {
+      await createNotification({
+        userIds,
+        type: "LIVE_SESSION_STARTED",
+        title_ar: `بدأت الجلسة المباشرة الآن!`,
+        title_en: `Live Session Started!`,
+        message_ar: `بدأت الجلسة المباشرة "${liveSession.title}". انضم الآن!`,
+        message_en: `The live session "${liveSession.title}" has started. Join now!`,
+      });
+    }
+  } catch (err) {
+    console.error("Failed to send live session started notification:", err);
+  }
+
   return updatedLiveSession;
 };
 

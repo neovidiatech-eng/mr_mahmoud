@@ -39,6 +39,9 @@ local
 .env.development.local
 .env.test.local
 .env.production.local
+*.text
+*-firebase-*.json
+*serviceaccount*.json
 
 # Prisma
 /prisma/*.db

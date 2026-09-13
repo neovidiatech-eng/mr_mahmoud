@@ -59,11 +59,19 @@ model support_category {
 }
 
 model notification {
-  id        String   @id @default(uuid())
-  userId    String
-  title     String
-  message   String
-  isRead    Boolean  @default(false)
-  type      String
-  createdAt DateTime @default(now())
+  id                       String                     @id @default(uuid())
+  userId                   String
+  isRead                   Boolean                    @default(false)
+  type                     String
+  createdAt                DateTime                   @default(now())
+  notificationTranslations notification_translation[]
+}
+
+model notification_translation {
+  id             String       @id @default(uuid())
+  title          String
+  message        String
+  notificationId String
+  lang           String
+  notification   notification @relation(fields: [notificationId], references: [id], onDelete: Cascade)
 }

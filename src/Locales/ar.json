@@ -446,5 +446,13 @@
   "QUIZ_DELETED": "تم حذف الاختبار بنجاح",
   "QUIZ_SUBMITTED": "تم تسليم الاختبار بنجاح",
   "STUDENT_NOT_FOUND": "الملف الشخصي للطالب غير موجود",
-  "QUIZ_ATTEMPT_NOT_FOUND": "محاولة الاختبار غير موجودة"
+  "QUIZ_ATTEMPT_NOT_FOUND": "محاولة الاختبار غير موجودة",
+  "NOTIFICATIONS_FETCHED": "تم جلب الإشعارات بنجاح",
+  "UNREAD_COUNT_FETCHED": "تم جلب عدد الإشعارات غير المقروءة بنجاح",
+  "NOTIFICATION_NOT_FOUND": "الإشعار غير موجود",
+  "NOTIFICATION_READ_SUCCESS": "تم تحديد الإشعار كمعلم كمقروء",
+  "ALL_NOTIFICATIONS_READ_SUCCESS": "تم تحديد جميع الإشعارات كمقروءة",
+  "NOTIFICATION_DELETED": "تم حذف الإشعار بنجاح",
+  "ALL_NOTIFICATIONS_DELETED": "تم حذف جميع الإشعارات بنجاح",
+  "NOTIFICATION_CREATED": "تم إنشاء الإشعار بنجاح"
 }

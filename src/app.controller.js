@@ -18,6 +18,8 @@ import { socketAuthentication } from "./Middlewares/SocketAuth.js";
 import { createAdapter } from "@socket.io/redis-adapter";
 import { initGeoIP } from "./Utils/GeoIP.js";
 import { swaggerSpec } from "./Utils/Swagger/swagger.js";
+import { getAdmin } from "./Utils/Firebase/index.js";
+
 
 const bootstrap = async () => {
   const app = express();
@@ -76,6 +78,8 @@ const bootstrap = async () => {
     }),
   );
   app.use(morgan("dev"));
+  getAdmin()
+
   app.use(globalRateLimiter);
   app.use(express.json());
   app.use(langMiddleware); // Detect language for all requests

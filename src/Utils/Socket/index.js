@@ -7,13 +7,19 @@ import * as db from "../../database/dbService.js";
  * Handles real-time communication events
  */
 
+let ioInstance = null;
+
+export const get_io = () => ioInstance;
+
 export const init_io = (io) => {
+  ioInstance = io;
   io.on("connection", async (socket) => {
     try {
       const user = socket.user;
       if (!user) return socket.disconnect();
 
-      console.log(`User connected: ${user.name} (${user.role.name})`);
+      console.log(`User connected: ${user.name} (${user.role?.name || "user"})`);
+      socket.join(`user_${user.id}`);
 
       // 1. Online status tracking
       const isFirstConnection = await RedisUtils.setUserOnline(user.id, socket.id);
