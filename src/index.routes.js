@@ -83,7 +83,7 @@ rootRouter.use("/withdrawals", authentication, withdrawalsRouter);
 rootRouter.use("/transactions", authentication, transactionsRouter);
 rootRouter.use("/transactions/currency", authentication, currencyRouter);
 rootRouter.use("/settings", settingsRouter);
-rootRouter.use("/course-purchase-requests", authentication, coursePurchaseRequestsRouter);
+rootRouter.use("/course-purchase-requests",  coursePurchaseRequestsRouter);
 rootRouter.use("/subscription", subscriptionRouter);
 rootRouter.use("/attendance", authentication, attendanceRouter);
 rootRouter.use("/offline-groups", offlineGroupsRouter);
