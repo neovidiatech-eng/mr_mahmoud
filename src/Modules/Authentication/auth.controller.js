@@ -109,13 +109,13 @@ export const register = asyncHandler(async (req, res, next) => {
   // 4. Send Verification Email
   const mailResult = await sendEmail({ email, otp, lang: req.lang });
 
-  /*   if (!mailResult.success) {
+    if (!mailResult.success) {
       const errorMsg =
         mailResult.code === "ETIMEDOUT"
           ? "EMAIL_SERVICE_TIMEOUT"
           : "EMAIL_SEND_FAILED";
       return errorResponse({ req, next, message: errorMsg, status: 500 });
-    } */
+    } 
 
   // 5. Transactional Database Operations
   await db.transaction(async (tx) => {
