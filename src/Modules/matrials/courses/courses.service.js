@@ -132,7 +132,7 @@ export const createCourse = async ({ req, res, next }) => {
 /* -----------------------------
    GET ALL COURSES
 ----------------------------- */
-export const getCourses = async (query = {}) => {
+export const getCourses = async (query = {}, user = null) => {
   const page = Number(query.page) || 1;
   const limit = Number(query.limit) || 10;
   const rankId = query.rankId;
@@ -174,7 +174,7 @@ export const getCourses = async (query = {}) => {
     ];
   }
 
-  return await db.findManyWithPaginationAndCount({
+  const result = await db.findManyWithPaginationAndCount({
     model: "courses",
     where,
     page,
@@ -184,12 +184,47 @@ export const getCourses = async (query = {}) => {
     ],
     include: lecturesInclude,
   });
+
+  let student = null;
+  if (user) {
+    student = user.student || (await db.findFirst({
+      model: "student",
+      where: { user_id: user.id },
+    }));
+  }
+
+  let purchasedCourseIdsSet = new Set();
+  if (student) {
+    const purchases = await db.findMany({
+      model: "CoursePurchase",
+      where: { studentId: student.id },
+      select: { courseId: true },
+    });
+    purchasedCourseIdsSet = new Set(purchases.map((p) => p.courseId));
+  }
+
+  const items = (result.items || []).map((course) => {
+    let isPurchased = false;
+    if (student) {
+      const matchesRank = student.active && student.rankId === course.rankId;
+      isPurchased = matchesRank || purchasedCourseIdsSet.has(course.id);
+    }
+    return {
+      ...course,
+      isPurchased,
+    };
+  });
+
+  return {
+    ...result,
+    items,
+  };
 };
 
 /* -----------------------------
    GET COURSE BY ID
 ----------------------------- */
-export const getCourseById = async (id) => {
+export const getCourseById = async (id, user = null) => {
   const course = await db.findFirst({
     model: "courses",
     where: { id },
@@ -202,7 +237,31 @@ export const getCourseById = async (id) => {
     throw error;
   }
 
-  return course;
+  let isPurchased = false;
+  if (user) {
+    const student = user.student || (await db.findFirst({
+      model: "student",
+      where: { user_id: user.id },
+    }));
+
+    if (student) {
+      const matchesRank = student.active && student.rankId === course.rankId;
+      if (matchesRank) {
+        isPurchased = true;
+      } else {
+        const purchase = await db.findFirst({
+          model: "CoursePurchase",
+          where: { studentId: student.id, courseId: id },
+        });
+        isPurchased = !!purchase;
+      }
+    }
+  }
+
+  return {
+    ...course,
+    isPurchased,
+  };
 };
 
 /* -----------------------------

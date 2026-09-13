@@ -19,13 +19,13 @@ const localizeCourse = (course, lang) => {
 };
 
 export const getAllCourses = asyncHandler(async (req, res, next) => {
-    const result = await coursesService.getCourses(req.query);
+    const result = await coursesService.getCourses(req.query, req.user);
     const items = result.items?.map((c) => localizeCourse(c, req.lang));
     return successResponse({ res, req, message: "FETCH_SUCCESS", data: { ...result, items } });
 });
 
 export const getCourse = asyncHandler(async (req, res, next) => {
-    const course = await coursesService.getCourseById(req.params.id);
+    const course = await coursesService.getCourseById(req.params.id, req.user);
     return successResponse({ res, req, message: "FETCH_SUCCESS", data: localizeCourse(course, req.lang) });
 });
 
@@ -54,6 +54,6 @@ export const getCourseLecturesForStudent = asyncHandler(async (req, res, next) =
 
 export const getMyPurchasedCourses = asyncHandler(async (req, res, next) => {
     const result = await coursesService.getPurchasedCourses({ req, res, next });
-    const items = result?.map((c) => localizeCourse(c, req.lang));
+    const items = result?.map((c) => ({ ...localizeCourse(c, req.lang), isPurchased: true }));
     return successResponse({ res, req, message: "FETCH_SUCCESS", data: items });
 });
