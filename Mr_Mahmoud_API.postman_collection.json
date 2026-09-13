@@ -817,7 +817,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"واجب الرياضيات 1\",\n  \"title_en\": \"Math Homework 1\",\n  \"description_ar\": \"حل التمارين من الصفحة 10 إلى 15\",\n  \"description_en\": \"Solve exercises from page 10 to 15\",\n  \"dueDate\": \"2026-09-13T10:13:21.390Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\"\n}",
+              "raw": "{\n  \"title_ar\": \"واجب الرياضيات 1\",\n  \"title_en\": \"Math Homework 1\",\n  \"description_ar\": \"حل التمارين من الصفحة 10 إلى 15\",\n  \"description_en\": \"Solve exercises from page 10 to 15\",\n  \"dueDate\": \"2026-09-13T10:28:15.967Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -921,7 +921,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"dueDate\": \"2026-09-13T10:13:21.390Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"grade\": 1,\n  \"feedback\": \"string\",\n  \"status\": \"pending\"\n}",
+              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"dueDate\": \"2026-09-13T10:28:15.967Z\",\n  \"studentId\": \"string\",\n  \"subjectId\": \"string\",\n  \"grade\": 1,\n  \"feedback\": \"string\",\n  \"status\": \"pending\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1104,7 +1104,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"امتحان منتصف الفصل في الفيزياء\",\n  \"title_en\": \"Midterm Physics Exam\",\n  \"subject\": \"Physics\",\n  \"dueDate\": \"2026-09-13T10:13:21.390Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\",\n  \"totalMarks\": 100,\n  \"duration\": 60\n}",
+              "raw": "{\n  \"title_ar\": \"امتحان منتصف الفصل في الفيزياء\",\n  \"title_en\": \"Midterm Physics Exam\",\n  \"subject\": \"Physics\",\n  \"dueDate\": \"2026-09-13T10:28:15.967Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"status\": \"pending\",\n  \"totalMarks\": 100,\n  \"duration\": 60\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -1208,7 +1208,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"subject\": \"string\",\n  \"dueDate\": \"2026-09-13T10:13:21.390Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"totalMarks\": 1,\n  \"duration\": 1,\n  \"status\": \"pending\"\n}",
+              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"subject\": \"string\",\n  \"dueDate\": \"2026-09-13T10:28:15.967Z\",\n  \"studentId\": \"string\",\n  \"teacherId\": \"string\",\n  \"totalMarks\": 1,\n  \"duration\": 1,\n  \"status\": \"pending\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4140,7 +4140,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"Server hosting fee\",\n  \"currencyId\": \"EGP\",\n  \"amount\": 150,\n  \"payment_type\": \"bank_transfer\",\n  \"type\": \"general\",\n  \"status\": \"paid\",\n  \"date\": \"2026-09-13T10:13:21.390Z\"\n}",
+              "raw": "{\n  \"title\": \"Server hosting fee\",\n  \"currencyId\": \"EGP\",\n  \"amount\": 150,\n  \"payment_type\": \"bank_transfer\",\n  \"type\": \"general\",\n  \"status\": \"paid\",\n  \"date\": \"2026-09-13T10:28:15.967Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -4217,7 +4217,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title\": \"string\",\n  \"currencyId\": \"string\",\n  \"amount\": 1,\n  \"payment_type\": \"string\",\n  \"type\": \"salary\",\n  \"status\": \"paid\",\n  \"date\": \"2026-09-13T10:13:21.390Z\"\n}",
+              "raw": "{\n  \"title\": \"string\",\n  \"currencyId\": \"string\",\n  \"amount\": 1,\n  \"payment_type\": \"string\",\n  \"type\": \"salary\",\n  \"status\": \"paid\",\n  \"date\": \"2026-09-13T10:28:15.967Z\"\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6286,7 +6286,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"weekStarting\": \"2026-09-13T10:13:21.390Z\",\n  \"weekEnding\": \"2026-09-13T10:13:21.390Z\",\n  \"totalClasses\": 10,\n  \"studentsTaught\": 25,\n  \"avgSessionDuration\": 60,\n  \"materialsUploaded\": 3,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 4.5\n}",
+              "raw": "{\n  \"weekStarting\": \"2026-09-13T10:28:15.967Z\",\n  \"weekEnding\": \"2026-09-13T10:28:15.967Z\",\n  \"totalClasses\": 10,\n  \"studentsTaught\": 25,\n  \"avgSessionDuration\": 60,\n  \"materialsUploaded\": 3,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 4.5\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6429,7 +6429,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"weekStarting\": \"2026-09-13T10:13:21.390Z\",\n  \"weekEnding\": \"2026-09-13T10:13:21.390Z\",\n  \"totalClasses\": 1,\n  \"studentsTaught\": 1,\n  \"avgSessionDuration\": 1,\n  \"materialsUploaded\": 1,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 1\n}",
+              "raw": "{\n  \"weekStarting\": \"2026-09-13T10:28:15.967Z\",\n  \"weekEnding\": \"2026-09-13T10:28:15.967Z\",\n  \"totalClasses\": 1,\n  \"studentsTaught\": 1,\n  \"avgSessionDuration\": 1,\n  \"materialsUploaded\": 1,\n  \"teachingSummary\": \"string\",\n  \"studentProgress\": \"string\",\n  \"challenges\": \"string\",\n  \"overallRating\": 1\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6544,7 +6544,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"سياسة الخصوصية\",\n  \"title_en\": \"Privacy Policy\",\n  \"description_ar\": \"تفاصيل سياسة الخصوصية...\",\n  \"description_en\": \"Privacy policy details...\",\n  \"icon\": \"shield\",\n  \"color\": \"#4CAF50\",\n  \"lastUpdated\": \"2026-09-13T10:13:21.390Z\",\n  \"active\": true\n}",
+              "raw": "{\n  \"title_ar\": \"سياسة الخصوصية\",\n  \"title_en\": \"Privacy Policy\",\n  \"description_ar\": \"تفاصيل سياسة الخصوصية...\",\n  \"description_en\": \"Privacy policy details...\",\n  \"icon\": \"shield\",\n  \"color\": \"#4CAF50\",\n  \"lastUpdated\": \"2026-09-13T10:28:15.967Z\",\n  \"active\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -6653,7 +6653,7 @@
             ],
             "body": {
               "mode": "raw",
-              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"icon\": \"string\",\n  \"color\": \"string\",\n  \"lastUpdated\": \"2026-09-13T10:13:21.390Z\",\n  \"active\": true\n}",
+              "raw": "{\n  \"title_ar\": \"string\",\n  \"title_en\": \"string\",\n  \"description_ar\": \"string\",\n  \"description_en\": \"string\",\n  \"icon\": \"string\",\n  \"color\": \"string\",\n  \"lastUpdated\": \"2026-09-13T10:28:15.967Z\",\n  \"active\": true\n}",
               "options": {
                 "raw": {
                   "language": "json"
@@ -9434,6 +9434,332 @@
               ]
             },
             "description": "Generates a Jitsi JWT token granting access to the live session room. Teachers joining their own session get moderator privileges. Students must be enrolled in the plan/stage and have available session credits. Attendance is recorded automatically on first join."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Notifications",
+      "item": [
+        {
+          "name": "Get user notifications",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications?page=&limit=&isRead=",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ],
+              "query": [
+                {
+                  "key": "page",
+                  "value": "",
+                  "description": "Page number (defaults to 1)"
+                },
+                {
+                  "key": "limit",
+                  "value": "",
+                  "description": "Number of items per page (defaults to 20)"
+                },
+                {
+                  "key": "isRead",
+                  "value": "",
+                  "description": "Filter by read status (true or false)"
+                }
+              ]
+            },
+            "description": "Returns a paginated list of notifications for the authenticated user, formatted based on the request language (header: accept-language or lang query/middleware). Optionally filter by read status."
+          },
+          "response": []
+        },
+        {
+          "name": "Create and dispatch notification(s)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"userId\": \"550e8400-e29b-41d4-a716-446655440000\",\n  \"userIds\": [\n    \"550e8400-e29b-41d4-a716-446655440000\"\n  ],\n  \"type\": \"SYSTEM_ANNOUNCEMENT\",\n  \"title_ar\": \"تنبيه هائم من المنصة\",\n  \"title_en\": \"Important Platform Notice\",\n  \"message_ar\": \"يرجى مراجعة الجدول الدراسي الجديد.\",\n  \"message_en\": \"Please check your updated class schedule.\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications"
+              ]
+            },
+            "description": "Admin or System endpoint to create and push a notification to a single user or multiple users via Database, Socket.io, and Firebase FCM."
+          },
+          "response": []
+        },
+        {
+          "name": "Get unread notifications count",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/unread-count",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "unread-count"
+              ]
+            },
+            "description": "Returns total unread notifications count for authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "Register / update FCM token",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fcmToken\": \"fcm_device_token_string_here...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/fcm-token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "fcm-token"
+              ]
+            },
+            "description": "Registers or updates the Firebase Cloud Messaging device token for pushing native mobile/web alerts."
+          },
+          "response": []
+        },
+        {
+          "name": "Update FCM token",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              },
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fcmToken\": \"fcm_device_token_string_here...\"\n}",
+              "options": {
+                "raw": {
+                  "language": "json"
+                }
+              }
+            },
+            "url": {
+              "raw": "{{baseUrl}}/notifications/fcm-token",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "fcm-token"
+              ]
+            },
+            "description": "Updates the FCM token for authenticated user's device."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark all notifications as read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/read-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "read-all"
+              ]
+            },
+            "description": "Marks all unread notifications belonging to the authenticated user as read."
+          },
+          "response": []
+        },
+        {
+          "name": "Mark a single notification as read",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:id/read",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                ":id",
+                "read"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123",
+                  "description": "UUID of the notification"
+                }
+              ]
+            },
+            "description": "Marks a specific notification as read by UUID."
+          },
+          "response": []
+        },
+        {
+          "name": "Clear all user notifications",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/clear-all",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                "clear-all"
+              ]
+            },
+            "description": "Permanently deletes all notifications belonging to the authenticated user."
+          },
+          "response": []
+        },
+        {
+          "name": "Delete a single notification",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              {
+                "key": "Accept",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{token}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/notifications/:id",
+              "host": [
+                "{{baseUrl}}"
+              ],
+              "path": [
+                "notifications",
+                ":id"
+              ],
+              "variable": [
+                {
+                  "key": "id",
+                  "value": "123",
+                  "description": "UUID of the notification to delete"
+                }
+              ]
+            },
+            "description": "Deletes a specific notification by UUID."
           },
           "response": []
         }
