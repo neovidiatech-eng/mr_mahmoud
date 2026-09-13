@@ -2,7 +2,6 @@ import jwt from "jsonwebtoken";
 const JITSI_APP_ID = process.env.JITSI_APP_ID;
 const JITSI_APP_SECRET = process.env.JITSI_JWT_SECRET;
 const JITSI_AUDIENCE = process.env.JITSI_AUDIENCE;
-
 export const generateJitsiToken = ({
   userId,
   roomName,

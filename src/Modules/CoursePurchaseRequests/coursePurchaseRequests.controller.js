@@ -7,7 +7,7 @@ import * as db from "../../database/dbService.js";
 import { isAdmin } from "../../Utils/Permissions/permissions.js";
 import fs from "node:fs";
 import path from "node:path";
-import { hash } from "../../Utils/Security/index.js";
+import { decryptText, hash } from "../../Utils/Security/index.js";
 
 const requestInclude = {
   student: { include: { user: { select: { name: true, email: true, phone: true } } } },
@@ -212,12 +212,28 @@ export const getRequests = asyncHandler(async (req, res, next) => {
     include: requestInclude,
     orderBy: { createdAt: "desc" },
   });
+  const decryptedItems = await Promise.all(
+    items.map(async(item)=>{
+      if(item.student?.user?.phone){
+        item.student.user.phone = await decryptText({
+          text:item.student.user.phone,
+          
+        });
+      }
+      if(item.student?.parentNumber){
+        item.student.parentNumber = await decryptText({
+          text:item.student.parentNumber
+        })
+      }
+      return item
+    })
+  )
 
   return successResponse({
     res,
     req,
     message: "FETCH_SUCCESS",
-    data: { items, pagination },
+    data: { items:decryptedItems, pagination },
     status: 200,
   });
 });
