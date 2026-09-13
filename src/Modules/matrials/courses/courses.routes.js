@@ -9,11 +9,14 @@ import {
   localMulterUpload,
 } from "../../../Utils/Multer/local.multer.js";
 
+import { guestAuth } from "../../../Middlewares/guestAuth.js";
+
 const router = Router();
 const coursesResource = "courses";
 
 router.get(
   "/",
+  guestAuth,
   validation(coursesValidation.getCoursesSchema),
   coursesController.getAllCourses,
 );
@@ -26,6 +29,7 @@ router.get(
 
 router.get(
   "/:id",
+  guestAuth,
   validation(coursesValidation.courseIdSchema),
   coursesController.getCourse,
 );
