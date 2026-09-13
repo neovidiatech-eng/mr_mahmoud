@@ -6,7 +6,7 @@ import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 import * as schema from "./coursePurchaseRequests.validation.js";
 
 import { fileValidation, localMulterUpload } from "../../Utils/Multer/local.multer.js";
-
+import { guestAuth } from "../../Middlewares/guestAuth.js";
 const router = Router();
 
 router.get(
@@ -22,6 +22,7 @@ router.post(
     customPath: "course-purchases/receipts",
     fileValidation: fileValidation.image,
   }).single("image"),
+  guestAuth,
   validation(schema.createRequestSchema),
   controller.createRequest,
 );
