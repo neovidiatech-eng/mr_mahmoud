@@ -4,7 +4,6 @@ import * as db from "../database/dbService.js";
 import { redis } from "../Utils/Radis/Connection.js";
 import { hasPermission, getUserPermissions } from "../Utils/Permissions/permissions.js";
 import { applyUserTimezone } from "./Timezone.js";
-import i18next from "../Utils/Language/i18next.js";
 
 
 
