@@ -4,6 +4,8 @@ import {
   asyncHandler,
 } from "../../Utils/Response.js";
 import * as db from "../../database/dbService.js";
+import { notifyAdmins } from "../Notifications/notifications.service.js";
+
 
 /* ------------------------------------------------------------------ */
 /*                  Teacher requests a withdrawal                     */
@@ -59,7 +61,20 @@ export const requestWithdrawal = asyncHandler(async (req, res, next) => {
     });
   });
 
+  // Notify Admins about new withdrawal request
+  const teacherName = req.user?.name || "معلم";
+  notifyAdmins({
+    type: "NEW_WITHDRAWAL_REQUEST",
+    title_ar: "طلب سحب رصيد جديد",
+    title_en: "New Withdrawal Request",
+    message_ar: `قام المعلم "${teacherName}" بتقديم طلب سحب رصيد بمبلغ ${amount}.`,
+    message_en: `Teacher "${teacherName}" submitted a withdrawal request for amount ${amount}.`,
+  }).catch((err) =>
+    console.error("Failed to notify admins of withdrawal request:", err),
+  );
+
   return successResponse({
+
     res,
     req,
     status: 201,

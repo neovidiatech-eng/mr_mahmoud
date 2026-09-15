@@ -1,6 +1,7 @@
 import * as db from "../../database/dbService.js";
-import { get_io } from "../../Utils/Socket/index.js";
 import { sendPushNotification } from "../../Utils/Firebase/index.js";
+import { ADMIN_ROLES } from "../../Utils/Permissions/permissions.js";
+
 
 /**
  * Format notification translations based on requested language
@@ -204,7 +205,6 @@ export const createNotification = async ({
   }
 
   const createdNotifications = [];
-  const io = get_io();
 
   for (const targetId of targetUserIds) {
     const notification = await db.create({
@@ -226,16 +226,8 @@ export const createNotification = async ({
     const formattedEn = formatNotification(notification, "en");
     createdNotifications.push(formattedAr);
 
-    // Socket.io Realtime Broadcast
-    if (io) {
-      io.to(`user_${targetId}`).emit("notification:new", {
-        ar: formattedAr,
-        en: formattedEn,
-        raw: notification,
-      });
-    }
-
     // FCM Push Notification
+
     try {
       const targetUser = await db.findFirst({
         model: "user",
@@ -261,3 +253,52 @@ export const createNotification = async ({
 
   return createdNotifications;
 };
+
+/**
+ * Fetch user IDs of all administrative users (admin, super_admin)
+ */
+export const getAdminUserIds = async () => {
+  const adminUsers = await db.findMany({
+    model: "user",
+    where: {
+      role: {
+        name: { in: ADMIN_ROLES },
+      },
+    },
+    select: { id: true },
+  });
+  return adminUsers.map((u) => u.id);
+};
+
+/**
+ * Helper to dispatch a notification to all Admin users
+ */
+export const notifyAdmins = async ({
+  type,
+  title_ar,
+  title_en,
+  message_ar,
+  message_en,
+  translations,
+}) => {
+  try {
+    const adminUserIds = await getAdminUserIds();
+    if (adminUserIds.length === 0) {
+      return [];
+    }
+
+    return await createNotification({
+      userIds: adminUserIds,
+      type,
+      title_ar,
+      title_en,
+      message_ar,
+      message_en,
+      translations,
+    });
+  } catch (error) {
+    console.error("Failed to notify admins:", error.message || error);
+    return [];
+  }
+};
+

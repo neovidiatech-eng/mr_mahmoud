@@ -21,13 +21,6 @@ router.patch(
   validation(schema.updateFcmTokenBody),
   controller.updateFcmToken,
 );
-
-router.post(
-  "/fcm-token",
-  validation(schema.updateFcmTokenBody),
-  controller.updateFcmToken,
-);
-
 router.patch("/read-all", controller.markAllAsRead);
 
 router.patch(
