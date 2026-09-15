@@ -225,31 +225,14 @@ export const deleteRank = async (req, res, next) => {
     throw error;
   }
 
-  const [coursesCount, studentsCount,stagesCount] = await Promise.all([
-    db.count({ model: "courses", where: { rankId: id } }),
-    db.count({ model: "student", where: { rankId: id } }),
-    db.count({ model: "stage", where: { rankId: id } }),
-  ]);
+  const studentsCount = await db.count({ model: "student", where: { rankId: id } });
 
-  if (coursesCount > 0 || studentsCount > 0 || stagesCount > 0) {
-    await Promise.all([
-      db.updateMany({
-        model: "courses",
-        where: { rankId: id },
-        data: { rankId: null },
-      }),
-      db.updateMany({
-        model: "student",
-        where: { rankId: id },
-        data: { rankId: null },
-      }),
-      db.updateMany({
-        model: "stage",
-        where: { rankId: id },
-        data: { rankId: null },
-      }),
-    ]);
- 
+  if (studentsCount > 0) {
+    await db.updateMany({
+      model: "student",
+      where: { rankId: id },
+      data: { rankId: null },
+    });
   }
 
   return await db.deleteOne({
