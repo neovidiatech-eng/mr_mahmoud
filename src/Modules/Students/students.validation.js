@@ -10,7 +10,7 @@ export const createStudentSchema = {
     phone_code: generalFields.codeCountry.required(),
     parentNumber:generalFields.phone.required(),
     country: generalFields.country.required(),
-    planId: generalFields.id
+    planId: generalFields.id.not("",null)
       .messages({
         "string.base": "PLAN_ID_MUST_BE_STRING",
         "string.empty": "PLAN_ID_CANNOT_BE_EMPTY",
