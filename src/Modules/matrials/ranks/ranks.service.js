@@ -232,10 +232,24 @@ export const deleteRank = async (req, res, next) => {
   ]);
 
   if (coursesCount > 0 || studentsCount > 0 || stagesCount > 0) {
-    const error = new Error("RANK_IN_USE");
-    error.status = 409;
-    error.isMessageKey = true;
-    throw error;
+    await Promise.all([
+      db.updateMany({
+        model: "courses",
+        where: { rankId: id },
+        data: { rankId: null },
+      }),
+      db.updateMany({
+        model: "student",
+        where: { rankId: id },
+        data: { rankId: null },
+      }),
+      db.updateMany({
+        model: "stage",
+        where: { rankId: id },
+        data: { rankId: null },
+      }),
+    ]);
+ 
   }
 
   return await db.deleteOne({

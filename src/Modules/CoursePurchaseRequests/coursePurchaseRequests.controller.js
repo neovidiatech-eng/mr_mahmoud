@@ -8,6 +8,8 @@ import { isAdmin } from "../../Utils/Permissions/permissions.js";
 import fs from "node:fs";
 import path from "node:path";
 import { decryptText, hash } from "../../Utils/Security/index.js";
+import { notifyAdmins } from "../Notifications/notifications.service.js";
+
 
 const requestInclude = {
   student: { include: { user: { select: { name: true, email: true, phone: true } } } },
@@ -182,7 +184,26 @@ export const createRequest = asyncHandler(async (req, res, next) => {
     });
   }
 
+  // Notify Admins about new course purchase requests
+  if (createdRequests.length > 0) {
+    const studentName = student?.user?.name || req.user?.name || "طالب";
+    for (const reqItem of createdRequests) {
+      const courseTitle =
+        reqItem.course?.title_ar || reqItem.course?.title_en || "كورس";
+      notifyAdmins({
+        type: "NEW_COURSE_PURCHASE_REQUEST",
+        title_ar: "طلب شراء كورس جديد",
+        title_en: "New Course Purchase Request",
+        message_ar: `قام الطالب "${studentName}" بتقديم طلب شراء للكورس "${courseTitle}".`,
+        message_en: `Student "${studentName}" submitted a purchase request for course "${courseTitle}".`,
+      }).catch((err) =>
+        console.error("Failed to notify admins of course purchase request:", err),
+      );
+    }
+  }
+
   return successResponse({
+
     res,
     req,
     message: "CREATE_SUCCESS",

@@ -6,6 +6,8 @@ import {
 import * as db from "../../database/dbService.js";
 import { normalizeDate } from "../../Utils/Helpers.js";
 import { uploadToCloudinary } from "../../Utils/Cloudinary/upload.js";
+import { notifyAdmins } from "../Notifications/notifications.service.js";
+
 
 // 1. Create Request (Teacher/Student/Admin)
 export const createRequest = asyncHandler(async (req, res, next) => {
@@ -66,7 +68,23 @@ export const createRequest = asyncHandler(async (req, res, next) => {
     },
   });
 
+  // Notify Admins if created by non-admin user
+  if (requesterRole !== "admin" && requesterRole !== "super_admin") {
+    const userName = req.user?.name || "مستخدم";
+    const reqTitle = request.title || type || "طلب جديد";
+    notifyAdmins({
+      type: "NEW_SYSTEM_REQUEST",
+      title_ar: "طلب جديد من مستخدم",
+      title_en: "New User System Request",
+      message_ar: `قام المستخدم "${userName}" بتقديم طلب جديد: "${reqTitle}".`,
+      message_en: `User "${userName}" submitted a new request: "${reqTitle}".`,
+    }).catch((err) =>
+      console.error("Failed to notify admins of new system request:", err),
+    );
+  }
+
   return successResponse({
+
     res,
     req,
     data: request,

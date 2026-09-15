@@ -20,6 +20,7 @@ import { sendEmail } from "../../Utils/Mailer/SendEmail.js";
 import { generateToken, verifyToken } from "../../Utils/Token/token.js";
 import { resolveStudentAge } from "../../Utils/Helpers.js";
 import { nanoid } from "nanoid";
+import { notifyAdmins } from "../Notifications/notifications.service.js";
 
 /* -------------------------------------------- ------------------------------ */
 /*                                SIGN IN AND SIGN UP                           */
@@ -169,7 +170,19 @@ export const register = asyncHandler(async (req, res, next) => {
           subscrption_img: image_path,
         },
       });
+
+      // Notify Admins about new student subscription request
+      notifyAdmins({
+        type: "NEW_STUDENT_SUBSCRIPTION_REQUEST",
+        title_ar: "طلب اشتراك طالب جديد",
+        title_en: "New Student Subscription Request",
+        message_ar: `قام الطالب "${name}" بتقديم طلب اشتراك جديد.`,
+        message_en: `Student "${name}" submitted a new subscription request.`,
+      }).catch((err) =>
+        console.error("Failed to notify admins of subscription request:", err),
+      );
     }
+
   });
 
   return successResponse({
