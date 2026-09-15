@@ -1,8 +1,17 @@
-import rateLimit from "express-rate-limit";
+import rateLimit, { ipKeyGenerator } from "express-rate-limit";
 
 // ── Shared handler ────────────────────────────────────────────────────────────
 const rateLimitHandler = (message) => (req, res) => {
   res.status(429).json({ success: false, status: 429, message });
+};
+
+// ── Key generator ─────────────────────────────────────────────────────────────
+// Extracts real client IP behind reverse proxies (Cloudflare, Nginx, Docker, Vercel)
+const keyGenerator = (req) => {
+  return ipKeyGenerator(req.ip, {
+    trustProxy: true,
+    header: "x-forwarded-for",
+  });
 };
 
 // ── Global limiter – applied to ALL routes ────────────────────────────────────
@@ -12,6 +21,7 @@ export const globalRateLimiter = rateLimit({
   limit: 200,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator,
   handler: rateLimitHandler("Too many requests, please slow down and try again later."),
 });
 
@@ -22,6 +32,7 @@ export const authRateLimiter = rateLimit({
   limit: 20,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator,
   handler: rateLimitHandler("Too many attempts, please try again after 15 minutes."),
 });
 
@@ -32,6 +43,7 @@ export const otpRateLimiter = rateLimit({
   limit: 5,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator,
   handler: rateLimitHandler("Too many OTP requests, please try again after an hour."),
 });
 
@@ -42,5 +54,6 @@ export const sensitiveRateLimiter = rateLimit({
   limit: 10,
   standardHeaders: true,
   legacyHeaders: false,
+  keyGenerator,
   handler: rateLimitHandler("Too many password reset attempts, please try again after an hour."),
 });

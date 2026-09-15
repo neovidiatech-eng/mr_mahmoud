@@ -23,7 +23,7 @@ import { getAdmin } from "./Utils/Firebase/index.js";
 
 const bootstrap = async () => {
   const app = express();
-  app.set("trust proxy", 1);
+  app.set("trust proxy", true);
   const port = process.env.PORT || 3013;
 
   // Initialize GeoIP database in the background
