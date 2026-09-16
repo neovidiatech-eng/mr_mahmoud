@@ -7,10 +7,12 @@ import * as schema from "./coursePurchaseRequests.validation.js";
 
 import { fileValidation, localMulterUpload } from "../../Utils/Multer/local.multer.js";
 import { guestAuth } from "../../Middlewares/guestAuth.js";
+import  authentication  from "../../Middlewares/Authentication.js";
 const router = Router();
 
 router.get(
   "/",
+  authentication,
   authorize(PERMISSIONS_V2.COURSE_PURCHASE_REQUESTS.READ),
   validation(schema.getRequestsSchema),
   controller.getRequests,

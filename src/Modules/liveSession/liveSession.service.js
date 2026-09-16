@@ -91,7 +91,6 @@ export const joinLiveSession = async ({ liveSessionId, userId }) => {
     error.isMessageKey = true;
     throw error;
   }
-
   if (
     liveSession.status === liveSessionsStatus.ENDED ||
     liveSession.status === liveSessionsStatus.CANCELLED
@@ -130,6 +129,19 @@ export const joinLiveSession = async ({ liveSessionId, userId }) => {
       },
     });
     if (!studentRecord) {
+      const error = new Error(
+        "YOU_ARE_NOT_AUTHORIZED_TO_JOIN_THIS_LIVE_SESSION",
+      );
+      error.isMessageKey = true;
+      throw error;
+    }
+    if (!studentRecord.planId) {
+      const error = new Error("STUDENT_PLAN_NOT_FOUND");
+      error.isMessageKey = true;
+      throw error;
+    }
+
+    if (studentRecord.planId !== liveSession.planId) {
       const error = new Error(
         "YOU_ARE_NOT_AUTHORIZED_TO_JOIN_THIS_LIVE_SESSION",
       );
