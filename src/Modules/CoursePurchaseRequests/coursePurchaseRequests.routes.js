@@ -34,6 +34,7 @@ router.post(
 
 router.patch(
   "/:id/status",
+  authentication,
   authorize(PERMISSIONS_V2.COURSE_PURCHASE_REQUESTS.UPDATE),
   validation(schema.changeStatusSchema),
   controller.changeStatus,
