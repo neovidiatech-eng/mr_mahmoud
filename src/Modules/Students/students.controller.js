@@ -218,6 +218,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     startingCourseId,
     startingLectureId,
     type,
+    status
   } = req.body;
 
   const activeValue = parseBoolean(active);
@@ -366,7 +367,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         plan: { connect: { id: planId } },
         ...(birth_date && { birth_date: new Date(birth_date) }),
         active: activeValue ?? false,
-        status: "approved",
+        status:status || "approved",
         sessions: checkPlan.sessionsCount,
         sessions_attended: 0,
         liveSessionsCount: checkPlan.liveSessionsCount,
@@ -521,6 +522,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     type,
     regenerateQr,
     qrActive,
+    status
   } = req.body;
 
   const activeValue = parseBoolean(active);
@@ -661,6 +663,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(type && { type }),
       ...(activeValue !== undefined && { active: activeValue }),
       ...(qrActive !== undefined && { qrActive }),
+      ...(status && { status }),
       ...(encryptedParentNumber && { parentNumber: encryptedParentNumber }),
       ...(newQrToken && { qrToken: newQrToken, qrActive: true }),
       ...(rankId && { rank: { connect: { id: rankId } } }),
