@@ -25,8 +25,6 @@ router.post(
     fileValidation: fileValidation.image,
   }).single("image"),
     (req, res, next) => {
-    console.log("FILE:", req.file);
-    console.log("BODY:", req.body);
     next();
   },
   guestAuth,
