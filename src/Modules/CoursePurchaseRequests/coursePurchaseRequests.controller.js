@@ -321,7 +321,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         where:{id:request.studentId},
         data:{
           status:"active",
-          active:"true"
+          active:true
           
         }
       })
