@@ -24,6 +24,11 @@ router.post(
     customPath: "course-purchases/receipts",
     fileValidation: fileValidation.image,
   }).single("image"),
+    (req, res, next) => {
+    console.log("FILE:", req.file);
+    console.log("BODY:", req.body);
+    next();
+  },
   guestAuth,
   validation(schema.createRequestSchema),
   controller.createRequest,
