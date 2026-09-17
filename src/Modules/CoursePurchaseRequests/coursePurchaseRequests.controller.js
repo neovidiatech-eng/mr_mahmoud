@@ -14,7 +14,7 @@ import { userStatus } from "../../Utils/Enums/status.js";
 const requestInclude = {
   student: {
     include: {
-      user: { select: { id: true, name: true, email: true, phone: true } },
+      user: { select: { id: true, name: true, email: true, phone: true, status: true } },
     },
   },
   course: true,
@@ -320,6 +320,36 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
 
   let updated;
   await db.transaction(async (tx) => {
+    if (status === "approved" && request.studentId) {
+      await tx.upsertOne({
+        model: "CoursePurchase",
+        where: {
+          studentId_courseId: {
+            studentId: request.studentId,
+            courseId: request.courseId,
+          },
+        },
+        create: { studentId: request.studentId, courseId: request.courseId },
+        update: {},
+      });
+
+      const studentRecord = await tx.findOne({
+        model: "student",
+        where: { id: request.studentId },
+        select: { user_id: true },
+      });
+
+      if (studentRecord?.user_id) {
+        await tx.updateOne({
+          model: "user",
+          where: { id: studentRecord.user_id },
+          data: {
+            status: userStatus.active,
+          },
+        });
+      }
+    }
+
     updated = await tx.updateOne({
       model: "course_purchase_request",
       where: { id },
@@ -343,30 +373,6 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         }
       } catch (err) {
         console.error("[Delete Course Purchase Receipt Image Error]:", err);
-      }
-    }
-
-    if (status === "approved" && request.student) {
-      await tx.upsertOne({
-        model: "CoursePurchase",
-        where: {
-          studentId_courseId: {
-            studentId: request.studentId,
-            courseId: request.courseId,
-          },
-        },
-        create: { studentId: request.studentId, courseId: request.courseId },
-        update: {},
-      });
-      const userId = request.student.user_id || request.student.user?.id;
-      if (userId) {
-        await tx.updateOne({
-          model: "user",
-          where: { id: userId },
-          data: {
-            status: userStatus.active,
-          },
-        });
       }
     }
   });
