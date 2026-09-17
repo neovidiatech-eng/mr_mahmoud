@@ -291,8 +291,6 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
           plan: { connect: { id: subscriptionRequest.planId } },
           sessions: subscriptionRequest.plan?.sessionsCount || 0,
           sessions_remaining: subscriptionRequest.plan?.sessionsCount || 0,
-          status: "approved",
-          active: true,
           rank: { connect: { id: parsedStudentData.rankId } },
           stage: { connect: { id: parsedStudentData.stageId } },
         },
