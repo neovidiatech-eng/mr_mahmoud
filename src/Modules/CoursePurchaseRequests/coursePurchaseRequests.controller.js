@@ -9,10 +9,14 @@ import {
 } from "../../Utils/Response.js";
 import { decryptText, hash } from "../../Utils/Security/index.js";
 import { notifyAdmins } from "../Notifications/notifications.service.js";
-
+import { userStatus } from "../../Utils/Enums/status.js";
 
 const requestInclude = {
-  student: { include: { user: { select: { name: true, email: true, phone: true } } } },
+  student: {
+    include: {
+      user: { select: { id: true, name: true, email: true, phone: true } },
+    },
+  },
   course: true,
 };
 
@@ -29,16 +33,34 @@ const cleanUpUploadedFile = (file) => {
 };
 
 export const createRequest = asyncHandler(async (req, res, next) => {
-  const { name, email, phone, rankId, courseId, courseIds, parentPhone, notes, password } = req.body;
+  const {
+    name,
+    email,
+    phone,
+    rankId,
+    courseId,
+    courseIds,
+    parentPhone,
+    notes,
+    password,
+  } = req.body;
   const receipt_img = req.file?.finalPath || req.file?.path || null;
 
-  const targetCourseIds = Array.isArray(courseIds) && courseIds.length > 0
-    ? courseIds
-    : (courseId ? [courseId] : []);
+  const targetCourseIds =
+    Array.isArray(courseIds) && courseIds.length > 0
+      ? courseIds
+      : courseId
+        ? [courseId]
+        : [];
 
   if (targetCourseIds.length === 0) {
     cleanUpUploadedFile(req.file);
-    return errorResponse({ req, next, message: "COURSE_ID_REQUIRED", status: 400 });
+    return errorResponse({
+      req,
+      next,
+      message: "COURSE_ID_REQUIRED",
+      status: 400,
+    });
   }
 
   // 1. Resolve or Create Student
@@ -49,10 +71,7 @@ export const createRequest = asyncHandler(async (req, res, next) => {
     const existingUser = await db.findFirst({
       model: "user",
       where: {
-        OR: [
-          ...(email ? [{ email }] : []),
-          ...(phone ? [{ phone }] : []),
-        ],
+        OR: [...(email ? [{ email }] : []), ...(phone ? [{ phone }] : [])],
       },
       include: { student: true },
     });
@@ -83,7 +102,7 @@ export const createRequest = asyncHandler(async (req, res, next) => {
     });
 
     const username = `${(name || "user").trim().replace(/\s+/g, "_").toLowerCase()}_${Date.now().toString().slice(-6)}`;
-    const hashedPassword = await hash({password});
+    const hashedPassword = await hash({ password });
 
     await db.transaction(async (tx) => {
       const newUser = await tx.create({
@@ -115,7 +134,8 @@ export const createRequest = asyncHandler(async (req, res, next) => {
   // Update parentNumber / rankId on student if missing
   if (student && (parentPhone || rankId)) {
     const updateData = {};
-    if (parentPhone && !student.parentNumber) updateData.parentNumber = parentPhone;
+    if (parentPhone && !student.parentNumber)
+      updateData.parentNumber = parentPhone;
     if (rankId && !student.rankId) updateData.rankId = rankId;
     if (Object.keys(updateData).length > 0) {
       await db.updateOne({
@@ -197,13 +217,15 @@ export const createRequest = asyncHandler(async (req, res, next) => {
         message_ar: `قام الطالب "${studentName}" بتقديم طلب شراء للكورس "${courseTitle}".`,
         message_en: `Student "${studentName}" submitted a purchase request for course "${courseTitle}".`,
       }).catch((err) =>
-        console.error("Failed to notify admins of course purchase request:", err),
+        console.error(
+          "Failed to notify admins of course purchase request:",
+          err,
+        ),
       );
     }
   }
 
   return successResponse({
-
     res,
     req,
     message: "CREATE_SUCCESS",
@@ -220,7 +242,12 @@ export const getRequests = asyncHandler(async (req, res, next) => {
 
   if (!isAdmin(req.user)) {
     if (!req.user.student) {
-      return errorResponse({ req, next, message: "STUDENT_NOT_FOUND", status: 404 });
+      return errorResponse({
+        req,
+        next,
+        message: "STUDENT_NOT_FOUND",
+        status: 404,
+      });
     }
     condition.studentId = req.user.student.id;
   }
@@ -234,27 +261,26 @@ export const getRequests = asyncHandler(async (req, res, next) => {
     orderBy: { createdAt: "desc" },
   });
   const decryptedItems = await Promise.all(
-    items.map(async(item)=>{
-      if(item.student?.user?.phone){
+    items.map(async (item) => {
+      if (item.student?.user?.phone) {
         item.student.user.phone = await decryptText({
-          text:item.student.user.phone,
-          
+          text: item.student.user.phone,
         });
       }
-      if(item.student?.parentNumber){
+      if (item.student?.parentNumber) {
         item.student.parentNumber = await decryptText({
-          text:item.student.parentNumber
-        })
+          text: item.student.parentNumber,
+        });
       }
-      return item
-    })
-  )
+      return item;
+    }),
+  );
 
   return successResponse({
     res,
     req,
     message: "FETCH_SUCCESS",
-    data: { items:decryptedItems, pagination },
+    data: { items: decryptedItems, pagination },
     status: 200,
   });
 });
@@ -269,11 +295,21 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
   });
 
   if (!request) {
-    return errorResponse({ req, next, message: "COURSE_PURCHASE_REQUEST_NOT_FOUND", status: 404 });
+    return errorResponse({
+      req,
+      next,
+      message: "COURSE_PURCHASE_REQUEST_NOT_FOUND",
+      status: 404,
+    });
   }
 
   if (request.status !== "pending") {
-    return errorResponse({ req, next, message: "REQUEST_ALREADY_PROCESSED", status: 400 });
+    return errorResponse({
+      req,
+      next,
+      message: "REQUEST_ALREADY_PROCESSED",
+      status: 400,
+    });
   }
 
   let updated;
@@ -317,14 +353,12 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         update: {},
       });
       await tx.updateOne({
-        model:"student",
-        where:{id:request.studentId},
-        data:{
-          status:"active",
-          active:true
-          
-        }
-      })
+        model: "user",
+        where: { id: request.student.user.id },
+        data: {
+          status: userStatus.active,
+        },
+      });
     }
   });
 

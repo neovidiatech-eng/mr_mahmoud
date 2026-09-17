@@ -11,6 +11,7 @@ import { resolveStudentAge } from "../../Utils/Helpers.js";
 import { nanoid } from "nanoid";
 import crypto from "crypto";
 import { studentTypes } from "../../Utils/Enums/studentTypes.js";
+import { userStatus } from "../../Utils/Enums/status.js";
 import { title } from "process";
 
 const getStartingPointLectureIds = async ({
@@ -87,11 +88,11 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
   }
   const activeStudents = await db.count({
     model: "student",
-    where: { user: { status: "active" } },
+    where: { user: { status: userStatus.active } },
   });
   const inactiveStudents = await db.count({
     model: "student",
-    where: { user: { status: { not: "active" } } },
+    where: { user: { status: { not: userStatus.active } } },
   });
   const totalStudents = await db.count({ model: "student" });
 
@@ -343,7 +344,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         phone: encryptedPhone,
         password: hashedPassword,
         code_country: phone_code,
-        status: status || "active",
+        status: status || userStatus.active,
         confirmAt: new Date(),
         gender,
         age: studentAge,
