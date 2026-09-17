@@ -123,7 +123,6 @@ export const createRequest = asyncHandler(async (req, res, next) => {
         data: {
           user_id: newUser.id,
           country: "Egypt",
-          status: "pending",
           ...(parentPhone && { parentNumber: parentPhone }),
           ...(rankId && { rankId }),
         },
