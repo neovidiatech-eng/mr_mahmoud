@@ -9,6 +9,7 @@ import { PERMISSIONS_V2 } from "../../Constants/permissions.constants.js";
 const router = Router();
 
 router.get("/", settingsController.getSettings);
+router.get("/payment-methods", settingsController.getPaymentMethods);
 
 router.patch(
   "/",
