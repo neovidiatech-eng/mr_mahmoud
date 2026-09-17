@@ -7,6 +7,7 @@ import * as db from "../../database/dbService.js";
 import { ensureExists } from "../../database/genericService.js";
 import { decryptText, encryptText, hash } from "../../Utils/Security/index.js";
 import { nanoid } from "nanoid";
+import { userStatus } from "../../Utils/Enums/status.js";
 
 export const getAllTeachers = asyncHandler(async (req, res, next) => {
   const { search, page = 1, limit = 10, status } = req.query;
@@ -46,7 +47,7 @@ export const getAllTeachers = asyncHandler(async (req, res, next) => {
 
   const activeCount = await db.count({
     model: "teacher",
-    where: { user: { status: "active" } },
+    where: { user: { status: userStatus.active } },
   });
 
   return successResponse({
@@ -116,7 +117,7 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
         code_country,
         roleId: getrole.id,
         confirmAt: new Date(),
-        status: status || "active",
+        status: status || userStatus.active,
         gender,
         age: parseInt(age),
       },

@@ -2,6 +2,7 @@ import { asyncHandler, successResponse, errorResponse } from "../../../Utils/Res
 import * as db from "../../../database/dbService.js";
 import { ensureExists } from "../../../database/genericService.js";
 import { hash, decryptText, encryptText } from "../../../Utils/Security/index.js";
+import { userStatus } from "../../../Utils/Enums/status.js";
 
 export const getAllStuff = asyncHandler(async (req, res, next) => {
   const { search, page = 1, limit = 10, status } = req.query;
@@ -110,7 +111,7 @@ export const createStuffUser = asyncHandler(async (req, res, next) => {
         phone: phone ? encryptText({ text: phone }) : undefined,
         code_country: codeCountry,
         roleId: roleId || null,
-        status: status || "active",
+        status: status || userStatus.active,
         confirmAt: new Date(),
       },
     }),
