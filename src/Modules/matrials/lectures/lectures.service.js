@@ -2,6 +2,33 @@ import * as db from "../../../database/dbService.js";
 import { createError } from "../../../Utils/Helpers.js";
 import { isAdmin } from "../../../Utils/Permissions/permissions.js";
 
+/**
+ * Resequences all lectures for a given courseId sequentially (1, 2, 3...)
+ * Uses a 2-step update (temporary negative orders first) inside a transaction
+ * to avoid @@unique([courseId, order]) constraint violations in Prisma/Postgres.
+ */
+export const resequenceCourseLectures = async (courseId, orderedLectureList, tx = db) => {
+  if (!courseId || !orderedLectureList || orderedLectureList.length === 0) return;
+
+  // Step 1: Set temporary negative orders to avoid unique key conflicts
+  for (let i = 0; i < orderedLectureList.length; i++) {
+    await tx.updateOne({
+      model: "lectures",
+      where: { id: orderedLectureList[i].id },
+      data: { order: -(i + 1000) },
+    });
+  }
+
+  // Step 2: Set final sequential positive 1-indexed orders
+  for (let i = 0; i < orderedLectureList.length; i++) {
+    await tx.updateOne({
+      model: "lectures",
+      where: { id: orderedLectureList[i].id },
+      data: { order: i + 1 },
+    });
+  }
+};
+
 /* -----------------------------
    CREATE LECTURE
 ----------------------------- */
@@ -18,7 +45,6 @@ export const createLecture = async ({ req, res, next }) => {
       status: 400,
       next,
     });
-
     throw error;
   }
 
@@ -55,49 +81,74 @@ export const createLecture = async ({ req, res, next }) => {
     throw error;
   }
 
-  // Auto-calculate order if not provided
-  if (order === undefined || order === null) {
-    const lastLecture = await db.findFirst({
+  return await db.transaction(async (tx) => {
+    // Fetch existing lectures for course sorted by order asc
+    const existingLectures = await tx.findMany({
       model: "lectures",
       where: { courseId },
-      orderBy: { order: "desc" },
+      orderBy: { order: "asc" },
     });
-    order = lastLecture ? lastLecture.order + 1 : 1;
-  }
 
-  const lecture = await db.create({
-    model: "lectures",
-    data: {
-      courseId,
-      title_ar,
-      ...(title_en !== undefined && { title_en }),
-      content_ar,
-      ...(content_en !== undefined && { content_en }),
-      video_path,
-      slides_path,
-      pdf_path,
-      order: parseInt(order),
-      duration,
-      date,
-    },
-    include: {
-      course: {
-        select: {
-          title_ar: true,
-          title_en: true,
+    // Create the new lecture with a temporary negative order
+    const createdLecture = await tx.create({
+      model: "lectures",
+      data: {
+        courseId,
+        title_ar,
+        ...(title_en !== undefined && { title_en }),
+        content_ar,
+        ...(content_en !== undefined && { content_en }),
+        video_path,
+        slides_path,
+        pdf_path,
+        order: -99999,
+        duration,
+        date,
+      },
+      include: {
+        course: {
+          select: {
+            title_ar: true,
+            title_en: true,
+          },
         },
       },
-    },
-  });
-  if (!lecture) {
-    const error = createError({
-      message: "CREATE_FAILED",
-      status: 500,
-      next,
     });
-    throw error;
-  }
-  return lecture;
+
+    if (!createdLecture) {
+      const error = createError({
+        message: "CREATE_FAILED",
+        status: 500,
+        next,
+      });
+      throw error;
+    }
+
+    // Insert newly created lecture into list at target order
+    const list = [...existingLectures];
+    if (order !== undefined && order !== null && !isNaN(parseInt(order)) && parseInt(order) > 0) {
+      const targetIndex = Math.max(0, Math.min(parseInt(order) - 1, list.length));
+      list.splice(targetIndex, 0, createdLecture);
+    } else {
+      list.push(createdLecture);
+    }
+
+    // Resequence all lectures in the course sequentially
+    await resequenceCourseLectures(courseId, list, tx);
+
+    return await tx.findFirst({
+      model: "lectures",
+      where: { id: createdLecture.id },
+      include: {
+        course: {
+          select: {
+            title_ar: true,
+            title_en: true,
+          },
+        },
+      },
+    });
+  });
 };
 
 /* -----------------------------
@@ -207,27 +258,6 @@ export const updateLecture = async ({ req, res, next }) => {
     where: { id },
   });
 
-  const video_path = req.body.video_path || req.body.videoUrl;
-  const slides_path = req.files?.slides?.[0]?.finalPath || req.files?.slides?.[0]?.path || req.body.slides_path || req.body.slidesUrl;
-  const pdf_path = req.files?.pdf?.[0]?.finalPath || req.files?.pdf?.[0]?.path || req.body.pdf_path || req.body.pdfUrl;
-
-  const data = {
-    courseId,
-    title_ar,
-    title_en,
-    content_ar,
-    content_en,
-    order:parseInt(order),
-    duration,
-    date,
-    video_path,
-    slides_path,
-    pdf_path,
-  };
-  const filteredData = Object.fromEntries(
-    Object.entries(data).filter(([_, value]) => value !== undefined),
-  );
-
   if (!lecture) {
     const error = createError({
       message: "LECTURE_NOT_FOUND",
@@ -237,7 +267,7 @@ export const updateLecture = async ({ req, res, next }) => {
     throw error;
   }
 
-  // validate course change if exists
+  const newCourseId = courseId || lecture.courseId;
   if (courseId && courseId !== lecture.courseId) {
     const course = await db.findFirst({
       model: "courses",
@@ -254,10 +284,106 @@ export const updateLecture = async ({ req, res, next }) => {
     }
   }
 
-  return await db.updateOne({
-    model: "lectures",
-    where: { id },
-    data: filteredData,
+  const video_path = req.body.video_path || req.body.videoUrl;
+  const slides_path = req.files?.slides?.[0]?.finalPath || req.files?.slides?.[0]?.path || req.body.slides_path || req.body.slidesUrl;
+  const pdf_path = req.files?.pdf?.[0]?.finalPath || req.files?.pdf?.[0]?.path || req.body.pdf_path || req.body.pdfUrl;
+
+  const data = {
+    ...(courseId !== undefined && { courseId }),
+    ...(title_ar !== undefined && { title_ar }),
+    ...(title_en !== undefined && { title_en }),
+    ...(content_ar !== undefined && { content_ar }),
+    ...(content_en !== undefined && { content_en }),
+    ...(duration !== undefined && { duration }),
+    ...(date !== undefined && { date }),
+    ...(video_path !== undefined && { video_path }),
+    ...(slides_path !== undefined && { slides_path }),
+    ...(pdf_path !== undefined && { pdf_path }),
+  };
+
+  return await db.transaction(async (tx) => {
+    const isCourseChanged = courseId && courseId !== lecture.courseId;
+    const isOrderUpdated = order !== undefined && order !== null && !isNaN(parseInt(order));
+
+    if (isCourseChanged) {
+      // Move lecture to new course with temporary order -99999
+      await tx.updateOne({
+        model: "lectures",
+        where: { id },
+        data: { ...data, order: -99999 },
+      });
+
+      // 1. Resequence old course
+      const oldCourseLectures = await tx.findMany({
+        model: "lectures",
+        where: { courseId: lecture.courseId },
+        orderBy: { order: "asc" },
+      });
+      await resequenceCourseLectures(lecture.courseId, oldCourseLectures, tx);
+
+      // 2. Resequence new course
+      const newCourseLectures = await tx.findMany({
+        model: "lectures",
+        where: { courseId: newCourseId, id: { not: id } },
+        orderBy: { order: "asc" },
+      });
+
+      const list = [...newCourseLectures];
+      if (isOrderUpdated && parseInt(order) > 0) {
+        const targetIndex = Math.max(0, Math.min(parseInt(order) - 1, list.length));
+        list.splice(targetIndex, 0, { id });
+      } else {
+        list.push({ id });
+      }
+      await resequenceCourseLectures(newCourseId, list, tx);
+    } else if (isOrderUpdated) {
+      // Same course, updated order
+      await tx.updateOne({
+        model: "lectures",
+        where: { id },
+        data: { ...data, order: -99999 },
+      });
+
+      const courseLectures = await tx.findMany({
+        model: "lectures",
+        where: { courseId: newCourseId, id: { not: id } },
+        orderBy: { order: "asc" },
+      });
+
+      const list = [...courseLectures];
+      const targetIndex = Math.max(0, Math.min(parseInt(order) - 1, list.length));
+      list.splice(targetIndex, 0, { id });
+
+      await resequenceCourseLectures(newCourseId, list, tx);
+    } else {
+      // Normal update without order change
+      await tx.updateOne({
+        model: "lectures",
+        where: { id },
+        data,
+      });
+
+      // Resequence course to fix any existing gaps/conflicts
+      const courseLectures = await tx.findMany({
+        model: "lectures",
+        where: { courseId: newCourseId },
+        orderBy: { order: "asc" },
+      });
+      await resequenceCourseLectures(newCourseId, courseLectures, tx);
+    }
+
+    return await tx.findFirst({
+      model: "lectures",
+      where: { id },
+      include: {
+        course: {
+          select: {
+            title_ar: true,
+            title_en: true,
+          },
+        },
+      },
+    });
   });
 };
 
@@ -319,9 +445,75 @@ export const deleteLecture = async ({ req, res, next }) => {
     throw error;
   }
 
-  return await db.deleteOne({
+  const { courseId } = lecture;
+
+  return await db.transaction(async (tx) => {
+    await tx.deleteOne({
+      model: "lectures",
+      where: { id },
+    });
+
+    const remainingLectures = await tx.findMany({
+      model: "lectures",
+      where: { courseId },
+      orderBy: { order: "asc" },
+    });
+
+    await resequenceCourseLectures(courseId, remainingLectures, tx);
+
+    return { id };
+  });
+};
+
+/* -----------------------------
+   REORDER LECTURES
+----------------------------- */
+export const reorderLectures = async ({ req, res, next }) => {
+  const { courseId, lectureIds } = req.body;
+
+  if (!courseId || !Array.isArray(lectureIds)) {
+    const error = createError({ message: "INVALID_INPUT", status: 400, next });
+    throw error;
+  }
+
+  const course = await db.findFirst({
+    model: "courses",
+    where: { id: courseId },
+  });
+
+  if (!course) {
+    const error = createError({ message: "COURSE_NOT_FOUND", status: 404, next });
+    throw error;
+  }
+
+  await db.transaction(async (tx) => {
+    const existingLectures = await tx.findMany({
+      model: "lectures",
+      where: { courseId },
+      orderBy: { order: "asc" },
+    });
+
+    const lectureMap = new Map(existingLectures.map((l) => [l.id, l]));
+    const orderedList = [];
+
+    for (const lid of lectureIds) {
+      if (lectureMap.has(lid)) {
+        orderedList.push(lectureMap.get(lid));
+        lectureMap.delete(lid);
+      }
+    }
+
+    for (const l of lectureMap.values()) {
+      orderedList.push(l);
+    }
+
+    await resequenceCourseLectures(courseId, orderedList, tx);
+  });
+
+  return await db.findMany({
     model: "lectures",
-    where: { id },
+    where: { courseId },
+    orderBy: { order: "asc" },
   });
 };
 
@@ -417,4 +609,5 @@ export const completeLecture = async ({ req, res, next }) => {
 
   return userLecture;
 };
+
 

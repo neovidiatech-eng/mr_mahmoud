@@ -49,3 +49,13 @@ export const removeSectionItemSchema = {
     itemId: generalFields.id.required(),
   }).required(),
 };
+
+export const reorderSectionItemsSchema = {
+  params: Joi.object({
+    id: generalFields.id.required(),
+  }).required(),
+  body: Joi.object({
+    itemIds: Joi.array().items(generalFields.id).min(1).required(),
+  }).required(),
+};
+

@@ -66,3 +66,11 @@ export const updateProgressSchema = {
     duration: Joi.number().min(0).optional(),
   }).required(),
 };
+
+export const reorderLecturesSchema = {
+  body: Joi.object({
+    courseId: generalFields.id.required(),
+    lectureIds: Joi.array().items(generalFields.id).min(1).required(),
+  }).required(),
+};
+
