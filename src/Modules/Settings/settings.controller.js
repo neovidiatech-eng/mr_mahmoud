@@ -12,7 +12,8 @@ export const getSettings = asyncHandler(async (req, res, next) => {
             data: {
                 userPrefix: "mr_mahmoud",
                 socialLinks: {},
-                contactInfo: {}
+                contactInfo: {},
+                paymentMethods: {}
             }
         });
     }
@@ -27,7 +28,7 @@ export const getSettings = asyncHandler(async (req, res, next) => {
 });
 
 export const updateSettings = asyncHandler(async (req, res, next) => {
-    const { userPrefix, socialLinks, contactInfo } = req.body;
+    const { userPrefix, socialLinks, contactInfo, paymentMethods } = req.body;
 
     let settings = await db.findFirst({
         model: "settings"
@@ -39,7 +40,8 @@ export const updateSettings = asyncHandler(async (req, res, next) => {
             data: {
                 userPrefix: userPrefix || "mr_mahmoud",
                 socialLinks: socialLinks || {},
-                contactInfo: contactInfo || {}
+                contactInfo: contactInfo || {},
+                paymentMethods: paymentMethods || {}
             }
         });
     } else {
@@ -47,6 +49,7 @@ export const updateSettings = asyncHandler(async (req, res, next) => {
         if (userPrefix !== undefined) data.userPrefix = userPrefix;
         if (socialLinks !== undefined) data.socialLinks = socialLinks;
         if (contactInfo !== undefined) data.contactInfo = contactInfo;
+        if (paymentMethods !== undefined) data.paymentMethods = paymentMethods;
 
         settings = await db.updateOne({
             model: "settings",

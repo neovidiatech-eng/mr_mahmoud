@@ -32,6 +32,14 @@ export const settingsPaths = {
                     phone: "+201000000000",
                     address: "Cairo, Egypt"
                   }
+                },
+                paymentMethods: {
+                  type: "object",
+                  example: {
+                    vodafoneCash: "01000000000",
+                    instaPay: "01000000000",
+                    fawry: "12345"
+                  }
                 }
               }
             }
