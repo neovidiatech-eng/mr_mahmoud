@@ -21,12 +21,12 @@ export const createStudentSchema = {
     age: generalFields.studentAge,
     birth_date: generalFields.birth_date,
     gender: generalFields.gender.required(),
-    active: generalFields.active.required(),
     rankId: generalFields.id,
     stageId: generalFields.id,
     startingCourseId: generalFields.id,
     startingLectureId: generalFields.id,
     type: generalFields.studentType.required(),
+    status: generalFields.status.optional(),
     image: Joi.string().optional().allow("", null),
     timezone: generalFields.timezone, // optional — fallback to default
   })
@@ -52,7 +52,7 @@ export const updateStudentSchema = {
       birth_date: generalFields.birth_date,
       age: generalFields.studentAge,
       gender: generalFields.gender,
-      active: generalFields.active,
+      status: generalFields.status,
       rankId: generalFields.id,
       stageId: generalFields.id,
       timezone: generalFields.timezone,

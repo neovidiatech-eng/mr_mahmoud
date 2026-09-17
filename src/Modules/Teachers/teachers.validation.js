@@ -6,7 +6,8 @@ export const getAllTeachersSchema = {
     page: generalFields.page,
     limit: generalFields.limit,
     sort: generalFields.sort,
-    sortType: generalFields.sortType, 
+    sortType: generalFields.sortType,
+    status: generalFields.status,
   }),
 };
 
@@ -29,7 +30,7 @@ export const createTeacherSchema = {
       age: generalFields.number.required(),
       hour_price: generalFields.price.required(),
       group_hour_price: joi.number().min(0).optional().default(0),
-      active: generalFields.active.required(),
+      status: generalFields.status.optional(),
     })
     .required(),
 };
@@ -65,7 +66,7 @@ export const updateTeacherSchema = {
       age: generalFields.number,
       hour_price: generalFields.price.optional(),
       group_hour_price: joi.number().min(0).optional(),
-      active: generalFields.active.optional(),
+      status: generalFields.status,
     })
     .required(),
 };

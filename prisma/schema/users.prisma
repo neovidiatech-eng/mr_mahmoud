@@ -4,7 +4,6 @@ model teacher {
   currencyId       String
   hour_price       Float
   group_hour_price Float?     @default(0)
-  active           Boolean    @default(false)
   roleId           String?
   createdAt        DateTime   @default(now())
   updatedAt        DateTime   @updatedAt
@@ -28,10 +27,8 @@ model student {
   qrToken                String?                   @unique
   qrActive               Boolean                   @default(true)
   type                   String?                   @default("online")
-  active                 Boolean                   @default(false)
   planId                 String?
   country                String
-  status                 String                    @default("pending")
   createdAt              DateTime                  @default(now())
   updatedAt              DateTime                  @updatedAt
   sessions               Float                     @default(0)

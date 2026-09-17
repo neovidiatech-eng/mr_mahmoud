@@ -185,7 +185,7 @@ const resolveLectureAccess = async (lecture, requestingUser) => {
       }
     : null;
 
-  const matchesRank = student.active && student.rankId === lecture.course?.rankId;
+  const matchesRank = student.rankId === lecture.course?.rankId;
   if (matchesRank) return { hasAccess: true, myProgress };
 
   const purchase = await db.findFirst({

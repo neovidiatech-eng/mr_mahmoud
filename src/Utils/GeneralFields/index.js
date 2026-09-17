@@ -261,6 +261,9 @@ export const generalFields = {
     "boolean.empty": "ACTIVE_EMPTY",
     "any.required": "ACTIVE_REQUIRED",
   }),
+  status: Joi.string().messages({
+    "string.base": "STATUS_STRING",
+  }),
   bestSeller: Joi.boolean().messages({
     "boolean.base": "BEST_SELLER_BOOLEAN",
     "boolean.empty": "BEST_SELLER_EMPTY",
