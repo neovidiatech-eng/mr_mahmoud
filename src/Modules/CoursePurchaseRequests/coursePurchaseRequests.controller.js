@@ -292,6 +292,13 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
   const request = await db.findOne({
     model: "course_purchase_request",
     where: { id },
+    include: {
+      student: {
+        include: {
+          user: true,
+        },
+      },
+    },
   });
 
   if (!request) {
@@ -340,7 +347,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       }
     }
 
-    if (status === "approved") {
+    if (status === "approved" && request.student) {
       await tx.upsertOne({
         model: "CoursePurchase",
         where: {
@@ -352,13 +359,16 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         create: { studentId: request.studentId, courseId: request.courseId },
         update: {},
       });
-      await tx.updateOne({
-        model: "user",
-        where: { id: request.student.user.id },
-        data: {
-          status: userStatus.active,
-        },
-      });
+      const userId = request.student.user_id || request.student.user?.id;
+      if (userId) {
+        await tx.updateOne({
+          model: "user",
+          where: { id: userId },
+          data: {
+            status: userStatus.active,
+          },
+        });
+      }
     }
   });
 
