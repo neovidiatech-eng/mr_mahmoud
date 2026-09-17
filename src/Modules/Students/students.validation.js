@@ -30,7 +30,7 @@ export const createStudentSchema = {
     image: Joi.string().optional().allow("", null),
     timezone: generalFields.timezone, // optional — fallback to default
   })
-    .or("planId","startingCourseId")
+    .and("startingCourseId", "startingLectureId")
     .or("age", "birth_date")
     .messages({ "object.missing": "AGE_OR_BIRTH_DATE_REQUIRED" }),
 };
