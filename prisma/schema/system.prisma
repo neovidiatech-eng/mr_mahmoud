@@ -38,12 +38,13 @@ model audit_log {
 }
 
 model settings {
-  id          String   @id @default(uuid())
-  userPrefix  String   @default("mr_mahmoud")
-  socialLinks Json
-  contactInfo Json
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id             String   @id @default(uuid())
+  userPrefix     String   @default("mr_mahmoud")
+  socialLinks    Json
+  contactInfo    Json
+  paymentMethods Json?
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
 }
 
 model policy {
