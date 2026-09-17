@@ -203,6 +203,7 @@ const parseBoolean = (value) => {
 
   return undefined;
 };
+
 export const createStudent = asyncHandler(async (req, res, next) => {
   const {
     name,
@@ -226,12 +227,21 @@ export const createStudent = asyncHandler(async (req, res, next) => {
 
   const studentAge = resolveStudentAge({ age, birthDate: birth_date });
 
-  const [checkUserByEmail, checkPlan, studentRole, settings] =
+  const [checkUserByEmail, checkPlan,checkCourse, studentRole, settings] =
     await Promise.all([
       email
         ? db.findOne({ model: "user", where: { email } })
         : Promise.resolve(null),
-      db.findOne({ model: "plan", where: { id: planId } }),
+
+      planId
+        ? db.findOne({ model: "plan", where: { id: planId } })
+        : Promise.resolve(null),
+
+      startingCourseId
+        ? db.findOne({ model: "course", where: { id: startingCourseId } })
+        : Promise.resolve(null),
+      
+
       db.findFirst({
         model: "role",
         where: { name: { equals: "student", mode: "insensitive" } },
@@ -247,8 +257,32 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       status: 400,
     });
 
-  if (!checkPlan)
-    return errorResponse({ req, next, message: "PLAN_NOT_FOUND", status: 404 });
+  if(!planId && !startingCourseId){
+    return errorResponse({
+      req,
+      next,
+      message: "PLAN_OR_COURSE_REQUIRED",
+      status: 400,
+    });
+  }
+
+  if (planId && !checkPlan) {
+    return errorResponse({
+      req,
+      next,
+      message: "PLAN_NOT_FOUND",
+      status: 404,
+    });
+  }
+
+  if (startingCourseId && !checkCourse) {
+    return errorResponse({
+      req,
+      next,
+      message: "COURSE_NOT_FOUND",
+      status: 404,
+    });
+  }
 
   let targetRankId = rankId;
   if (!targetRankId && stageId) {
@@ -365,16 +399,16 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         user: { connect: { id: user.id } },
         parentNumber: encryptedParentNumber,
         country,
-        plan: { connect: { id: planId } },
+        ...(planId && { plan: { connect: { id: planId } } }),
         ...(birth_date && { birth_date: new Date(birth_date) }),
-        sessions: checkPlan.sessionsCount,
+        sessions: checkPlan?.sessionsCount ?? 0,
         sessions_attended: 0,
-        liveSessionsCount: checkPlan.liveSessionsCount,
+        liveSessionsCount: checkPlan?.liveSessionsCount ?? 0,
         attendedLiveSessions: 0,
-        liveSessionsRemaining: checkPlan.liveSessionsCount,
-        sessions_remaining: checkPlan.sessionsCount,
+        liveSessionsRemaining: checkPlan?.liveSessionsCount ?? 0,
+        sessions_remaining: checkPlan?.sessionsCount ?? 0,
         rank: { connect: { id: effectiveRankId } },
-        stage: { connect: { id: stageId } },
+        ...(stageId && { stage: { connect: { id: stageId } } }),
         ...(qrToken && { qrToken, qrActive: true }),
         type,
       },
@@ -399,6 +433,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     }
 
     // 3. Create subscription record
+    if(planId && checkPlan){
     const subscription = await tx.create({
       model: "Subscription",
       data: {
@@ -433,8 +468,8 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       where: { id: systemWallet.id },
       data: { balance: { increment: amount } },
     });
-  });
-
+  }
+});
   if (createdStudent && createdStudent.user) {
     if (createdStudent.user.phone) {
       createdStudent.user.phone = await decryptText({
