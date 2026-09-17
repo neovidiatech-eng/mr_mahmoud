@@ -106,6 +106,26 @@ export const getQuiz = async ({ req, res, next }) => {
   });
 };
 
+export const resequenceCourseQuizzes = async (courseId, orderedQuizList, tx = db) => {
+  if (!courseId || !orderedQuizList || orderedQuizList.length === 0) return;
+
+  for (let i = 0; i < orderedQuizList.length; i++) {
+    await tx.updateOne({
+      model: "quiz",
+      where: { id: orderedQuizList[i].id },
+      data: { order: -(i + 1000) },
+    });
+  }
+
+  for (let i = 0; i < orderedQuizList.length; i++) {
+    await tx.updateOne({
+      model: "quiz",
+      where: { id: orderedQuizList[i].id },
+      data: { order: i + 1 },
+    });
+  }
+};
+
 export const createQuiz = async ({ req, res, next }) => {
   const {
     title_ar,
@@ -123,7 +143,6 @@ export const createQuiz = async ({ req, res, next }) => {
   const slug =
     slugify(slugSource, { lower: true, replacement: "-", trim: true }) ||
     `quiz-${Date.now()}-${Math.random().toString(36).substr(2, 5)}`;
-
 
   const exitingQuiz = await db.findOne({
     model: "quiz",
@@ -151,45 +170,77 @@ export const createQuiz = async ({ req, res, next }) => {
     }
   }
 
-  const quiz = await db.create({
-    model: "quiz",
-    data: {
-      title_ar,
-      title_en: title_en || "",
-      slug,
-      description_ar: description_ar || "",
-      description_en: description_en || "",
-      total_points,
-      pass_points,
-      duration_min,
-      ...(order !== undefined && { order }),
-      ...(courseId && {
-        course: {
-          connect: {
-            id: courseId,
-          },
-        },
-      }),
-      questions: {
-        create: questions?.map((question, index) => ({
-          question_ar: question.question_ar,
-          question_en: question.question_en,
-          points: question.points,
-          type: question.type,
-          order: question.order || index + 1,
-          options: {
-            create: question.options ?? [],
-          },
-        })),
-      },
-    },
-  });
+  return await db.transaction(async (tx) => {
+    const existingQuizzes = courseId
+      ? await tx.findMany({
+          model: "quiz",
+          where: { courseId },
+          orderBy: { order: "asc" },
+        })
+      : [];
 
-  return localizeResponse({
-    data: quiz,
-    lang: req.lang,
-    fields: [],
-    removeRaw: true,
+    const createdQuiz = await tx.create({
+      model: "quiz",
+      data: {
+        title_ar,
+        title_en: title_en || "",
+        slug,
+        description_ar: description_ar || "",
+        description_en: description_en || "",
+        total_points,
+        pass_points,
+        duration_min,
+        order: courseId ? -99999 : (order !== undefined ? parseInt(order) : 1),
+        ...(courseId && {
+          course: {
+            connect: {
+              id: courseId,
+            },
+          },
+        }),
+        questions: {
+          create: questions?.map((question, index) => ({
+            question_ar: question.question_ar,
+            question_en: question.question_en,
+            points: question.points,
+            type: question.type,
+            order: question.order || index + 1,
+            options: {
+              create: question.options ?? [],
+            },
+          })),
+        },
+      },
+    });
+
+    if (courseId) {
+      const list = [...existingQuizzes];
+      if (order !== undefined && order !== null && !isNaN(parseInt(order)) && parseInt(order) > 0) {
+        const targetIndex = Math.max(0, Math.min(parseInt(order) - 1, list.length));
+        list.splice(targetIndex, 0, createdQuiz);
+      } else {
+        list.push(createdQuiz);
+      }
+      await resequenceCourseQuizzes(courseId, list, tx);
+    }
+
+    const finalQuiz = await tx.findOne({
+      model: "quiz",
+      where: { id: createdQuiz.id },
+      include: {
+        questions: {
+          orderBy: { order: "asc" },
+          include: { options: true },
+        },
+      },
+    });
+
+    return localizeResponse({
+      data: finalQuiz,
+      lang: req.lang,
+      fields: [],
+      removeRaw: true,
+    });
   });
 };
 
@@ -327,13 +378,27 @@ export const deleteQuiz = async ({ req, res, next }) => {
     throw error;
   }
 
-  await db.deleteOne({
-    model: "quiz",
-    where: { id },
+  const { courseId } = existingQuiz;
+
+  await db.transaction(async (tx) => {
+    await tx.deleteOne({
+      model: "quiz",
+      where: { id },
+    });
+
+    if (courseId) {
+      const remaining = await tx.findMany({
+        model: "quiz",
+        where: { courseId },
+        orderBy: { order: "asc" },
+      });
+      await resequenceCourseQuizzes(courseId, remaining, tx);
+    }
   });
 
   return { id };
 };
+
 
 export const submitQuiz = async ({ req, res, next }) => {
   const { quiz_id, answers } = req.body;

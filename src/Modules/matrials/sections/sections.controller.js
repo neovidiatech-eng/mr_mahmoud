@@ -95,3 +95,14 @@ export const removeSectionItem = asyncHandler(async (req, res, next) => {
     data: localizeSection(section, req.lang),
   });
 });
+
+export const reorderSectionItems = asyncHandler(async (req, res, next) => {
+  const section = await sectionsService.reorderSectionItems({ req, res, next });
+  return successResponse({
+    res,
+    req,
+    message: "UPDATE_SUCCESS",
+    data: localizeSection(section, req.lang),
+  });
+});
+

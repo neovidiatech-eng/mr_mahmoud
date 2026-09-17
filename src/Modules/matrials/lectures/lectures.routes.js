@@ -48,6 +48,14 @@ router.post(
 );
 
 router.patch(
+  "/reorder",
+  authentication,
+  authorizeResource(lecturesResource),
+  validation(lecturesValidation.reorderLecturesSchema),
+  lecturesController.reorderLectures,
+);
+
+router.patch(
   "/:id",
   authentication,
   uploader,
@@ -55,6 +63,7 @@ router.patch(
   validation(lecturesValidation.updateLectureSchema),
   lecturesController.updateLecture,
 );
+
 
 router.delete(
   "/:id",

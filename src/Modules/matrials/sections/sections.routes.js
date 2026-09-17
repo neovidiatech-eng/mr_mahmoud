@@ -56,4 +56,13 @@ router.delete(
   sectionsController.removeSectionItem,
 );
 
+router.patch(
+  "/:id/items/reorder",
+  authentication,
+  authorizeResource(sectionsResource),
+  validation(sectionsValidation.reorderSectionItemsSchema),
+  sectionsController.reorderSectionItems,
+);
+
 export default router;
+

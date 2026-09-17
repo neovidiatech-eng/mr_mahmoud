@@ -61,3 +61,10 @@ export const updateProgress = asyncHandler(async (req, res, next) => {
   const result = await lecturesService.updateLectureProgress({ req, res, next });
   return successResponse({ res, req, message: "UPDATE_SUCCESS", data: result });
 });
+
+export const reorderLectures = asyncHandler(async (req, res, next) => {
+  const lectures = await lecturesService.reorderLectures({ req, res, next });
+  const items = lectures?.map((l) => localizeLecture(l, req.lang));
+  return successResponse({ res, req, message: "UPDATE_SUCCESS", data: items });
+});
+

@@ -70,6 +70,27 @@ export const populateSectionItems = async (sectionsList) => {
   }));
 };
 
+/**
+ * Resequences section items within a section so that orders are strictly 1, 2, 3...
+ */
+export const resequenceSectionItems = async (sectionId, tx = db) => {
+  if (!sectionId) return;
+
+  const items = await tx.findMany({
+    model: "section_items",
+    where: { section_id: sectionId },
+    orderBy: { order: "asc" },
+  });
+
+  for (let i = 0; i < items.length; i++) {
+    await tx.updateOne({
+      model: "section_items",
+      where: { id: items[i].id },
+      data: { order: i + 1 },
+    });
+  }
+};
+
 export const getSections = async ({ req }) => {
   const { page = 1, limit = 20, course_id, search } = req.query;
 
@@ -168,7 +189,7 @@ export const createSection = async ({ req }) => {
             create: items.map((item, idx) => ({
               item_id: item.item_id,
               item_type: (item.item_type || "").toUpperCase(),
-              order: item.order !== undefined ? item.order : idx + 1,
+              order: idx + 1,
             })),
           }
         : undefined,
@@ -242,7 +263,7 @@ export const updateSection = async ({ req }) => {
             create: items.map((item, idx) => ({
               item_id: item.item_id,
               item_type: (item.item_type || "").toUpperCase(),
-              order: item.order !== undefined ? item.order : idx + 1,
+              order: idx + 1,
             })),
           },
         },
@@ -318,14 +339,33 @@ export const addSectionItems = async ({ req }) => {
     throw error;
   }
 
-  await db.createMany({
-    model: "section_items",
-    data: items.map((item, idx) => ({
-      section_id: id,
-      item_id: item.item_id,
-      item_type: (item.item_type || "").toUpperCase(),
-      order: item.order !== undefined ? item.order : idx + 1,
-    })),
+  await db.transaction(async (tx) => {
+    const existingItems = await tx.findMany({
+      model: "section_items",
+      where: { section_id: id },
+      orderBy: { order: "asc" },
+    });
+
+    const currentMaxOrder = existingItems.length;
+
+    for (let idx = 0; idx < items.length; idx++) {
+      const item = items[idx];
+      const targetOrder = item.order !== undefined && item.order !== null && !isNaN(parseInt(item.order)) && parseInt(item.order) > 0
+        ? parseInt(item.order)
+        : currentMaxOrder + idx + 1;
+
+      await tx.create({
+        model: "section_items",
+        data: {
+          section_id: id,
+          item_id: item.item_id,
+          item_type: (item.item_type || "").toUpperCase(),
+          order: targetOrder,
+        },
+      });
+    }
+
+    await resequenceSectionItems(id, tx);
   });
 
   return await getSectionById(id);
@@ -346,13 +386,66 @@ export const removeSectionItem = async ({ req }) => {
     throw error;
   }
 
-  await db.deleteMany({
-    model: "section_items",
-    where: {
-      section_id: id,
-      item_id: itemId,
-    },
+  await db.transaction(async (tx) => {
+    await tx.deleteMany({
+      model: "section_items",
+      where: {
+        section_id: id,
+        item_id: itemId,
+      },
+    });
+
+    await resequenceSectionItems(id, tx);
   });
 
   return await getSectionById(id);
 };
+
+export const reorderSectionItems = async ({ req }) => {
+  const { id } = req.params;
+  const { itemIds } = req.body;
+
+  const existingSection = await db.findOne({
+    model: "sections",
+    where: { id },
+  });
+
+  if (!existingSection) {
+    const error = new Error("SECTION_NOT_FOUND");
+    error.status = 404;
+    error.isMessageKey = true;
+    throw error;
+  }
+
+  await db.transaction(async (tx) => {
+    const existingItems = await tx.findMany({
+      model: "section_items",
+      where: { section_id: id },
+    });
+
+    const itemMap = new Map(existingItems.map((item) => [item.item_id, item]));
+    const orderedItems = [];
+
+    for (const itemId of itemIds) {
+      if (itemMap.has(itemId)) {
+        orderedItems.push(itemMap.get(itemId));
+        itemMap.delete(itemId);
+      }
+    }
+
+    for (const item of itemMap.values()) {
+      orderedItems.push(item);
+    }
+
+    for (let i = 0; i < orderedItems.length; i++) {
+      await tx.updateOne({
+        model: "section_items",
+        where: { id: orderedItems[i].id },
+        data: { order: i + 1 },
+      });
+    }
+  });
+
+  return await getSectionById(id);
+};
+
