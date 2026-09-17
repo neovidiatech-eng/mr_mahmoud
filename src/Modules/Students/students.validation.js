@@ -10,7 +10,7 @@ export const createStudentSchema = {
     phone_code: generalFields.codeCountry.required(),
     parentNumber:generalFields.phone.required(),
     country: generalFields.country.required(),
-    planId: generalFields.id
+    planId: generalFields.id.not("",null)
       .messages({
         "string.base": "PLAN_ID_MUST_BE_STRING",
         "string.empty": "PLAN_ID_CANNOT_BE_EMPTY",
@@ -21,12 +21,12 @@ export const createStudentSchema = {
     age: generalFields.studentAge,
     birth_date: generalFields.birth_date,
     gender: generalFields.gender.required(),
+    status: generalFields.status.optional(),
     rankId: generalFields.id,
     stageId: generalFields.id,
     startingCourseId: generalFields.id,
     startingLectureId: generalFields.id,
     type: generalFields.studentType.required(),
-    status: generalFields.status.optional(),
     image: Joi.string().optional().allow("", null),
     timezone: generalFields.timezone, // optional — fallback to default
   })
@@ -52,7 +52,7 @@ export const updateStudentSchema = {
       birth_date: generalFields.birth_date,
       age: generalFields.studentAge,
       gender: generalFields.gender,
-      status: generalFields.status,
+      status: generalFields.status.optional(),
       rankId: generalFields.id,
       stageId: generalFields.id,
       timezone: generalFields.timezone,

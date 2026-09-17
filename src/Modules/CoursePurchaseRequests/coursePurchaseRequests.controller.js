@@ -1,12 +1,12 @@
+import fs from "node:fs";
+import path from "node:path";
+import * as db from "../../database/dbService.js";
+import { isAdmin } from "../../Utils/Permissions/permissions.js";
 import {
   asyncHandler,
   errorResponse,
   successResponse,
 } from "../../Utils/Response.js";
-import * as db from "../../database/dbService.js";
-import { isAdmin } from "../../Utils/Permissions/permissions.js";
-import fs from "node:fs";
-import path from "node:path";
 import { decryptText, hash } from "../../Utils/Security/index.js";
 import { notifyAdmins } from "../Notifications/notifications.service.js";
 
@@ -316,6 +316,15 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         create: { studentId: request.studentId, courseId: request.courseId },
         update: {},
       });
+      await tx.updateOne({
+        model:"student",
+        where:{id:request.studentId},
+        data:{
+          status:"active",
+          active:true
+          
+        }
+      })
     }
   });
 

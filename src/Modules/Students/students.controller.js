@@ -215,12 +215,12 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     age,
     birth_date,
     gender,
-    status,
     rankId,
     stageId,
     startingCourseId,
     startingLectureId,
     type,
+    status
   } = req.body;
 
   const studentAge = resolveStudentAge({ age, birthDate: birth_date });
@@ -513,13 +513,13 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     birth_date,
     age,
     gender,
-    status,
     rankId,
     stageId,
     timezone,
     type,
     regenerateQr,
     qrActive,
+    status
   } = req.body;
 
   const student = await ensureExists({

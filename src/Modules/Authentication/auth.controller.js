@@ -260,6 +260,14 @@ export const login = asyncHandler(async (req, res, next) => {
       status: 401,
     });
   }
+  if (user.status === "disabled" || user.status === "blocked") {
+    return errorResponse({
+      req,
+      next,
+      message: "USER_ACCOUNT_DISABLED",
+      status: 403,
+    });
+  }
 
   const decryptedPhone = await decryptText({ text: user.phone });
   user.phone = decryptedPhone;

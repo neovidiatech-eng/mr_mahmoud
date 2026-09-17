@@ -57,3 +57,22 @@ export const sensitiveRateLimiter = rateLimit({
   keyGenerator,
   handler: rateLimitHandler("Too many password reset attempts, please try again after an hour."),
 });
+
+// ── Log rate limit info ───────────────────────────────────────────────────────
+
+export const logRateLimit = (req, res, next) => {
+  const limit = res.getHeader("RateLimit-Limit");
+  const remaining = res.getHeader("RateLimit-Remaining");
+  const reset = res.getHeader("RateLimit-Reset");
+
+  console.log("🔥 RATE LIMIT CHECK", {
+    ip: req.ip,
+    method: req.method,
+    route: req.originalUrl,
+    limit,
+    remaining,
+    reset,
+  });
+
+  next();
+};
