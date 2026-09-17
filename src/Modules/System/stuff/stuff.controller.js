@@ -4,15 +4,18 @@ import { ensureExists } from "../../../database/genericService.js";
 import { hash, decryptText, encryptText } from "../../../Utils/Security/index.js";
 
 export const getAllStuff = asyncHandler(async (req, res, next) => {
-  const { search, page = 1, limit = 10 } = req.query;
+  const { search, page = 1, limit = 10, status } = req.query;
 
   const where = {};
-  if (search) {
+  if (search || status) {
     where.user = {
-      OR: [
-        { name: { contains: search, mode: "insensitive" } },
-        { email: { contains: search, mode: "insensitive" } },
-      ],
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { email: { contains: search, mode: "insensitive" } },
+        ],
+      }),
+      ...(status && { status }),
     };
   }
 
@@ -85,7 +88,7 @@ export const getStuffById = asyncHandler(async (req, res, next) => {
 });
 
 export const createStuffUser = asyncHandler(async (req, res, next) => {
-  const { name, email, password, phone, codeCountry, roleId } = req.body;
+  const { name, email, password, phone, codeCountry, roleId, status } = req.body;
 
   const [checkUserByEmail, checkRole] = await Promise.all([
     db.findOne({ model: "user", where: { email } }),
@@ -107,7 +110,7 @@ export const createStuffUser = asyncHandler(async (req, res, next) => {
         phone: phone ? encryptText({ text: phone }) : undefined,
         code_country: codeCountry,
         roleId: roleId || null,
-        status: "active",
+        status: status || "active",
         confirmAt: new Date(),
       },
     }),
@@ -142,7 +145,7 @@ export const createStuffUser = asyncHandler(async (req, res, next) => {
 
 export const updateStuffUser = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
-  const { name, email, password, phone, code_country, roleId } = req.body;
+  const { name, email, password, phone, code_country, roleId, status } = req.body;
 
   const stuff = await ensureExists({ model: "stuff", where: { id }, include: { user: true } });
 
@@ -166,7 +169,7 @@ export const updateStuffUser = asyncHandler(async (req, res, next) => {
   }
 
   // Update user data
-  if (name || email || hashedPassword || phone || code_country || roleId !== undefined) {
+  if (name || email || hashedPassword || phone || code_country || roleId !== undefined || status) {
     await db.updateOne({
       model: "user",
       where: { id: stuff.user_id },
@@ -177,6 +180,7 @@ export const updateStuffUser = asyncHandler(async (req, res, next) => {
         ...(phone && { phone: encryptText({ text: phone }) }),
         ...(code_country && { code_country }),
         ...(roleId !== undefined && { roleId }),
+        ...(status && { status }),
       },
     });
   }

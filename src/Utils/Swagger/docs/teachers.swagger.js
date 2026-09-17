@@ -8,6 +8,7 @@ export const teachersPaths = {
         { name: "search", in: "query", schema: { type: "string" } },
         { name: "page", in: "query", schema: { type: "integer", minimum: 1, default: 1 } },
         { name: "limit", in: "query", schema: { type: "integer", minimum: 1, default: 10 } },
+        { name: "status", in: "query", schema: { type: "string" } },
         { name: "sort", in: "query", schema: { type: "string" } },
         { name: "sortType", in: "query", schema: { type: "string", enum: ["asc", "desc"] } }
       ],
@@ -32,7 +33,7 @@ export const teachersPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name", "email", "password", "phone", "code_country", "currency_id", "gender", "age", "hour_price", "active"],
+              required: ["name", "email", "password", "phone", "code_country", "currency_id", "gender", "age", "hour_price"],
               properties: {
                 name: { type: "string", example: "Mahmoud Hassan" },
                 email: { type: "string", format: "email", example: "teacher@example.com" },
@@ -44,7 +45,7 @@ export const teachersPaths = {
                 age: { type: "number", example: 35 },
                 hour_price: { type: "number", example: 150 },
                 group_hour_price: { type: "number", example: 50 },
-                active: { type: "boolean", default: true }
+                status: { type: "string", example: "active" }
               }
             }
           }
@@ -89,7 +90,7 @@ export const teachersPaths = {
                 age: { type: "number" },
                 hour_price: { type: "number" },
                 group_hour_price: { type: "number" },
-                active: { type: "boolean" }
+                status: { type: "string" }
               }
             }
           }

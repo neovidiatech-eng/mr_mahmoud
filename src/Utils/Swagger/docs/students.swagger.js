@@ -8,7 +8,7 @@ export const studentsPaths = {
         { name: "page", in: "query", schema: { type: "integer", minimum: 1, default: 1 } },
         { name: "limit", in: "query", schema: { type: "integer", minimum: 1, default: 10 } },
         { name: "search", in: "query", schema: { type: "string" } },
-        { name: "active", in: "query", schema: { type: "boolean" } }
+        { name: "status", in: "query", schema: { type: "string" } }
       ],
       responses: { 200: { description: "Students list retrieved." } }
     }
@@ -24,7 +24,7 @@ export const studentsPaths = {
           "multipart/form-data": {
             schema: {
               type: "object",
-              required: ["name", "email", "password", "phone", "phone_code", "parentNumber", "country", "planId", "gender", "active", "type"],
+              required: ["name", "email", "password", "phone", "phone_code", "parentNumber", "country", "planId", "gender", "type"],
               properties: {
                 name: { type: "string", example: "Karem Mahmoud" },
                 email: { type: "string", format: "email", example: "karem@example.com" },
@@ -37,7 +37,7 @@ export const studentsPaths = {
                 age: { type: "integer", example: 16 },
                 birth_date: { type: "string", format: "date", example: "2008-01-01" },
                 gender: { type: "string", enum: ["male", "female"], example: "male" },
-                active: { type: "boolean", default: true },
+                status: { type: "string", example: "active" },
                 rankId: { type: "string", format: "uuid" },
                 stageId: { type: "string", format: "uuid", description: "Educational Stage ID (optional)" },
                 startingCourseId: { type: "string", format: "uuid" },
@@ -99,7 +99,7 @@ export const studentsPaths = {
                 birth_date: { type: "string", format: "date" },
                 age: { type: "integer" },
                 gender: { type: "string", enum: ["male", "female"] },
-                active: { type: "boolean" },
+                status: { type: "string" },
                 rankId: { type: "string", format: "uuid" },
                 stageId: { type: "string", format: "uuid" },
                 type: { type: "string", enum: ["online", "onsite"] },

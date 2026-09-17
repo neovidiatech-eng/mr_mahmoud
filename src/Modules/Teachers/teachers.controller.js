@@ -9,20 +9,19 @@ import { decryptText, encryptText, hash } from "../../Utils/Security/index.js";
 import { nanoid } from "nanoid";
 
 export const getAllTeachers = asyncHandler(async (req, res, next) => {
-  const { search, page = 1, limit = 10, active } = req.query;
+  const { search, page = 1, limit = 10, status } = req.query;
 
   let where = {};
-  if (search) {
+  if (search || status) {
     where.user = {
-      OR: [
-        { name: { contains: search, mode: "insensitive" } },
-        { email: { contains: search, mode: "insensitive" } },
-      ],
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { email: { contains: search, mode: "insensitive" } },
+        ],
+      }),
+      ...(status && { status }),
     };
-  }
-
-  if (active !== undefined) {
-    where.active = active === "true";
   }
 
   const { items: teachers, pagination } =
@@ -47,7 +46,7 @@ export const getAllTeachers = asyncHandler(async (req, res, next) => {
 
   const activeCount = await db.count({
     model: "teacher",
-    where: { active: true },
+    where: { user: { status: "active" } },
   });
 
   return successResponse({
@@ -74,7 +73,7 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
     gender,
     age,
     hour_price,
-    active,
+    status,
   } = req.body;
 
   const [checkUserByEmail, checkCurrency, getrole, settings] =
@@ -117,7 +116,7 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
         code_country,
         roleId: getrole.id,
         confirmAt: new Date(),
-        status: "active",
+        status: status || "active",
         gender,
         age: parseInt(age),
       },
@@ -131,7 +130,6 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
         currency: { connect: { id: checkCurrency.id } },
         hour_price,
         group_hour_price: group_hour_price ?? 0,
-        active: active ?? false,
       },
       include: { user: true },
     });
@@ -175,7 +173,6 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
     select: {
       id: true,
       hour_price: true,
-      active: true,
       createdAt: true,
       updatedAt: true,
   
@@ -264,7 +261,7 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
     age,
     hour_price,
     group_hour_price,
-    active,
+    status,
   } = req.body;
 
   const teacher = await ensureExists({
@@ -300,7 +297,7 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
   }
 
   // Update user data first if needed
-  if (name || email || hashedPassword || phone || code_country || gender || age) {
+  if (name || email || hashedPassword || phone || code_country || gender || age || status) {
     await db.updateOne({
       model: "user",
       where: { id: teacher.user_id },
@@ -311,6 +308,7 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
         ...(phone && { phone: encryptText({ text: phone }) }),
         ...(code_country && { code_country }),
         ...(gender && { gender }),
+        ...(status && { status }),
         ...(age && { age: parseInt(age) }),
       },
     });
@@ -324,7 +322,6 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
       ...(currency_id && { currency: { connect: { id: currency_id } } }),
       ...(hour_price !== undefined && { hour_price }),
       ...(group_hour_price !== undefined && { group_hour_price }),
-      ...(active !== undefined && { active }),
     },
     include: {
       user: true,

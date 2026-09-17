@@ -206,7 +206,7 @@ export const getCourses = async (query = {}, user = null) => {
   const items = (result.items || []).map((course) => {
     let isPurchased = false;
     if (student) {
-      const matchesRank = student.active && student.rankId === course.rankId;
+      const matchesRank = student.rankId === course.rankId;
       isPurchased = matchesRank || purchasedCourseIdsSet.has(course.id);
     }
     return {
@@ -245,7 +245,7 @@ export const getCourseById = async (id, user = null) => {
     }));
 
     if (student) {
-      const matchesRank = student.active && student.rankId === course.rankId;
+      const matchesRank = student.rankId === course.rankId;
       if (matchesRank) {
         isPurchased = true;
       } else {
@@ -455,7 +455,7 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
   // Check course access
   let hasCourseAccess = true;
   if (student) {
-    const matchesRank = student.active && student.rankId === course.rankId;
+    const matchesRank = student.rankId === course.rankId;
     if (!matchesRank) {
       const purchase = await db.findFirst({
         model: "CoursePurchase",

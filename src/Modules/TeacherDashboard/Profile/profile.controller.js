@@ -75,7 +75,6 @@ export const getProfile = asyncHandler(async (req, res, next) => {
       gender: user.gender,
       hourPrice: user.hour_price,
       status: user.user.status,
-      active: user.active,
       wallet: user.user.wallet,
     },
     stats: {
@@ -101,7 +100,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
         email: s.student.user.email,
         gender: s.student.gender,
         country: s.student.country,
-        status: s.student.status,
+        status: s.student.user.status,
         sessions: {
           total: s.student.sessions,
           attended: s.student.sessions_attended,

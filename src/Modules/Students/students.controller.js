@@ -65,15 +65,18 @@ const getStartingPointLectureIds = async ({
 };
 
 export const getAllStudents = asyncHandler(async (req, res, next) => {
-  const { search, country, plans, page = 1, limit = 10 } = req.query;
+  const { search, country, plans, page = 1, limit = 10, status } = req.query;
 
   const where = {};
-  if (search) {
+  if (search || status) {
     where.user = {
-      OR: [
-        { name: { contains: search, mode: "insensitive" } },
-        { email: { contains: search, mode: "insensitive" } },
-      ],
+      ...(search && {
+        OR: [
+          { name: { contains: search, mode: "insensitive" } },
+          { email: { contains: search, mode: "insensitive" } },
+        ],
+      }),
+      ...(status && { status }),
     };
   }
   if (country) {
@@ -84,11 +87,11 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
   }
   const activeStudents = await db.count({
     model: "student",
-    where: { active: true },
+    where: { user: { status: "active" } },
   });
   const inactiveStudents = await db.count({
     model: "student",
-    where: { active: false },
+    where: { user: { status: { not: "active" } } },
   });
   const totalStudents = await db.count({ model: "student" });
 
@@ -212,7 +215,6 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     age,
     birth_date,
     gender,
-    active,
     rankId,
     stageId,
     startingCourseId,
@@ -220,8 +222,6 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     type,
     status
   } = req.body;
-
-  const activeValue = parseBoolean(active);
 
   const studentAge = resolveStudentAge({ age, birthDate: birth_date });
 
@@ -343,7 +343,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         phone: encryptedPhone,
         password: hashedPassword,
         code_country: phone_code,
-        status: "active",
+        status: status || "active",
         confirmAt: new Date(),
         gender,
         age: studentAge,
@@ -366,8 +366,6 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         country,
         plan: { connect: { id: planId } },
         ...(birth_date && { birth_date: new Date(birth_date) }),
-        active: activeValue ?? false,
-        status:status || "approved",
         sessions: checkPlan.sessionsCount,
         sessions_attended: 0,
         liveSessionsCount: checkPlan.liveSessionsCount,
@@ -515,7 +513,6 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     birth_date,
     age,
     gender,
-    active,
     rankId,
     stageId,
     timezone,
@@ -524,8 +521,6 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     qrActive,
     status
   } = req.body;
-
-  const activeValue = parseBoolean(active);
 
   const student = await ensureExists({
     model: "student",
@@ -623,6 +618,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     birth_date ||
     age ||
     gender ||
+    status ||
     timezone ||
     image_path
   ) {
@@ -636,6 +632,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         ...(username && { username }),
         ...(hashedPassword && { password: hashedPassword }),
         ...(gender && { gender }),
+        ...(status && { status }),
         ...(studentAge !== null ? { age: studentAge } : {}),
         ...(phone && { phone: encryptedPhone }),
         ...(phone_code && { code_country: phone_code }),
@@ -661,9 +658,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(planId && { plan: { connect: { id: planId } } }),
       ...(birth_date && { birth_date: new Date(birth_date) }),
       ...(type && { type }),
-      ...(activeValue !== undefined && { active: activeValue }),
       ...(qrActive !== undefined && { qrActive }),
-      ...(status && { status }),
       ...(encryptedParentNumber && { parentNumber: encryptedParentNumber }),
       ...(newQrToken && { qrToken: newQrToken, qrActive: true }),
       ...(rankId && { rank: { connect: { id: rankId } } }),

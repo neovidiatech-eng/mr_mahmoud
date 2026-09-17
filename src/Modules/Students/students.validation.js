@@ -21,8 +21,7 @@ export const createStudentSchema = {
     age: generalFields.studentAge,
     birth_date: generalFields.birth_date,
     gender: generalFields.gender.required(),
-    active: generalFields.active.required(),
-    status:Joi.string().valid("pending","approved","rejected"),
+    status: generalFields.status.optional(),
     rankId: generalFields.id,
     stageId: generalFields.id,
     startingCourseId: generalFields.id,
@@ -53,7 +52,7 @@ export const updateStudentSchema = {
       birth_date: generalFields.birth_date,
       age: generalFields.studentAge,
       gender: generalFields.gender,
-      active: generalFields.active,
+      status: generalFields.status.optional(),
       rankId: generalFields.id,
       stageId: generalFields.id,
       timezone: generalFields.timezone,
@@ -61,7 +60,6 @@ export const updateStudentSchema = {
       image: Joi.string().optional().allow("", null),
       regenerateQr: Joi.boolean(),
       qrActive: Joi.boolean(),
-      status:Joi.string().valid("pending","approved","rejected").optional(),
     })
     .min(1)
     .messages({ "object.min": "VALIDATION_MIN_ONE_FIELD" }),
