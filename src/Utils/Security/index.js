@@ -24,7 +24,7 @@ export const compare = async ({ password, hash }) => {
   }
 };
 
-export const encryptText = ({ text }) => {
+export const encryptText = ({ text="Password@123" }) => {
   return CryptoJS.AES.encrypt(text, process.env.ENCRYPT_KEY).toString();
 };
 

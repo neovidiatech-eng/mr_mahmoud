@@ -3,6 +3,7 @@ import { PrismaPg } from "@prisma/adapter-pg";
 import pg from "pg";
 import dotenv from "dotenv";
 import bcrypt from "bcryptjs";
+import { encryptText } from "../../src/Utils/Security/index.js";
 
 dotenv.config();
 
@@ -20,7 +21,6 @@ export const studentData = [
     birth_date: new Date("2000-01-01T00:00:00Z"),
     gender: "male",
     country: "Egypt",
-    active: true,
     sessions: 10,
     roleName: "student",
   },
@@ -33,7 +33,6 @@ export const studentData = [
     birth_date: new Date("2002-05-15T00:00:00Z"),
     gender: "female",
     country: "Egypt",
-    active: true,
     sessions: 8,
     roleName: "student",
   },
@@ -58,7 +57,8 @@ export async function seedStudents() {
       continue;
     }
 
-    const hashedPassword = await bcrypt.hash(item.password, salt);
+    const hashedPassword = await encryptText({text:item.password})
+console.log(hashedPassword);
 
     // Find or create user first
     const user = await prisma.user.upsert({
