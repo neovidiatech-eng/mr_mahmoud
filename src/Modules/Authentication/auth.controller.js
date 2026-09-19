@@ -38,7 +38,6 @@ export const register = asyncHandler(async (req, res, next) => {
     gender,
     country,
     parentNumber,
-    timezone,
     rankId,
     stageId
   } = req.body;
@@ -96,7 +95,7 @@ export const register = asyncHandler(async (req, res, next) => {
   });
 
   // 2. Preparation (Hashing, Encryption, OTP)
-  const hashedPassword = encryptText({ password });
+  const hashedPassword = encryptText({ text: password });
   const encryptedPhone = encryptText({ text: phone });
   const encryptedParentNumber = encryptText({ text: parentNumber });
   const otp = /* generateOtp(); */"225566"

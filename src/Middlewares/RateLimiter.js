@@ -8,6 +8,9 @@ const rateLimitHandler = (message) => (req, res) => {
 // ── Key generator ─────────────────────────────────────────────────────────────
 // Extracts real client IP behind reverse proxies (Cloudflare, Nginx, Docker, Vercel)
 const keyGenerator = (req) => {
+  if (process.env.NODE_ENV !== "production") {
+    return req.ip;
+  }
   return ipKeyGenerator(req.ip, {
     trustProxy: true,
     header: "x-forwarded-for",

@@ -162,6 +162,8 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
     });
   const studentsData = await Promise.all(
     students.map(async (student) => {
+  
+      
       const phone = student.user.phone
         ? await decryptText({ text: student.user.phone })
         : undefined;
