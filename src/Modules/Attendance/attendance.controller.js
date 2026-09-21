@@ -280,7 +280,7 @@ export const getTodaySummary = asyncHandler(async (req, res, next) => {
 
   const [totalOnsiteStudents, checkedInToday, presentCount, lateCount, absentCount] =
     await Promise.all([
-      db.count({ model: "student", where: { type: studentTypes.ONSITE, active: true } }),
+      db.count({ model: "student", where: { type: studentTypes.ONSITE } }),
       db.count({ model: "Attendance", where: { attendanceDate: today } }),
       db.count({ model: "Attendance", where: { attendanceDate: today, status: "present" } }),
       db.count({ model: "Attendance", where: { attendanceDate: today, status: "late" } }),
