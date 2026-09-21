@@ -116,6 +116,25 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
           },
         },
         plan: true,
+        coursePurchases:{
+          orderBy:{purchasedAt:"desc"},
+          include:{
+            course:{
+              select:{
+                id:true,
+                title_ar:true,
+                title_en:true,
+                price:true,
+                image:true,
+                rankId:true,
+                stageId:true,
+              }
+            }
+          }
+          },
+
+          
+        },
         stage: {
           select: {
             id: true,
@@ -162,7 +181,7 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
           },
         },
       },
-    });
+    );
   const studentsData = await Promise.all(
     students.map(async (student) => {
   
