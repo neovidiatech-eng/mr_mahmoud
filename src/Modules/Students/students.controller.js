@@ -68,7 +68,13 @@ const getStartingPointLectureIds = async ({
 export const getAllStudents = asyncHandler(async (req, res, next) => {
   const { search, country, plans, page = 1, limit = 10, status } = req.query;
 
-  const where = {};
+  const hasPlan = { planId: { not: null } };
+  const hasCourse = {coursePurchases:{some:{}}};
+
+  const plansFilter = plans ==="plan" ? hasPlan :plans === "course" ? hasCourse : {OR:[hasPlan,hasCourse]};
+
+
+  const where = {...plansFilter};
   if (search || status) {
     where.user = {
       ...(search && {
@@ -83,18 +89,15 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
   if (country) {
     where.country = country;
   }
-  if (plans) {
-    where.planId = plans;
-  }
   const activeStudents = await db.count({
     model: "student",
-    where: { user: { status: userStatus.active } },
+    where: { ...plansFilter,user: { status: userStatus.active } },
   });
   const inactiveStudents = await db.count({
     model: "student",
-    where: { user: { status: { not: userStatus.active } } },
+    where: { ...plansFilter,user: { status: { not: userStatus.active } } },
   });
-  const totalStudents = await db.count({ model: "student" });
+  const totalStudents = await db.count({ model: "student",where: plansFilter });
 
   const { items: students, pagination } =
     await db.findManyWithPaginationAndCount({
