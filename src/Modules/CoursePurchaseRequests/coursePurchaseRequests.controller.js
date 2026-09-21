@@ -344,6 +344,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
           where: { id: studentRecord.user_id },
           data: {
             status: userStatus.active,
+            confirmAt: new Date(),
           },
         });
       }
