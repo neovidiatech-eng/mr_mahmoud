@@ -98,11 +98,7 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
     })
   );
 
-  // Decrypt phone numbers and passwords for display
   for (const s of requests) {
-    if (s.user && s.user.phone && s.user.phone !== "null") {
-      s.user.phone = await decryptText({ text: s.user.phone });
-    }
     if (s.user && s.user.password) {
       s.user.password = await decryptText({ text: s.user.password });
     }

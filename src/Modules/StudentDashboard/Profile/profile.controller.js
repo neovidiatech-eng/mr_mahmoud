@@ -3,11 +3,7 @@ import {
   errorResponse,
   successResponse,
 } from "../../../Utils/Response.js";
-import {
-  decryptText,
-  encryptText,
-  hash,
-} from "../../../Utils/Security/index.js";
+import { hash } from "../../../Utils/Security/index.js";
 import * as db from "../../../database/dbService.js";
 import {
   createError,
@@ -95,18 +91,10 @@ export const getProfile = asyncHandler(async (req, res, next) => {
     });
     throw error;
   }
-  const phone = await decryptText({ text: user.user.phone });
-  const userDecrypted = {
-    ...user,
-    user: {
-      ...user.user,
-      phone: phone,
-    },
-  };
   return successResponse({
     res,
     req,
-    data: userDecrypted,
+    data: user,
     status: 200,
     message: "FETCH_SUCCESS",
   });
@@ -225,7 +213,6 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
   }
 
   const hashedPassword = password ? await hash({ password }) : undefined;
-  const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
   const shouldCalculateAge = age !== undefined || birth_date;
   const studentAge = shouldCalculateAge
     ? resolveStudentAge({ age, birthDate: birth_date })
@@ -252,7 +239,7 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
         ...(name && { name }),
         ...(username && { username }),
         ...(hashedPassword && { password: hashedPassword }),
-        ...(phone && { phone: encryptedPhone }),
+        ...(phone && { phone }),
         ...(phone_code && { code_country: phone_code }),
         ...(studentAge !== null ? { age: studentAge } : {}),
         ...(gender && { gender }),
@@ -281,7 +268,6 @@ export const updateProfile = asyncHandler(async (req, res, next) => {
     throw error;
   }
 
-  user_updated.phone = await decryptText({ text: user_updated.phone });
   delete user_updated.password;
 
   return successResponse({

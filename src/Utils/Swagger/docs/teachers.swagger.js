@@ -38,7 +38,7 @@ export const teachersPaths = {
                 name: { type: "string", example: "Mahmoud Hassan" },
                 email: { type: "string", format: "email", example: "teacher@example.com" },
                 password: { type: "string", format: "password", example: "Password123!" },
-                phone: { type: "string", example: "1000000002" },
+                phone: { type: "string", example: "01000000002", description: "Raw unencrypted phone number" },
                 code_country: { type: "string", example: "+20" },
                 currency_id: { type: "string", example: "EGP" },
                 gender: { type: "string", enum: ["MALE", "FEMALE"], example: "MALE" },

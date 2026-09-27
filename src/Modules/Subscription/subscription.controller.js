@@ -53,9 +53,7 @@ export const getallSubscriptions = asyncHandler(async (req, res, next) => {
 
   const subscriptionsData = await Promise.all(
     subscriptions.map(async (subscription) => {
-      const phone = subscription.user?.phone
-        ? await decryptText({ text: subscription.user.phone })
-        : "";
+      const phone = subscription.user?.phone || "";
       return {
         id: subscription.id,
         status: subscription.status,
@@ -133,9 +131,7 @@ export const getMySubscription = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const phone = subscription.user?.phone
-    ? await decryptText({ text: subscription.user.phone })
-    : "";
+  const phone = subscription.user?.phone || "";
   const subscriptionData = {
     id: subscription.id,
     status: subscription.status,

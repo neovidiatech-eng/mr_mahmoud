@@ -39,16 +39,18 @@ export const register = asyncHandler(async (req, res, next) => {
     country,
     parentNumber,
     rankId,
-    stageId
+    stageId,
   } = req.body;
 
   // 1. Initial validations (Check existence outside transaction to keep it short)
-  const [checkUserByEmail, settings, existStage,existRank] = await Promise.all([
-    db.findFirst({ model: "user", where: { email } }),
-    db.findFirst({ model: "settings" }),
-    db.findFirst({ model: "stage", where: { id: stageId } }),
-    db.findFirst({model:"ranks",where:{id:rankId}})
-  ]);
+  const [checkUserByEmail, settings, existStage, existRank] = await Promise.all(
+    [
+      email ? db.findOne({ model: "user", where: { email } }) : null,
+      db.findFirst({ model: "settings" }),
+      db.findFirst({ model: "stage", where: { id: stageId } }),
+      db.findFirst({ model: "ranks", where: { id: rankId } }),
+    ],
+  );
   const image_path = req.file?.finalPath || req.file?.path;
 
   const userRole = await db.findFirst({
@@ -56,23 +58,33 @@ export const register = asyncHandler(async (req, res, next) => {
     where: { name: "student" },
   });
 
-  if(!existRank) {
+  if (!existRank) {
     return errorResponse({ req, next, message: "RANK_NOT_FOUND", status: 404 });
   }
 
   if (!existStage) {
-    return errorResponse({ req, next, message: "STAGE_NOT_FOUND", status: 404 });
+    return errorResponse({
+      req,
+      next,
+      message: "STAGE_NOT_FOUND",
+      status: 404,
+    });
   }
 
   if (!userRole) {
     return errorResponse({ req, next, message: "ROLE_NOT_FOUND", status: 404 });
   }
 
-  if (checkUserByEmail) {
+  if (checkUserByEmail !== null) {
     return errorResponse({ req, next, message: "EMAIL_EXISTS", status: 400 });
   }
-  if(existStage.rankId !== rankId){
-    return errorResponse({ req, next, message: "STAGE_NOT_BELONG_TO_RANK", status: 404 })
+  if (existStage.rankId !== rankId) {
+    return errorResponse({
+      req,
+      next,
+      message: "STAGE_NOT_BELONG_TO_RANK",
+      status: 404,
+    });
   }
 
   if (plan_id) {
@@ -94,20 +106,18 @@ export const register = asyncHandler(async (req, res, next) => {
     birthDate: birth_date,
   });
 
-  // 2. Preparation (Hashing, Encryption, OTP)
+  // 2. Preparation (Hashing, OTP)
   const hashedPassword = encryptText({ text: password });
-  const encryptedPhone = encryptText({ text: phone });
-  const encryptedParentNumber = encryptText({ text: parentNumber });
-  const otp = /* generateOtp(); */"225566"
-  const hashedOtp = await hash({ password: otp });
+  let otp = null;
+  if (email) {
+    otp = /* generateOtp(); */ "225566";
+    const hashedOtp = await hash({ password: otp });
 
-  // 3. Redis OTP Setup
-  await redis.set(`${email}_otp_register`, hashedOtp);
-  await redis.expire(`${email}_otp_register`, 60 * 10);
-  await redis.set(`${email}_otp_attempts`, 0, { EX: 60 * 10 });
-
-  // 4. Send Verification Email
-  const mailResult = await sendEmail({ email, otp, lang: req.lang });
+    // 3. Redis OTP Setup
+    await redis.set(`${email}_otp_register`, hashedOtp);
+    await redis.expire(`${email}_otp_register`, 60 * 10);
+    await redis.set(`${email}_otp_attempts`, 0, { EX: 60 * 10 });
+    const mailResult = await sendEmail({ email, otp, lang: req.lang });
 
     if (!mailResult.success) {
       const errorMsg =
@@ -115,7 +125,9 @@ export const register = asyncHandler(async (req, res, next) => {
           ? "EMAIL_SERVICE_TIMEOUT"
           : "EMAIL_SEND_FAILED";
       return errorResponse({ req, next, message: errorMsg, status: 500 });
-    } 
+    }
+  }
+  // 4. Send Verification Email
 
   // 5. Transactional Database Operations
   await db.transaction(async (tx) => {
@@ -130,10 +142,11 @@ export const register = asyncHandler(async (req, res, next) => {
         age: studentAge,
         username,
         password: hashedPassword,
-        phone: encryptedPhone,
+        phone,
         code_country: codeCountry,
         role: { connect: { id: userRole.id } },
         timezone: req.timezone || DEFAULT_TIMEZONE,
+        ...(phone && { confirmAt: new Date(), status: "pending" }),
       },
     });
 
@@ -144,7 +157,7 @@ export const register = asyncHandler(async (req, res, next) => {
         name,
         email,
         password: hashedPassword,
-        phone: encryptedPhone,
+        phone,
         code_country: codeCountry,
         birth_date: birth_date || null,
         gender,
@@ -154,7 +167,7 @@ export const register = asyncHandler(async (req, res, next) => {
         user_id: user.id,
         stageId: existStage.id,
         rankId: existRank.id,
-        parentNumber: encryptedParentNumber || null,
+        parentNumber: parentNumber || null,
       }),
     );
     await redis.expire(`${email}_Student_data`, 60 * 60 * 24);
@@ -181,7 +194,6 @@ export const register = asyncHandler(async (req, res, next) => {
         console.error("Failed to notify admins of subscription request:", err),
       );
     }
-
   });
 
   return successResponse({
@@ -206,7 +218,7 @@ export const login = asyncHandler(async (req, res, next) => {
   const user = await db.findFirst({
     model: "user",
     where: {
-      OR: [{ username }, { email: username }],
+      OR: [{ username }, { email: username }, { phone: username }],
     },
     include: {
       role: {
@@ -268,8 +280,6 @@ export const login = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const decryptedPhone = await decryptText({ text: user.phone });
-  user.phone = decryptedPhone;
   const accessToken = generateToken({ user, tokenType: "access" });
   const refreshToken = generateToken({ user, tokenType: "refresh" });
 

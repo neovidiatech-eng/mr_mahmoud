@@ -5,7 +5,8 @@ export const registeritonSchema = {
   body: Joi.object()
     .keys({
       name: generalFields.name.required(),
-      email: generalFields.email.required(),
+      email: generalFields.email.optional(),
+      phone:generalFields.phone.optional(),
       stageId: generalFields.id.messages({
         "string.base": "STAGE_ID_MUST_BE_STRING",
         "string.empty": "STAGE_ID_CANNOT_BE_EMPTY",

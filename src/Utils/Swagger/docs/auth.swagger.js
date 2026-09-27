@@ -10,16 +10,16 @@ export const authPaths = {
           "multipart/form-data": {
             schema: {
               type: "object",
-              required: ["name", "email", "password", "codeCountry", "phone", "parentNumber", "gender", "country", "plan_id", "stageId", "rankId"],
+              required: ["name", "password", "codeCountry", "phone", "parentNumber", "gender", "country", "plan_id", "stageId", "rankId"],
               properties: {
                 name: { type: "string", example: "Ahmed Ali" },
-                email: { type: "string", format: "email", example: "ahmed@example.com" },
+                email: { type: "string", format: "email", example: "ahmed@example.com", description: "Email address (optional)" },
                 password: { type: "string", format: "password", example: "Password123!" },
                 stageId: { type: "string", format: "uuid", example: "45f94b32-9c16-43b3-8d07-c5ef547781b1", description: "Educational Stage ID" },
                 rankId: { type: "string", format: "uuid", example: "3fa85f64-5717-4562-b3fc-2c963f66afa6", description: "Educational Rank ID" },
                 codeCountry: { type: "string", example: "+20" },
-                phone: { type: "string", example: "1000000000" },
-                parentNumber: { type: "string", example: "1000000002", description: "Parent phone number" },
+                phone: { type: "string", example: "01000000000", description: "Raw unencrypted phone number" },
+                parentNumber: { type: "string", example: "01000000002", description: "Parent unencrypted phone number" },
                 gender: { type: "string", enum: ["male", "female"], example: "male" },
                 country: { type: "string", example: "Egypt" },
                 plan_id: { type: "string", example: "60d5ec49f1b2c80015f8e4a1" },
@@ -33,16 +33,16 @@ export const authPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name", "email", "password", "codeCountry", "phone", "parentNumber", "gender", "country", "plan_id", "stageId", "rankId"],
+              required: ["name", "password", "codeCountry", "phone", "parentNumber", "gender", "country", "plan_id", "stageId", "rankId"],
               properties: {
                 name: { type: "string", example: "Ahmed Ali" },
-                email: { type: "string", format: "email", example: "ahmed@example.com" },
+                email: { type: "string", format: "email", example: "ahmed@example.com", description: "Email address (optional)" },
                 password: { type: "string", format: "password", example: "Password123!" },
                 stageId: { type: "string", format: "uuid", example: "45f94b32-9c16-43b3-8d07-c5ef547781b1", description: "Educational Stage ID" },
                 rankId: { type: "string", format: "uuid", example: "3fa85f64-5717-4562-b3fc-2c963f66afa6", description: "Educational Rank ID" },
                 codeCountry: { type: "string", example: "+20" },
-                phone: { type: "string", example: "1000000000" },
-                parentNumber: { type: "string", example: "1000000002", description: "Parent phone number" },
+                phone: { type: "string", example: "01000000000", description: "Raw unencrypted phone number" },
+                parentNumber: { type: "string", example: "01000000002", description: "Parent unencrypted phone number" },
                 gender: { type: "string", enum: ["male", "female"], example: "male" },
                 country: { type: "string", example: "Egypt" },
                 plan_id: { type: "string", example: "60d5ec49f1b2c80015f8e4a1" },
@@ -55,8 +55,8 @@ export const authPaths = {
         }
       },
       responses: {
-        201: { description: "User registered successfully. OTP verification code sent." },
-        400: { description: "Validation error or user already exists." }
+        201: { description: "User registered successfully." },
+        400: { description: "Validation error, EMAIL_EXISTS, or PHONE_ALREADY_EXISTS." }
       }
     }
   },

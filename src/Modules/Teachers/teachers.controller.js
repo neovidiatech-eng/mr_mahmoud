@@ -37,9 +37,6 @@ export const getAllTeachers = asyncHandler(async (req, res, next) => {
     });
 
   for (const teacher of teachers) {
-    if (teacher.user && teacher.user.phone) {
-      teacher.user.phone = await decryptText({ text: teacher.user.phone });
-    }
     if (teacher.user && teacher.user.password) {
       teacher.user.password = await decryptText({ text: teacher.user.password });
     }
@@ -113,7 +110,7 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
         email,
         username,
         password: hashedPassword,
-        phone: phone ? encryptText({ text: phone }) : undefined,
+        phone: phone || undefined,
         code_country,
         roleId: getrole.id,
         confirmAt: new Date(),
@@ -150,9 +147,6 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
   });
 
   if (result.teacher?.user) {
-    if (result.teacher.user.phone) {
-      result.teacher.user.phone = await decryptText({ text: result.teacher.user.phone });
-    }
     if (result.teacher.user.password) {
       result.teacher.user.password = await decryptText({ text: result.teacher.user.password });
     }
@@ -214,9 +208,6 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
     delete teacher.currency.name_en;
   }
 
-  if (teacher.user && teacher.user.phone) {
-    teacher.user.phone = await decryptText({ text: teacher.user.phone });
-  }
   if (teacher.user && teacher.user.password) {
     teacher.user.password = await decryptText({ text: teacher.user.password });
   }
@@ -306,7 +297,7 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
         ...(name && { name }),
         ...(email && { email }),
         ...(hashedPassword && { password: hashedPassword }),
-        ...(phone && { phone: encryptText({ text: phone }) }),
+        ...(phone && { phone }),
         ...(code_country && { code_country }),
         ...(gender && { gender }),
         ...(status && { status }),
@@ -330,11 +321,6 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
     },
   });
 
-  if (updatedTeacher.user && updatedTeacher.user.phone) {
-    updatedTeacher.user.phone = await decryptText({
-      text: updatedTeacher.user.phone,
-    });
-  }
   if (updatedTeacher.user && updatedTeacher.user.password) {
     updatedTeacher.user.password = await decryptText({
       text: updatedTeacher.user.password,
@@ -400,7 +386,7 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
           name: student.user.name,
           code: `STU-${student.id.slice(0, 3)}`,
           email: student.user.email,
-          phone: `${student.user.code_country}${await decryptText({ text: student.user.phone })}`,
+          phone: `${student.user.code_country || ""}${student.user.phone || ""}`,
           sessions: `${student.sessions_attended}/${student.sessions}`,
         };
       }
