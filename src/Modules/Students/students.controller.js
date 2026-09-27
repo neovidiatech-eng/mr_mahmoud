@@ -184,24 +184,14 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
     );
   const studentsData = await Promise.all(
     students.map(async (student) => {
-  
-      
-      const phone = student.user.phone
-        ? await decryptText({ text: student.user.phone })
-        : undefined;
       const decryptedPassword = student.user.password
         ? await decryptText({ text: student.user.password })
-        : undefined;
-      const parentNumber = student.parentNumber
-        ? await decryptText({ text: student.parentNumber })
         : undefined;
       return {
         ...student,
         user: {
           ...student.user,
-          phone: phone,
           ...(decryptedPassword && { password: decryptedPassword }),
-          ...(parentNumber && { parentNumber: parentNumber }),
         },
       };
     }),
@@ -352,11 +342,6 @@ export const createStudent = asyncHandler(async (req, res, next) => {
     const prefix = settings?.userPrefix || "mr_mahmoud";
     const username = `${name.trim().replace(/\s+/g, "-")}_${nanoid(3)}_${prefix}`;
 
-    const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
-    const encryptedParentNumber = parentNumber
-      ? encryptText({ text: parentNumber })
-      : undefined;
-
     const image_path = req.file?.finalPath || req.file?.path || req.body.image;
 
     const user = await tx.create({
@@ -365,7 +350,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
         name,
         email: email || undefined,
         username,
-        phone: encryptedPhone,
+        phone: phone || undefined,
         password: hashedPassword,
         code_country: phone_code,
         status: status || userStatus.active,
@@ -387,7 +372,7 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       model: "student",
       data: {
         user: { connect: { id: user.id } },
-        parentNumber: encryptedParentNumber,
+        parentNumber: parentNumber || undefined,
         country,
         plan: { connect: { id: planId } },
         ...(birth_date && { birth_date: new Date(birth_date) }),
@@ -460,19 +445,9 @@ export const createStudent = asyncHandler(async (req, res, next) => {
   });
 
   if (createdStudent && createdStudent.user) {
-    if (createdStudent.user.phone) {
-      createdStudent.user.phone = await decryptText({
-        text: createdStudent.user.phone,
-      });
-    }
     if (createdStudent.user.password) {
       createdStudent.user.password = await decryptText({
         text: createdStudent.user.password,
-      });
-    }
-    if (createdStudent.parentNumber) {
-      createdStudent.parentNumber = await decryptText({
-        text: createdStudent.parentNumber,
       });
     }
   }
@@ -503,14 +478,6 @@ export const getStudentById = asyncHandler(async (req, res, next) => {
     message: "STUDENT_NOT_FOUND",
   });
 
-  if (student.user.phone) {
-    student.user.phone = await decryptText({ text: student.user.phone });
-  }
-  if (student.parentNumber) {
-    student.parentNumber = await decryptText({
-      text: student.parentNumber,
-    });
-  }
   if (student.user.password) {
     student.user.password = await decryptText({ text: student.user.password });
   }
@@ -647,8 +614,6 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     timezone ||
     image_path
   ) {
-    const encryptedPhone = phone ? encryptText({ text: phone }) : undefined;
-
     await db.updateOne({
       model: "user",
       where: { id: student.user_id },
@@ -659,16 +624,13 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
         ...(gender && { gender }),
         ...(status && { status }),
         ...(studentAge !== null ? { age: studentAge } : {}),
-        ...(phone && { phone: encryptedPhone }),
+        ...(phone && { phone }),
         ...(phone_code && { code_country: phone_code }),
         ...(image_path && { image: image_path }),
         ...(timezone && { timezone }),
       },
     });
   }
-  const encryptedParentNumber = parentNumber
-    ? encryptText({ text: parentNumber })
-    : undefined;
 
   let newQrToken;
   if (regenerateQr || (type === "onsite" && !student.qrToken)) {
@@ -684,7 +646,7 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
       ...(birth_date && { birth_date: new Date(birth_date) }),
       ...(type && { type }),
       ...(qrActive !== undefined && { qrActive }),
-      ...(encryptedParentNumber && { parentNumber: encryptedParentNumber }),
+      ...(parentNumber && { parentNumber }),
       ...(newQrToken && { qrToken: newQrToken, qrActive: true }),
       ...(rankId && { rank: { connect: { id: rankId } } }),
       ...(stageId && { stage: { connect: { id: stageId } } }),
@@ -692,17 +654,9 @@ export const updateStudent = asyncHandler(async (req, res, next) => {
     include: { user: true, plan: true },
   });
 
-  updatedStudent.user.phone = await decryptText({
-    text: updatedStudent.user.phone,
-  });
   if (updatedStudent.user.password) {
     updatedStudent.user.password = await decryptText({
       text: updatedStudent.user.password,
-    });
-  }
-  if (updatedStudent.parentNumber) {
-    updatedStudent.parentNumber = await decryptText({
-      text: updatedStudent.parentNumber,
     });
   }
 

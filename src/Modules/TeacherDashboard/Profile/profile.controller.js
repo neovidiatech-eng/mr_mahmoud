@@ -53,7 +53,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
           name: student?.user.name,
           code: `STU-${student.id.slice(0, 3)}`,
           email: student.user.email,
-          phone: `${student.user.code_country}${await decryptText({ text: student.user.phone })}`,
+          phone: `${student.user.code_country || ""}${student.user.phone || ""}`,
           course: {
             title: req.lang === "ar" ? (item.course.title_ar ?? item.course.title_en) : (item.course.title_en ?? item.course.title_ar),
             id: item.course.id,
@@ -71,7 +71,7 @@ export const getProfile = asyncHandler(async (req, res, next) => {
       user_id: user.user_id,
       name: user.user.name,
       email: user.user.email,
-      phone: `${user.user.code_country} ${await decryptText({ text: user.user.phone })}`, // ✅ استخدم الـ decrypted phone
+      phone: `${user.user.code_country || ""} ${user.user.phone || ""}`,
       gender: user.gender,
       hourPrice: user.hour_price,
       status: user.user.status,
@@ -153,7 +153,7 @@ export const getMyStudents = asyncHandler(async (req, res, next) => {
           name: student.user.name,
           code: `STU-${student.id.slice(0, 3)}`,
           email: student.user.email,
-          phone: `${student.user.code_country}${await decryptText({ text: student.user.phone })}`,
+          phone: `${student.user.code_country || ""}${student.user.phone || ""}`,
           sessions: `${student.sessions_attended}/${student.sessions}`,
         };
       }

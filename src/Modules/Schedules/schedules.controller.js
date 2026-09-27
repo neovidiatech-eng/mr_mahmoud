@@ -116,25 +116,11 @@ export const getAllSchedules = asyncHandler(async (req, res, next) => {
         },
       },
     });
-  const scheduleData = await Promise.all(
-    schedule.map(async (schedule) => {
-      if (schedule.student?.user?.phone) {
-        schedule.student.user.phone = await decryptText({
-          text: schedule.student.user.phone,
-        });
-      }
-      if (schedule.teacher?.user?.phone) {
-        schedule.teacher.user.phone = await decryptText({
-          text: schedule.teacher.user.phone,
-        });
-      }
-      return {
-        ...schedule,
-        start_time: toLocal(schedule.start_time, req.timezone),
-        end_time: toLocal(schedule.end_time, req.timezone),
-      };
-    }),
-  );
+  const scheduleData = schedule.map((s) => ({
+    ...s,
+    start_time: toLocal(s.start_time, req.timezone),
+    end_time: toLocal(s.end_time, req.timezone),
+  }));
   const now = getNowUTC();
   const nowTime = now.toDate().getTime();
   const tz = req.timezone;
@@ -235,16 +221,7 @@ export const getScheduleById = asyncHandler(async (req, res, next) => {
       },
     },
   });
-  if (schedule?.student?.user?.phone) {
-    schedule.student.user.phone = await decryptText({
-      text: schedule.student.user.phone,
-    });
-  }
-  if (schedule?.teacher?.user?.phone) {
-    schedule.teacher.user.phone = await decryptText({
-      text: schedule.teacher.user.phone,
-    });
-  }
+
 
   const scheduleData = {
     ...schedule,
@@ -911,25 +888,11 @@ export const getUserSchedules = asyncHandler(async (req, res, next) => {
     orderBy: { start_time: "asc" },
   });
 
-  const schedulesData = await Promise.all(
-    schedules.map(async (s) => {
-      if (s.student?.user?.phone) {
-        s.student.user.phone = await decryptText({
-          text: s.student.user.phone,
-        });
-      }
-      if (s.teacher?.user?.phone) {
-        s.teacher.user.phone = await decryptText({
-          text: s.teacher.user.phone,
-        });
-      }
-      return {
-        ...s,
-        start_time: toLocal(s.start_time, req.timezone),
-        end_time: toLocal(s.end_time, req.timezone),
-      };
-    }),
-  );
+  const schedulesData = schedules.map((s) => ({
+    ...s,
+    start_time: toLocal(s.start_time, req.timezone),
+    end_time: toLocal(s.end_time, req.timezone),
+  }));
 
   const now = getNowUTC();
   const nowTime = now.toDate().getTime();

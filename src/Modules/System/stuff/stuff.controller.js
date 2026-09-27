@@ -32,9 +32,6 @@ export const getAllStuff = asyncHandler(async (req, res, next) => {
   });
 
   for (const s of stuff) {
-    if (s.user && s.user.phone) {
-      s.user.phone = await decryptText({ text: s.user.phone });
-    }
     if (s.user && s.user.password) {
       s.user.password = await decryptText({ text: s.user.password });
     }
@@ -68,9 +65,6 @@ export const getStuffById = asyncHandler(async (req, res, next) => {
     message: "USER_NOT_FOUND"
   });
 
-  if (stuff.user && stuff.user.phone) {
-    stuff.user.phone = await decryptText({ text: stuff.user.phone });
-  }
   if (stuff.user && stuff.user.password) {
     stuff.user.password = await decryptText({ text: stuff.user.password });
   }
@@ -108,7 +102,7 @@ export const createStuffUser = asyncHandler(async (req, res, next) => {
         email,
         password: hashedPassword,
         name,
-        phone: phone ? encryptText({ text: phone }) : undefined,
+        phone: phone || undefined,
         code_country: codeCountry,
         roleId: roleId || null,
         status: status || userStatus.active,
@@ -128,9 +122,6 @@ export const createStuffUser = asyncHandler(async (req, res, next) => {
     include: { user: true, role: true }
   });
 
-  if (newStuff.user && newStuff.user.phone) {
-    newStuff.user.phone = await decryptText({ text: newStuff.user.phone });
-  }
   if (newStuff.user && newStuff.user.password) {
     newStuff.user.password = await decryptText({ text: newStuff.user.password });
   }
@@ -178,7 +169,7 @@ export const updateStuffUser = asyncHandler(async (req, res, next) => {
         ...(name && { name }),
         ...(email && { email }),
         ...(hashedPassword && { password: hashedPassword }),
-        ...(phone && { phone: encryptText({ text: phone }) }),
+        ...(phone && { phone }),
         ...(code_country && { code_country }),
         ...(roleId !== undefined && { roleId }),
         ...(status && { status }),
@@ -198,9 +189,6 @@ export const updateStuffUser = asyncHandler(async (req, res, next) => {
     },
   });
 
-  if (updatedStuff.user && updatedStuff.user.phone) {
-    updatedStuff.user.phone = await decryptText({ text: updatedStuff.user.phone });
-  }
   if (updatedStuff.user && updatedStuff.user.password) {
     updatedStuff.user.password = await decryptText({ text: updatedStuff.user.password });
   }
