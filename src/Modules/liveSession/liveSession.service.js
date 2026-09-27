@@ -1,5 +1,5 @@
 import * as db from "../../database/dbService.js";
-import { getNowUTC } from "../../Utils/Date/time.js";
+import { getNowUTC, toUTC } from "../../Utils/Date/time.js";
 import { liveSessionsStatus } from "../../Utils/Enums/liveSessions.js";
 import { generateJitsiToken } from "../../Utils/Token/jitsiToken.js";
 import { createNotification } from "../Notifications/notifications.service.js";
@@ -39,13 +39,15 @@ export const createLiveSession = async ({
 
   const roomName = `live-${Date.now().toString(36)}`;
 
+  const parsedStartAt = startAt ? toUTC(startAt).toDate() : new Date();
+
   const liveSession = await db.create({
     model: "liveSession",
     data: {
       planId,
       userId,
       stageId,
-      startAt,
+      startAt: parsedStartAt,
       roomName,
       title,
       status: liveSessionsStatus.SCHEDULED,
@@ -415,7 +417,7 @@ export const updateLiveSession = async ({
     data: {
       ...(planId && { planId }),
       ...(stageId && { stageId }),
-      ...(startAt && { startAt }),
+      ...(startAt && { startAt: toUTC(startAt).toDate() }),
       ...(title && { title }),
       ...(status && { status }),
     },
@@ -485,16 +487,18 @@ export const getStudentUpcomingLiveSessions = async ({
     throw error;
   }
 
-  const now = getNowUTC();
-  const nowString = now.toISOString();
-  console.log(nowString);
+  const startOfToday = getNowUTC().startOf("day").toDate();
 
   const where = {
     stageId: student.stageId,
-    startAt: { gte: nowString },
-    status: {
-      notIn: [liveSessionsStatus.CANCELLED, liveSessionsStatus.ENDED],
-    },
+    ...(student.planId ? { planId: student.planId } : {}),
+    OR: [
+      { status: liveSessionsStatus.LIVE },
+      {
+        status: liveSessionsStatus.SCHEDULED,
+        startAt: { gte: startOfToday },
+      },
+    ],
   };
 
   if (search) {
@@ -549,17 +553,19 @@ export const getStudentNextLiveSession = async ({ userId }) => {
     throw error;
   }
 
-  const now = new Date()
+  const startOfToday = getNowUTC().startOf("day").toDate();
 
-  const nextLiveSession = await db.findFirst({
+  const baseWhere = {
+    stageId: student.stageId,
+    ...(student.planId ? { planId: student.planId } : {}),
+  };
+
+  // 1. Prioritize a currently LIVE session
+  let nextLiveSession = await db.findFirst({
     model: "liveSession",
     where: {
-      stageId: student.stageId,
-      planId:student.planId,
-      startAt: { gte: now },
-      status: {
-        notIn: [liveSessionsStatus.CANCELLED, liveSessionsStatus.ENDED],
-      },
+      ...baseWhere,
+      status: liveSessionsStatus.LIVE,
     },
     orderBy: {
       startAt: "asc",
@@ -578,6 +584,34 @@ export const getStudentNextLiveSession = async ({ userId }) => {
       },
     },
   });
+
+  // 2. If no LIVE session, fetch the next SCHEDULED session starting from start of today
+  if (!nextLiveSession) {
+    nextLiveSession = await db.findFirst({
+      model: "liveSession",
+      where: {
+        ...baseWhere,
+        status: liveSessionsStatus.SCHEDULED,
+        startAt: { gte: startOfToday },
+      },
+      orderBy: {
+        startAt: "asc",
+      },
+      include: {
+        plan: true,
+        stage: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            image: true,
+          },
+        },
+      },
+    });
+  }
 
   return nextLiveSession;
 };
