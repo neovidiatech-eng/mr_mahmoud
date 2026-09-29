@@ -34,7 +34,7 @@ export const registeritonSchema = {
           "any.required": "PLAN_ID_REQUIRED",
           "string.empty": "PLAN_ID_REQUIRED",
         })
-        .required(),
+        .optional(),
     })
     .or("age", "birth_date")
     .messages({ "object.missing": "AGE_OR_BIRTH_DATE_REQUIRED" })
