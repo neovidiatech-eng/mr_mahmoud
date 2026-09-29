@@ -43,14 +43,19 @@ export const register = asyncHandler(async (req, res, next) => {
   } = req.body;
 
   // 1. Initial validations (Check existence outside transaction to keep it short)
-  const [checkUserByEmail, settings, existStage, existRank] = await Promise.all(
-    [
+  const [checkUserByEmail, checkUserByPhone, settings, existStage, existRank] =
+    await Promise.all([
       email ? db.findOne({ model: "user", where: { email } }) : null,
+      phone
+        ? db.findFirst({
+            model: "user",
+            where: { phone },
+          })
+        : null,
       db.findFirst({ model: "settings" }),
       db.findFirst({ model: "stage", where: { id: stageId } }),
       db.findFirst({ model: "ranks", where: { id: rankId } }),
-    ],
-  );
+    ]);
   const image_path = req.file?.finalPath || req.file?.path;
 
   const userRole = await db.findFirst({
@@ -77,6 +82,9 @@ export const register = asyncHandler(async (req, res, next) => {
 
   if (checkUserByEmail !== null) {
     return errorResponse({ req, next, message: "EMAIL_EXISTS", status: 400 });
+  }
+  if (checkUserByPhone !== null) {
+    return errorResponse({ req, next, message: "PHONE_EXISTS", status: 400 });
   }
   if (existStage.rankId !== rankId) {
     return errorResponse({
@@ -152,7 +160,7 @@ export const register = asyncHandler(async (req, res, next) => {
 
     // Store Student metadata in Redis
     await redis.set(
-      `${email}_Student_data`,
+      `${email||phone}_Student_data`,
       JSON.stringify({
         name,
         email,
@@ -170,7 +178,9 @@ export const register = asyncHandler(async (req, res, next) => {
         parentNumber: parentNumber || null,
       }),
     );
-    await redis.expire(`${email}_Student_data`, 60 * 60 * 24);
+    console.log(`${email || phone}_Student_data`);
+
+    await redis.expire(`${email || phone}_Student_data`, 60 * 60 * 24);
 
     // Create Subscription Request if a plan is selected
     if (plan_id) {

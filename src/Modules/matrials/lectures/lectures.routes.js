@@ -11,6 +11,8 @@ import {
   localMulterUpload,
 } from "../../../Utils/Multer/local.multer.js";
 
+import { guestAuth } from "../../../Middlewares/guestAuth.js";
+
 const router = Router();
 const lecturesResource = "lectures";
 const uploader = localMulterUpload({
@@ -30,10 +32,18 @@ const uploader = localMulterUpload({
   { name: "slides", maxCount: 1 },
   { name: "pdf", maxCount: 1 },
 ]);
-router.get("/", lecturesController.getAllLectures);
+router.get("/", guestAuth, lecturesController.getAllLectures);
+
+router.get(
+  "/history",
+  authentication,
+  validation(lecturesValidation.getHistorySchema),
+  lecturesController.getLecturesHistory,
+);
 
 router.get(
   "/:id",
+  guestAuth,
   validation(lecturesValidation.lectureIdSchema),
   lecturesController.getLecture,
 );

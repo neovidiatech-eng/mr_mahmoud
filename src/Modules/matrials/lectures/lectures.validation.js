@@ -74,3 +74,14 @@ export const reorderLecturesSchema = {
   }).required(),
 };
 
+export const getHistorySchema = {
+  query: Joi.object({
+    page: generalFields.number.optional(),
+    limit: generalFields.number.optional(),
+    status: Joi.string().valid("completed", "in_progress").optional(),
+    courseId: generalFields.id.optional(),
+    userId: generalFields.id.optional(),
+  }).optional(),
+};
+
+

@@ -7,10 +7,7 @@ import * as db from "../../../database/dbService.js";
 import { redis } from "../../../Utils/Radis/Connection.js";
 import { decryptText } from "../../../Utils/Security/index.js";
 import { ensureExists } from "../../../database/genericService.js";
-import {
-  convertAmount,
-  resolveStudentAge,
-} from "../../../Utils/Helpers.js";
+import { convertAmount, resolveStudentAge } from "../../../Utils/Helpers.js";
 
 import fs from "node:fs";
 import path from "node:path";
@@ -57,8 +54,14 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
     subscriptionRequests.map(async (s) => {
       if (!s.user) return s;
 
-      const redisKey = s.user.email ? `${s.user.email}_Student_data` : null;
+      const redisKey =
+        s.user.email || s.user.phone
+          ? `${s.user.email || s.user.phone}_Student_data`
+          : null;
+      console.log(redisKey);
+
       const studentDataJson = redisKey ? await redis.get(redisKey) : null;
+      console.log(studentDataJson);
 
       let parsedStudentData = null;
       if (studentDataJson) {
@@ -69,9 +72,12 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
         }
       }
 
-      const stageId = parsedStudentData?.stageId || s.user.student?.stageId || null;
-      const rankId = parsedStudentData?.rankId || s.user.student?.rankId || null;
-      const parentNumber = parsedStudentData?.parentNumber || s.user.student?.parentNumber || null;
+      const stageId =
+        parsedStudentData?.stageId || s.user.student?.stageId || null;
+      const rankId =
+        parsedStudentData?.rankId || s.user.student?.rankId || null;
+      const parentNumber =
+        parsedStudentData?.parentNumber || s.user.student?.parentNumber || null;
 
       let stageObj = s.user.student?.stage || null;
       let rankObj = s.user.student?.rank || null;
@@ -95,7 +101,7 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
           rank: rankObj,
         },
       };
-    })
+    }),
   );
 
   for (const s of requests) {
@@ -112,7 +118,6 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
     data: { subscriptionRequests: requests, pagination },
   });
 });
-
 
 export const changeStatus = asyncHandler(async (req, res, next) => {
   const { id } = req.params;
@@ -137,9 +142,13 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const redisKey = `${subscriptionRequest.user.email}_Student_data`;
+  const redisKey =
+    `${subscriptionRequest.user.email || subscriptionRequest.user.phone}_Student_data`;
+  console.log(redisKey);
 
   const studentDataJson = await redis.get(redisKey);
+  console.log(studentDataJson);
+
   const parsedStudentData = studentDataJson
     ? JSON.parse(studentDataJson)
     : null;
@@ -160,39 +169,38 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
       birthDate: parsedStudentData?.birth_date,
     });
 
-    if(!parsedStudentData?.rankId){
+    if (!parsedStudentData?.rankId) {
       return errorResponse({
         next,
         req,
-        message:"RANK_NOT_FOUND",
-        status:404,
-      })
+        message: "RANK_NOT_FOUND",
+        status: 404,
+      });
     }
 
-    if(!parsedStudentData?.stageId){
+    if (!parsedStudentData?.stageId) {
       return errorResponse({
         next,
         req,
-        message:"STAGE_NOT_FOUND",
-        status:404,
-      })
+        message: "STAGE_NOT_FOUND",
+        status: 404,
+      });
     }
-    const selectStage =await ensureExists({
-      model:"stage",
-      where:{
-        id:parsedStudentData.stageId,
+    const selectStage = await ensureExists({
+      model: "stage",
+      where: {
+        id: parsedStudentData.stageId,
       },
-      message:"STAGE_NOT_FOUND"
+      message: "STAGE_NOT_FOUND",
     });
-    if(selectStage.rankId !== parsedStudentData.rankId){
+    if (selectStage.rankId !== parsedStudentData.rankId) {
       return errorResponse({
         next,
         req,
-        message:"STAGE_NOT_BELONG_TO_RANK",
-        status:404,
-      })
+        message: "STAGE_NOT_BELONG_TO_RANK",
+        status: 404,
+      });
     }
-
   }
 
   const studentRole = await db.findFirst({
@@ -283,7 +291,9 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
             birth_date: new Date(parsedStudentData.birth_date),
           }),
           country: parsedStudentData.country,
-          ...(parsedStudentData.parentNumber && { parentNumber: parsedStudentData.parentNumber }),
+          ...(parsedStudentData.parentNumber && {
+            parentNumber: parsedStudentData.parentNumber,
+          }),
           plan: { connect: { id: subscriptionRequest.planId } },
           sessions: subscriptionRequest.plan?.sessionsCount || 0,
           sessions_remaining: subscriptionRequest.plan?.sessionsCount || 0,

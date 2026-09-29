@@ -158,22 +158,147 @@ export const getLectures = async ({ req, res, next }) => {
   const { page, limit, courseId } = req.query;
 
   const where = {};
-
   if (courseId) {
     where.courseId = courseId;
   }
-  const lectures = await db.findManyWithPaginationAndCount({
+
+  const lecturesResult = await db.findManyWithPaginationAndCount({
     model: "lectures",
     where,
     page,
     limit,
     orderBy: { order: "asc" },
+    include: {
+      course: {
+        select: {
+          id: true,
+          title_ar: true,
+          title_en: true,
+          rankId: true,
+        },
+      },
+    },
   });
-  if (!lectures) {
+
+  if (!lecturesResult) {
     throw createError({ message: "LECTURE_NOT_FOUND", status: 404, next });
   }
 
-  return lectures;
+  const requestingUser = req.user;
+  if (!requestingUser) {
+    const items = lecturesResult.items.map((l) => ({
+      ...l,
+      video_path: null,
+      pdf_path: null,
+      slides_path: null,
+      hasAccess: false,
+      isLocked: true,
+      myProgress: null,
+    }));
+    return { ...lecturesResult, items };
+  }
+
+  if (isAdmin(requestingUser) || requestingUser.teacher) {
+    const items = lecturesResult.items.map((l) => ({
+      ...l,
+      hasAccess: true,
+      isLocked: false,
+      myProgress: null,
+    }));
+    return { ...lecturesResult, items };
+  }
+
+  const student = requestingUser.student;
+  const userLectures = await db.findMany({
+    model: "user_lectures",
+    where: { userId: requestingUser.id },
+  });
+
+  const userLecturesMap = new Map(userLectures.map((ul) => [ul.lectureId, ul]));
+
+  const courseIds = [...new Set(lecturesResult.items.map((l) => l.courseId))];
+  const allCourseLectures = await db.findMany({
+    model: "lectures",
+    where: { courseId: { in: courseIds } },
+    select: { id: true, courseId: true, order: true },
+    orderBy: { order: "asc" },
+  });
+
+  const lecturesByCourse = new Map();
+  for (const l of allCourseLectures) {
+    if (!lecturesByCourse.has(l.courseId)) {
+      lecturesByCourse.set(l.courseId, []);
+    }
+    lecturesByCourse.get(l.courseId).push(l);
+  }
+
+  const purchasedCourses = student
+    ? await db.findMany({
+        model: "CoursePurchase",
+        where: { studentId: student.id, courseId: { in: courseIds } },
+        select: { courseId: true },
+      })
+    : [];
+  const purchasedCourseIds = new Set(purchasedCourses.map((p) => p.courseId));
+
+  const items = lecturesResult.items.map((lecture) => {
+    const matchesRank = student?.rankId && lecture.course?.rankId ? student.rankId === lecture.course.rankId : false;
+    const hasCourseAccess = matchesRank || purchasedCourseIds.has(lecture.courseId);
+
+    const ul = userLecturesMap.get(lecture.id);
+    const myProgress = ul
+      ? { status: ul.status, progress: ul.progress, lastPosition: ul.lastPosition, completedAt: ul.completedAt }
+      : null;
+
+    if (!hasCourseAccess) {
+      return {
+        ...lecture,
+        video_path: null,
+        pdf_path: null,
+        slides_path: null,
+        hasAccess: false,
+        isLocked: true,
+        lockReason: "NO_COURSE_ACCESS",
+        myProgress,
+      };
+    }
+
+    const courseLecturesList = lecturesByCourse.get(lecture.courseId) || [];
+    const prevLectures = courseLecturesList.filter((l) => l.order < lecture.order);
+
+    let isLocked = false;
+    if (prevLectures.length > 0) {
+      const allPrevCompleted = prevLectures.every((pl) => {
+        const item = userLecturesMap.get(pl.id);
+        return item && item.status === "completed";
+      });
+      if (!allPrevCompleted) {
+        isLocked = true;
+      }
+    }
+
+    if (isLocked) {
+      return {
+        ...lecture,
+        video_path: null,
+        pdf_path: null,
+        slides_path: null,
+        hasAccess: false,
+        isLocked: true,
+        lockReason: "PREVIOUS_LECTURE_NOT_COMPLETED",
+        myProgress,
+      };
+    }
+
+    return {
+      ...lecture,
+      hasAccess: true,
+      isLocked: false,
+      myProgress,
+    };
+  });
+
+  return { ...lecturesResult, items };
 };
 
 /* -----------------------------
@@ -192,36 +317,50 @@ export const getLectureById = async (id, requestingUser) => {
     throw error;
   }
 
-  const { hasAccess, myProgress } = await resolveLectureAccess(lecture, requestingUser);
+  const access = await resolveLectureAccess(lecture, requestingUser);
 
-  if (!hasAccess) {
+  if (!access.hasAccess || access.isLocked) {
     return {
       ...lecture,
       video_path: null,
       pdf_path: null,
       slides_path: null,
       hasAccess: false,
+      isLocked: true,
+      lockReason: access.lockReason || "LECTURE_LOCKED",
+      myProgress: access.myProgress,
     };
   }
 
-  return { ...lecture, hasAccess: true, myProgress };
+  return {
+    ...lecture,
+    hasAccess: true,
+    isLocked: false,
+    myProgress: access.myProgress,
+  };
 };
 
 /**
  * Determines whether the requesting user can access a lecture's protected
  * content (video/pdf/slides), and returns their saved progress if so.
- * Admins/staff/teachers always have access. Students need either an active
- * subscription matching the course's rank, or a direct course purchase.
+ * Admins/staff/teachers always have access.
+ * Students need:
+ * 1. Course access (rank match or direct purchase).
+ * 2. Prerequisite lecture completion (all preceding lectures in course must be completed).
  */
-const resolveLectureAccess = async (lecture, requestingUser) => {
-  if (!requestingUser) return { hasAccess: false, myProgress: null };
+export const resolveLectureAccess = async (lecture, requestingUser) => {
+  if (!requestingUser) {
+    return { hasAccess: false, isLocked: true, lockReason: "UNAUTHORIZED", myProgress: null };
+  }
 
   if (isAdmin(requestingUser) || requestingUser.teacher) {
-    return { hasAccess: true, myProgress: null };
+    return { hasAccess: true, isLocked: false, myProgress: null };
   }
 
   const student = requestingUser.student;
-  if (!student) return { hasAccess: false, myProgress: null };
+  if (!student) {
+    return { hasAccess: false, isLocked: true, lockReason: "STUDENT_PROFILE_NOT_FOUND", myProgress: null };
+  }
 
   const userLecture = await db.findFirst({
     model: "user_lectures",
@@ -233,18 +372,64 @@ const resolveLectureAccess = async (lecture, requestingUser) => {
         status: userLecture.status,
         progress: userLecture.progress,
         lastPosition: userLecture.lastPosition,
+        completedAt: userLecture.completedAt,
       }
     : null;
 
   const matchesRank = student.rankId === lecture.course?.rankId;
-  if (matchesRank) return { hasAccess: true, myProgress };
+  let hasCourseAccess = matchesRank;
+  if (!hasCourseAccess && lecture.courseId) {
+    const purchase = await db.findFirst({
+      model: "CoursePurchase",
+      where: { studentId: student.id, courseId: lecture.courseId },
+    });
+    hasCourseAccess = !!purchase;
+  }
 
-  const purchase = await db.findFirst({
-    model: "CoursePurchase",
-    where: { studentId: student.id, courseId: lecture.course?.id },
-  });
+  if (!hasCourseAccess) {
+    return {
+      hasAccess: false,
+      isLocked: true,
+      lockReason: "NO_COURSE_ACCESS",
+      myProgress,
+    };
+  }
 
-  return { hasAccess: !!purchase, myProgress };
+  // Prerequisite check: student must have completed all previous lectures in this course
+  if (lecture.courseId && lecture.order > 1) {
+    const previousLectures = await db.findMany({
+      model: "lectures",
+      where: {
+        courseId: lecture.courseId,
+        order: { lt: lecture.order },
+      },
+      select: { id: true, order: true },
+      orderBy: { order: "asc" },
+    });
+
+    if (previousLectures.length > 0) {
+      const prevIds = previousLectures.map((l) => l.id);
+      const completedCount = await db.count({
+        model: "user_lectures",
+        where: {
+          userId: requestingUser.id,
+          lectureId: { in: prevIds },
+          status: "completed",
+        },
+      });
+
+      if (completedCount < previousLectures.length) {
+        return {
+          hasAccess: false,
+          isLocked: true,
+          lockReason: "PREVIOUS_LECTURE_NOT_COMPLETED",
+          myProgress,
+        };
+      }
+    }
+  }
+
+  return { hasAccess: true, isLocked: false, myProgress };
 };
 
 /* -----------------------------
@@ -395,9 +580,20 @@ export const updateLectureProgress = async ({ req, res, next }) => {
   const { position, duration } = req.body;
   const userId = req.user.id;
 
-  const lecture = await db.findFirst({ model: "lectures", where: { id } });
+  const lecture = await db.findFirst({ model: "lectures", where: { id }, include: { course: true } });
   if (!lecture) {
     const error = createError({ message: "LECTURE_NOT_FOUND", status: 404, next });
+    throw error;
+  }
+
+  // Check prerequisite lecture lock
+  const access = await resolveLectureAccess(lecture, req.user);
+  if (!access.hasAccess || access.isLocked) {
+    const error = createError({
+      message: access.lockReason || "PREVIOUS_LECTURE_NOT_COMPLETED",
+      status: 403,
+      next,
+    });
     throw error;
   }
 
@@ -528,12 +724,24 @@ export const completeLecture = async ({ req, res, next }) => {
   const lecture = await db.findFirst({
     model: "lectures",
     where: { id },
+    include: { course: true },
   });
 
   if (!lecture) {
     const error = createError({
       message: "LECTURE_NOT_FOUND",
       status: 404,
+      next,
+    });
+    throw error;
+  }
+
+  // Check prerequisite lecture lock
+  const access = await resolveLectureAccess(lecture, req.user);
+  if (!access.hasAccess || access.isLocked) {
+    const error = createError({
+      message: access.lockReason || "PREVIOUS_LECTURE_NOT_COMPLETED",
+      status: 403,
       next,
     });
     throw error;
@@ -608,6 +816,71 @@ export const completeLecture = async ({ req, res, next }) => {
   });
 
   return userLecture;
+};
+
+/* -----------------------------
+   GET USER LECTURES HISTORY
+----------------------------- */
+export const getUserLecturesHistory = async ({ req, res, next }) => {
+  const { page = 1, limit = 20, status, courseId, userId: targetUserId } = req.query;
+
+  let userId = req.user.id;
+  if (targetUserId) {
+    if (isAdmin(req.user) || req.user.teacher) {
+      userId = targetUserId;
+    } else {
+      const error = createError({ message: "UNAUTHORIZED", status: 403, next });
+      throw error;
+    }
+  }
+
+  const where = {
+    userId,
+    ...(status && { status }),
+    ...(courseId && { lecture: { courseId } }),
+  };
+
+  const [historyResult, totalCompleted, totalInProgress] = await Promise.all([
+    db.findManyWithPaginationAndCount({
+      model: "user_lectures",
+      where,
+      page,
+      limit,
+      orderBy: { updatedAt: "desc" },
+      include: {
+        lecture: {
+          include: {
+            course: {
+              select: {
+                id: true,
+                title_ar: true,
+                title_en: true,
+                image: true,
+                rankId: true,
+              },
+            },
+          },
+        },
+      },
+    }),
+    db.count({
+      model: "user_lectures",
+      where: { userId, status: "completed" },
+    }),
+    db.count({
+      model: "user_lectures",
+      where: { userId, status: "in_progress" },
+    }),
+  ]);
+
+  return {
+    ...historyResult,
+    stats: {
+      totalWatched: historyResult.pagination.totalItems,
+      totalCompleted,
+      totalInProgress,
+    },
+  };
 };
 
 
