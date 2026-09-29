@@ -178,7 +178,9 @@ export const register = asyncHandler(async (req, res, next) => {
         parentNumber: parentNumber || null,
       }),
     );
-    await redis.expire(`${email||phone}_Student_data`, 60 * 60 * 24);
+    console.log(`${email || phone}_Student_data`);
+
+    await redis.expire(`${email || phone}_Student_data`, 60 * 60 * 24);
 
     // Create Subscription Request if a plan is selected
     if (plan_id) {

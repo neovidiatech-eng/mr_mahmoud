@@ -54,8 +54,14 @@ export const getSubscriptionRequests = asyncHandler(async (req, res, next) => {
     subscriptionRequests.map(async (s) => {
       if (!s.user) return s;
 
-      const redisKey = s.user.email ? `${s.user.email}_Student_data` : null;
+      const redisKey =
+        s.user.email || s.user.phone
+          ? `${s.user.email || s.user.phone}_Student_data`
+          : null;
+      console.log(redisKey);
+
       const studentDataJson = redisKey ? await redis.get(redisKey) : null;
+      console.log(studentDataJson);
 
       let parsedStudentData = null;
       if (studentDataJson) {
@@ -138,8 +144,11 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
 
   const redisKey =
     `${subscriptionRequest.user.email || subscriptionRequest.user.phone}_Student_data`;
+  console.log(redisKey);
 
   const studentDataJson = await redis.get(redisKey);
+  console.log(studentDataJson);
+
   const parsedStudentData = studentDataJson
     ? JSON.parse(studentDataJson)
     : null;
