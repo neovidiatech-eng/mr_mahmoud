@@ -15,11 +15,29 @@ const localizeLecture = (lecture, lang) => {
   return result;
 };
 
+const localizeUserLecture = (ul, lang) => {
+  if (!ul) return ul;
+  if (ul.lecture) {
+    return {
+      ...ul,
+      lecture: localizeLecture(ul.lecture, lang),
+    };
+  }
+  return ul;
+};
+
 export const getAllLectures = asyncHandler(async (req, res, next) => {
   const result = await lecturesService.getLectures({ req, res, next });
   const items = result.items?.map((l) => localizeLecture(l, req.lang));
   return successResponse({ res, req, message: "FETCH_SUCCESS", data: { ...result, items } });
 });
+
+export const getLecturesHistory = asyncHandler(async (req, res, next) => {
+  const result = await lecturesService.getUserLecturesHistory({ req, res, next });
+  const items = result.items?.map((ul) => localizeUserLecture(ul, req.lang));
+  return successResponse({ res, req, message: "FETCH_SUCCESS", data: { ...result, items } });
+});
+
 
 export const getLecture = asyncHandler(async (req, res, next) => {
   const lecture = await lecturesService.getLectureById(req.params.id, req.user);

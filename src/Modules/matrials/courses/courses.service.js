@@ -490,6 +490,9 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
   // 3. Process Section Gating Progression
   let prevSectionPassed = true;
 
+  const sortedCourseLectures = [...(course.lectures || [])].sort((a, b) => a.order - b.order);
+  const userLecturesMap = new Map(userLectures.map((ul) => [ul.lectureId, ul]));
+
   const sectionsWithStatus = populatedSections.map((sec, secIdx) => {
     let isLocked = false;
 
@@ -508,21 +511,36 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
       const type = (item.item_type || "").toUpperCase();
 
       if (type === "LECTURE") {
-        const userLect = userLectures.find((ul) => ul.lectureId === item.item_id);
+        const userLect = userLecturesMap.get(item.item_id);
         const isCompleted = userLect?.status === "completed";
         if (!isCompleted) sectionAllLecturesCompleted = false;
 
+        const targetLect = (course.lectures || []).find((l) => l.id === item.item_id);
+        let prevLecturesCompleted = true;
+        if (targetLect) {
+          const prevLectures = sortedCourseLectures.filter((l) => l.order < targetLect.order);
+          if (prevLectures.length > 0) {
+            prevLecturesCompleted = prevLectures.every((pl) => {
+              const ul = userLecturesMap.get(pl.id);
+              return ul && ul.status === "completed";
+            });
+          }
+        }
+
+        const isItemLocked = isLocked || !prevLecturesCompleted;
         let itemStatus = "Locked";
-        if (!isLocked) {
+        if (!isItemLocked) {
           itemStatus = isCompleted ? "Completed" : "Pending";
         }
 
         return {
           ...item,
           status: itemStatus,
+          isLocked: isItemLocked,
           lastPosition: userLect?.lastPosition ?? 0,
+          progress: userLect?.progress ?? 0,
           details:
-            itemStatus === "Locked" && item.details
+            isItemLocked && item.details
               ? {
                   ...item.details,
                   video_path: null,
