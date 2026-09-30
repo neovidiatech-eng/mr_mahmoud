@@ -183,7 +183,6 @@ export const register = asyncHandler(async (req, res, next) => {
     await redis.expire(`${email || phone}_Student_data`, 60 * 60 * 24);
 
     // Create Subscription Request if a plan is selected
-
     await tx.create({
       model: "subscription_requests",
       data: {

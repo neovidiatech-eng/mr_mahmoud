@@ -142,8 +142,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const redisKey =
-    `${subscriptionRequest.user.email || subscriptionRequest.user.phone}_Student_data`;
+  const redisKey = `${subscriptionRequest.user.email || subscriptionRequest.user.phone}_Student_data`;
   console.log(redisKey);
 
   const studentDataJson = await redis.get(redisKey);
@@ -294,7 +293,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
           ...(parsedStudentData.parentNumber && {
             parentNumber: parsedStudentData.parentNumber,
           }),
-          plan: { connect: { id: subscriptionRequest.planId } },
+          plan: { connect: { id: subscriptionRequest.planId || null } },
           sessions: subscriptionRequest.plan?.sessionsCount || 0,
           sessions_remaining: subscriptionRequest.plan?.sessionsCount || 0,
           rank: { connect: { id: parsedStudentData.rankId } },
