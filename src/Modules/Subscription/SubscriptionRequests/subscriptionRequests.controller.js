@@ -293,7 +293,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
           ...(parsedStudentData.parentNumber && {
             parentNumber: parsedStudentData.parentNumber,
           }),
-          plan: { connect: { id: subscriptionRequest.planId || null } },
+          planId: subscriptionRequest.planId || "no_plan",
           sessions: subscriptionRequest.plan?.sessionsCount || 0,
           sessions_remaining: subscriptionRequest.plan?.sessionsCount || 0,
           rank: { connect: { id: parsedStudentData.rankId } },
