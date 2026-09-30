@@ -27,7 +27,7 @@ model student {
   qrToken                String?                   @unique
   qrActive               Boolean                   @default(true)
   type                   String?                   @default("online")
-  planId                 String?                   @default("no_plan")
+  planId                 String?
   country                String
   createdAt              DateTime                  @default(now())
   updatedAt              DateTime                  @updatedAt

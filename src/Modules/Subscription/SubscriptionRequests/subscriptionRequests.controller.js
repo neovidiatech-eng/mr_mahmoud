@@ -221,7 +221,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         }),
       ]);
 
-      if (!systemWallet || !defaultCurrency) {
+      if (subscriptionRequest.planId && (!systemWallet || !defaultCurrency)) {
         const error = new Error("SYSTEM_CONFIGURATION_ERROR");
         error.cause = 500;
         error.isMessageKey = true;
@@ -293,7 +293,9 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
           ...(parsedStudentData.parentNumber && {
             parentNumber: parsedStudentData.parentNumber,
           }),
-          planId: subscriptionRequest.planId || "no_plan",
+          ...(subscriptionRequest.planId && {
+            plan: { connect: { id: subscriptionRequest.planId } },
+          }),
           sessions: subscriptionRequest.plan?.sessionsCount || 0,
           sessions_remaining: subscriptionRequest.plan?.sessionsCount || 0,
           rank: { connect: { id: parsedStudentData.rankId } },
@@ -301,55 +303,59 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         },
       });
 
-      // Fetch plan with currency
-      const plan = await tx.findOne({
-        model: "plan",
-        where: { id: subscriptionRequest.planId },
-        include: { currency: true },
-      });
+      if (subscriptionRequest.planId) {
+        // Fetch plan with currency
+        const plan = await tx.findOne({
+          model: "plan",
+          where: { id: subscriptionRequest.planId },
+          include: { currency: true },
+        });
 
-      const rawPrice = parseFloat(plan?.price) || 0;
-      const convertedAmount = convertAmount(
-        rawPrice,
-        plan.currency.exchangeRate,
-        defaultCurrency.exchangeRate,
-      );
+        if (plan) {
+          const rawPrice = parseFloat(plan.price) || 0;
+          const convertedAmount = convertAmount(
+            rawPrice,
+            plan.currency?.exchangeRate,
+            defaultCurrency.exchangeRate,
+          );
 
-      // Create subscription
-      const subscription = await tx.create({
-        model: "Subscription",
-        data: {
-          userId: subscriptionRequest.user_id,
-          planId: subscriptionRequest.planId,
-          status: "active",
-          amount: rawPrice,
-          currencyId: plan.currencyId,
-          startDate: new Date(),
-          paidAt: new Date(),
-        },
-      });
+          // Create subscription
+          const subscription = await tx.create({
+            model: "Subscription",
+            data: {
+              userId: subscriptionRequest.user_id,
+              planId: subscriptionRequest.planId,
+              status: "active",
+              amount: rawPrice,
+              currencyId: plan.currencyId,
+              startDate: new Date(),
+              paidAt: new Date(),
+            },
+          });
 
-      // Ledger (transaction)
-      await tx.create({
-        model: "Transaction",
-        data: {
-          walletId: systemWallet.id,
-          type: "subscription",
-          amount: convertedAmount,
-          status: "completed",
-          reason: `Subscription: ${plan.name}`,
-          subscriptionId: subscription.id,
-        },
-      });
+          // Ledger (transaction)
+          await tx.create({
+            model: "Transaction",
+            data: {
+              walletId: systemWallet.id,
+              type: "subscription",
+              amount: convertedAmount,
+              status: "completed",
+              reason: `Subscription: ${plan.name}`,
+              subscriptionId: subscription.id,
+            },
+          });
 
-      // Update wallet balance
-      await tx.updateOne({
-        model: "Wallet",
-        where: { id: systemWallet.id },
-        data: {
-          balance: { increment: convertedAmount },
-        },
-      });
+          // Update wallet balance
+          await tx.updateOne({
+            model: "Wallet",
+            where: { id: systemWallet.id },
+            data: {
+              balance: { increment: convertedAmount },
+            },
+          });
+        }
+      }
     });
 
     await redis.del(redisKey);
