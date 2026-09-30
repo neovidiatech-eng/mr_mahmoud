@@ -160,7 +160,7 @@ export const register = asyncHandler(async (req, res, next) => {
 
     // Store Student metadata in Redis
     await redis.set(
-      `${email||phone}_Student_data`,
+      `${email || phone}_Student_data`,
       JSON.stringify({
         name,
         email,
@@ -183,27 +183,26 @@ export const register = asyncHandler(async (req, res, next) => {
     await redis.expire(`${email || phone}_Student_data`, 60 * 60 * 24);
 
     // Create Subscription Request if a plan is selected
-    if (plan_id) {
-      await tx.create({
-        model: "subscription_requests",
-        data: {
-          user_id: user.id,
-          planId: plan_id,
-          subscrption_img: image_path,
-        },
-      });
 
-      // Notify Admins about new student subscription request
-      notifyAdmins({
-        type: "NEW_STUDENT_SUBSCRIPTION_REQUEST",
-        title_ar: "طلب اشتراك طالب جديد",
-        title_en: "New Student Subscription Request",
-        message_ar: `قام الطالب "${name}" بتقديم طلب اشتراك جديد.`,
-        message_en: `Student "${name}" submitted a new subscription request.`,
-      }).catch((err) =>
-        console.error("Failed to notify admins of subscription request:", err),
-      );
-    }
+    await tx.create({
+      model: "subscription_requests",
+      data: {
+        user_id: user.id,
+        planId: plan_id || null,
+        subscrption_img: image_path || null,
+      },
+    });
+
+    // Notify Admins about new student subscription request
+    notifyAdmins({
+      type: "NEW_STUDENT_SUBSCRIPTION_REQUEST",
+      title_ar: "طلب اشتراك طالب جديد",
+      title_en: "New Student Subscription Request",
+      message_ar: `قام الطالب "${name}" بتقديم طلب اشتراك جديد.`,
+      message_en: `Student "${name}" submitted a new subscription request.`,
+    }).catch((err) =>
+      console.error("Failed to notify admins of subscription request:", err),
+    );
   });
 
   return successResponse({
