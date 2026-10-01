@@ -16,13 +16,13 @@ import {
   hash,
 } from "../../Utils/Security/index.js";
 import { generateOtp } from "../../Utils/Security/otp.js";
-import { sendEmail } from "../../Utils/Mailer/SendEmail.js";
+import { sendSMS } from "../../Utils/SMS/SendSMS.js";
 import { generateToken, verifyToken } from "../../Utils/Token/token.js";
 import { resolveStudentAge } from "../../Utils/Helpers.js";
 import { nanoid } from "nanoid";
 import { notifyAdmins } from "../Notifications/notifications.service.js";
 
-/* -------------------------------------------- ------------------------------ */
+/* -------------------------------------------------------------------------- */
 /*                                SIGN IN AND SIGN UP                           */
 /* -------------------------------------------------------------------------- */
 export const register = asyncHandler(async (req, res, next) => {
@@ -31,7 +31,7 @@ export const register = asyncHandler(async (req, res, next) => {
     email,
     password,
     phone,
-    codeCountry,
+    codeCountry = "20",
     plan_id,
     age: submittedAge,
     birth_date,
@@ -42,16 +42,18 @@ export const register = asyncHandler(async (req, res, next) => {
     stageId,
   } = req.body;
 
+  if (!phone) {
+    return errorResponse({ req, next, message: "PHONE_REQUIRED", status: 400 });
+  }
+
   // 1. Initial validations (Check existence outside transaction to keep it short)
   const [checkUserByEmail, checkUserByPhone, settings, existStage, existRank] =
     await Promise.all([
       email ? db.findOne({ model: "user", where: { email } }) : null,
-      phone
-        ? db.findFirst({
-            model: "user",
-            where: { phone },
-          })
-        : null,
+      db.findFirst({
+        model: "user",
+        where: { phone },
+      }),
       db.findFirst({ model: "settings" }),
       db.findFirst({ model: "stage", where: { id: stageId } }),
       db.findFirst({ model: "ranks", where: { id: rankId } }),
@@ -80,7 +82,7 @@ export const register = asyncHandler(async (req, res, next) => {
     return errorResponse({ req, next, message: "ROLE_NOT_FOUND", status: 404 });
   }
 
-  if (checkUserByEmail !== null) {
+  if (email && checkUserByEmail !== null) {
     return errorResponse({ req, next, message: "EMAIL_EXISTS", status: 400 });
   }
   if (checkUserByPhone !== null) {
@@ -116,26 +118,28 @@ export const register = asyncHandler(async (req, res, next) => {
 
   // 2. Preparation (Hashing, OTP)
   const hashedPassword = encryptText({ text: password });
-  let otp = null;
-  if (email) {
-    otp = /* generateOtp(); */ "225566";
-    const hashedOtp = await hash({ password: otp });
+  const otp = generateOtp();
+  const hashedOtp = await hash({ password: otp });
 
-    // 3. Redis OTP Setup
-    await redis.set(`${email}_otp_register`, hashedOtp);
-    await redis.expire(`${email}_otp_register`, 60 * 10);
-    await redis.set(`${email}_otp_attempts`, 0, { EX: 60 * 10 });
-    const mailResult = await sendEmail({ email, otp, lang: req.lang });
+  // 3. Redis OTP Setup
+  await redis.set(`${phone}_otp_register`, hashedOtp);
+  await redis.expire(`${phone}_otp_register`, 60 * 10);
+  await redis.set(`${phone}_otp_attempts`, 0, { EX: 60 * 10 });
 
-    if (!mailResult.success) {
-      const errorMsg =
-        mailResult.code === "ETIMEDOUT"
-          ? "EMAIL_SERVICE_TIMEOUT"
-          : "EMAIL_SEND_FAILED";
-      return errorResponse({ req, next, message: errorMsg, status: 500 });
-    }
+  // 4. Send Verification SMS
+  const smsResult = await sendSMS({
+    phone,
+    codeCountry,
+    otp,
+  });
+
+  if (!smsResult.success) {
+    const errorMsg =
+      smsResult.code === "ETIMEDOUT"
+        ? "SMS_SERVICE_TIMEOUT"
+        : "SMS_SEND_FAILED";
+    return errorResponse({ req, next, message: errorMsg, status: 500 });
   }
-  // 4. Send Verification Email
 
   // 5. Transactional Database Operations
   await db.transaction(async (tx) => {
@@ -146,7 +150,7 @@ export const register = asyncHandler(async (req, res, next) => {
       model: "user",
       data: {
         name,
-        email,
+        email: email || null,
         age: studentAge,
         username,
         password: hashedPassword,
@@ -154,16 +158,17 @@ export const register = asyncHandler(async (req, res, next) => {
         code_country: codeCountry,
         role: { connect: { id: userRole.id } },
         timezone: req.timezone || DEFAULT_TIMEZONE,
-        ...(phone && { confirmAt: new Date(), status: "pending" }),
+        confirmAt: null,
+        status: "pending",
       },
     });
 
     // Store Student metadata in Redis
     await redis.set(
-      `${email || phone}_Student_data`,
+      `${phone}_Student_data`,
       JSON.stringify({
         name,
-        email,
+        email: email || null,
         password: hashedPassword,
         phone,
         code_country: codeCountry,
@@ -178,9 +183,8 @@ export const register = asyncHandler(async (req, res, next) => {
         parentNumber: parentNumber || null,
       }),
     );
-    console.log(`${email || phone}_Student_data`);
 
-    await redis.expire(`${email || phone}_Student_data`, 60 * 60 * 24);
+    await redis.expire(`${phone}_Student_data`, 60 * 60 * 24);
 
     // Create Subscription Request if a plan is selected
     await tx.create({
@@ -209,7 +213,7 @@ export const register = asyncHandler(async (req, res, next) => {
     req,
     status: 201,
     userRole,
-    message: "REGISTER_SUCCESS_CHECK_EMAIL",
+    message: "REGISTER_SUCCESS_CHECK_PHONE",
   });
 });
 
@@ -293,10 +297,9 @@ export const login = asyncHandler(async (req, res, next) => {
 
   res.cookie("refreshToken", refreshToken, {
     httpOnly: true,
-    secure: true, // يجب أن تكون true للعمل مع sameSite: 'none'
-    sameSite: "none", // ضروري جداً للـ Cross-Origin
+    secure: true,
+    sameSite: "none",
     maxAge: 60 * 60 * 24 * 30 * 1000,
-    // لا تضع خاصية domain هنا، اتركها فارغة لتعمل بشكل صحيح مع النطاقات المختلفة
   });
   return successResponse({
     res,
@@ -317,19 +320,45 @@ export const login = asyncHandler(async (req, res, next) => {
   });
 });
 
-/* -------------------------------------------- ------------------------------ */
+/* -------------------------------------------------------------------------- */
 /*                RESEND OTP         And VERIFY ACCOUNT                         */
 /* -------------------------------------------------------------------------- */
 
 export const resendOtp = asyncHandler(async (req, res, next) => {
-  const { email } = req.body;
-  const otp = generateOtp();
-  const hashedOtp = await hash({ password: otp });
-  const isHaveOtp = await redis.get(`${email}_otp_register`);
+  const { phone, email, codeCountry } = req.body;
+  const targetPhone = phone;
+
+  if (!targetPhone) {
+    return errorResponse({ req, next, message: "PHONE_REQUIRED", status: 400 });
+  }
+
   const isConfirmed = await db.findFirst({
     model: "user",
-    where: { email, confirmAt: null },
+    where: { phone: targetPhone, confirmAt: { not: null } },
   });
+  if (isConfirmed) {
+    return errorResponse({
+      req,
+      next,
+      message: "USER_ALREADY_CONFIRMED",
+      status: 400,
+    });
+  }
+
+  const existingUser = await db.findFirst({
+    model: "user",
+    where: { phone: targetPhone },
+  });
+  if (!existingUser) {
+    return errorResponse({
+      req,
+      next,
+      message: "USER_NOT_FOUND",
+      status: 404,
+    });
+  }
+
+  const isHaveOtp = await redis.get(`${targetPhone}_otp_register`);
   if (isHaveOtp) {
     return errorResponse({
       req,
@@ -338,23 +367,24 @@ export const resendOtp = asyncHandler(async (req, res, next) => {
       status: 400,
     });
   }
-  if (isConfirmed) {
+
+  const otp = generateOtp();
+  const hashedOtp = await hash({ password: otp });
+  await redis.set(`${targetPhone}_otp_register`, hashedOtp);
+  await redis.expire(`${targetPhone}_otp_register`, 60 * 10);
+  await redis.set(`${targetPhone}_otp_attempts`, 0, { EX: 60 * 10 }); // Reset attempts
+
+  const smsResult = await sendSMS({
+    phone: targetPhone,
+    codeCountry: existingUser.code_country || codeCountry || "20",
+    otp,
+  });
+
+  if (!smsResult.success) {
     return errorResponse({
       req,
       next,
-      message: "USER_ALREADY_CONFIRMED",
-      status: 404,
-    });
-  }
-  await redis.set(`${email}_otp_register`, hashedOtp);
-  await redis.expire(`${email}_otp_register`, 60 * 10);
-  await redis.set(`${email}_otp_attempts`, 0, { EX: 60 * 10 }); // Reset attempts
-  const mailResult = await sendEmail({ email, otp, lang: req.lang });
-  if (!mailResult.success) {
-    return errorResponse({
-      req,
-      next,
-      message: "EMAIL_SEND_FAILED",
+      message: "SMS_SEND_FAILED",
       status: 500,
     });
   }
@@ -366,11 +396,18 @@ export const resendOtp = asyncHandler(async (req, res, next) => {
     message: "OTP_SENT_SUCCESS",
   });
 });
-export const verifyAccount = asyncHandler(async (req, res, next) => {
-  const { email, otp } = req.body;
-  const hasedOtp = await redis.get(`${email}_otp_register`);
 
-  const attemptsKey = `${email}_otp_attempts`;
+export const verifyAccount = asyncHandler(async (req, res, next) => {
+  const { phone, otp } = req.body;
+  const targetPhone = phone;
+
+  if (!targetPhone) {
+    return errorResponse({ req, next, message: "PHONE_REQUIRED", status: 400 });
+  }
+
+  const hashedOtp = await redis.get(`${targetPhone}_otp_register`);
+
+  const attemptsKey = `${targetPhone}_otp_attempts`;
   const attempts = await redis.incr(attemptsKey);
   if (attempts > 5) {
     return errorResponse({
@@ -381,23 +418,28 @@ export const verifyAccount = asyncHandler(async (req, res, next) => {
     });
   }
 
-  const comparedPassword = await compare({ password: otp, hash: hasedOtp });
+  if (!hashedOtp) {
+    return errorResponse({ req, next, message: "INVALID_OTP", status: 401 });
+  }
+
+  const comparedPassword = await compare({ password: otp, hash: hashedOtp });
   if (!comparedPassword) {
     return errorResponse({ req, next, message: "INVALID_OTP", status: 401 });
   }
   const matchedUser = await db.findFirst({
     model: "user",
-    where: { email },
+    where: { phone: targetPhone },
   });
   if (!matchedUser) {
     return errorResponse({ req, next, message: "USER_NOT_FOUND", status: 404 });
   }
-  await redis.del(`${email}_otp_register`);
-  await redis.del(`${email}_otp_attempts`);
+  await redis.del(`${targetPhone}_otp_register`);
+  await redis.del(`${targetPhone}_otp_attempts`);
+
   const user = await db.updateOne({
     model: "user",
-    where: { email },
-    data: { confirmAt: new Date().toISOString() },
+    where: { phone: targetPhone },
+    data: { confirmAt: new Date().toISOString(), status: "active" },
   });
 
   if (!user) {
@@ -412,10 +454,14 @@ export const verifyAccount = asyncHandler(async (req, res, next) => {
 });
 
 export const forgetPassword = asyncHandler(async (req, res, next) => {
-  const { email } = req.body;
+  const { phone, codeCountry } = req.body;
+  if (!phone) {
+    return errorResponse({ req, next, message: "PHONE_REQUIRED", status: 400 });
+  }
+
   const checkuser = await db.findFirst({
     model: "user",
-    where: { email, confirmAt: { not: null } },
+    where: { phone, confirmAt: { not: null } },
   });
   if (!checkuser) {
     return errorResponse({
@@ -427,24 +473,21 @@ export const forgetPassword = asyncHandler(async (req, res, next) => {
   }
   const otp = generateOtp();
   const hashedOtp = await hash({ password: otp });
-  await redis.set(`${email}_otp_forget_password`, hashedOtp);
-  await redis.expire(`${email}_otp_forget_password`, 60 * 10);
-  await redis.set(`${email}_otp_forget_attempts`, 0, { EX: 60 * 10 });
-  const text = req.t("RESET_PASSWORD_EMAIL_TEXT");
-  const subject = req.t("RESET_PASSWORD_SUBJECT");
+  await redis.set(`${phone}_otp_forget_password`, hashedOtp);
+  await redis.expire(`${phone}_otp_forget_password`, 60 * 10);
+  await redis.set(`${phone}_otp_forget_attempts`, 0, { EX: 60 * 10 });
 
-  const mailResult = await sendEmail({
-    email,
+  const smsResult = await sendSMS({
+    phone,
+    codeCountry: checkuser.code_country || codeCountry || "20",
     otp,
-    subject,
-    text,
-    lang: req.lang,
   });
-  if (!mailResult.success) {
+
+  if (!smsResult.success) {
     return errorResponse({
       req,
       next,
-      message: "EMAIL_SEND_FAILED",
+      message: "SMS_SEND_FAILED",
       status: 500,
     });
   }
@@ -452,23 +495,28 @@ export const forgetPassword = asyncHandler(async (req, res, next) => {
   return successResponse({
     res,
     req,
-    status: 201,
+    status: 200,
     message: "OTP_SENT_SUCCESS",
   });
 });
+
 export const resetPassword = asyncHandler(async (req, res, next) => {
-  const { email, otp, password } = req.body;
-  const checkuser = await db.findFirst({ model: "user", where: { email } });
+  const { phone, otp, password } = req.body;
+  if (!phone) {
+    return errorResponse({ req, next, message: "PHONE_REQUIRED", status: 400 });
+  }
+
+  const checkuser = await db.findFirst({ model: "user", where: { phone } });
   if (!checkuser) {
     return errorResponse({ req, next, message: "USER_NOT_FOUND", status: 404 });
   }
-  const hashedOtp = await redis.get(`${email}_otp_forget_password`);
+  const hashedOtp = await redis.get(`${phone}_otp_forget_password`);
 
   if (!hashedOtp) {
     return errorResponse({ req, next, message: "INVALID_OTP", status: 404 });
   }
 
-  const attemptsKey = `${email}_otp_forget_attempts`;
+  const attemptsKey = `${phone}_otp_forget_attempts`;
   const attempts = await redis.incr(attemptsKey);
   if (attempts > 5) {
     return errorResponse({
@@ -485,21 +533,22 @@ export const resetPassword = asyncHandler(async (req, res, next) => {
   }
 
   const hashedPassword = await hash({ password });
-  const user = await db.updateOne({
+  await db.updateOne({
     model: "user",
-    where: { email },
+    where: { phone },
     data: { password: hashedPassword },
   });
-  await redis.del(`${email}_otp_forget_password`);
-  await redis.del(`${email}_otp_forget_attempts`);
+  await redis.del(`${phone}_otp_forget_password`);
+  await redis.del(`${phone}_otp_forget_attempts`);
 
   return successResponse({
     res,
     req,
-    status: 201,
+    status: 200,
     message: "PASSWORD_RESET_SUCCESS",
   });
 });
+
 
 export const refresh = asyncHandler(async (req, res, next) => {
   const { refreshToken } = req.cookies;

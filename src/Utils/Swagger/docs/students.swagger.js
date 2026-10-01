@@ -24,13 +24,13 @@ export const studentsPaths = {
           "multipart/form-data": {
             schema: {
               type: "object",
-              required: ["name", "email", "password", "phone", "phone_code", "parentNumber", "country", "planId", "gender", "type"],
+              required: ["name", "password", "phone", "phone_code", "parentNumber", "country", "planId", "gender", "type"],
               properties: {
                 name: { type: "string", example: "Karem Mahmoud" },
-                email: { type: "string", format: "email", example: "karem@example.com", description: "Email address (optional)" },
-                password: { type: "string", format: "password", example: "Password123!" },
                 phone: { type: "string", example: "01000000001", description: "Raw unencrypted phone number" },
                 phone_code: { type: "string", example: "+20" },
+                email: { type: "string", format: "email", example: "karem@example.com", description: "Email address (optional)" },
+                password: { type: "string", format: "password", example: "Password123!" },
                 parentNumber: { type: "string", example: "01000000002", description: "Parent raw unencrypted phone number" },
                 country: { type: "string", example: "Egypt" },
                 planId: { type: "string", format: "uuid" },

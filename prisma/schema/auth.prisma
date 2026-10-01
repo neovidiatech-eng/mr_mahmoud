@@ -5,7 +5,7 @@ model user {
   password             String?
   fcmToken             String?
   name                 String?
-  phone                String?                 
+  phone                String?                 @unique
   createdAt            DateTime                @default(now())
   gender               String?
   age                  Int?
@@ -39,6 +39,7 @@ model user {
   homeworks            homework[]
 
   @@index([email])
+  @@index([phone])
   @@index([username])
   @@index([googleId])
 }

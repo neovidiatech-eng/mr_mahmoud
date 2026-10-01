@@ -19,6 +19,7 @@ export const getAllTeachers = asyncHandler(async (req, res, next) => {
         OR: [
           { name: { contains: search, mode: "insensitive" } },
           { email: { contains: search, mode: "insensitive" } },
+          { phone: { contains: search, mode: "insensitive" } },
         ],
       }),
       ...(status && { status }),
@@ -38,7 +39,9 @@ export const getAllTeachers = asyncHandler(async (req, res, next) => {
 
   for (const teacher of teachers) {
     if (teacher.user && teacher.user.password) {
-      teacher.user.password = await decryptText({ text: teacher.user.password });
+      teacher.user.password = await decryptText({
+        text: teacher.user.password,
+      });
     }
   }
 
@@ -74,9 +77,14 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
     status,
   } = req.body;
 
-  const [checkUserByEmail, checkCurrency, getrole, settings] =
+  const [checkUserByEmail, checkUserByPhone, checkCurrency, getrole, settings] =
     await Promise.all([
-      db.findOne({ model: "user", where: { email } }),
+      email
+        ? db.findOne({ model: "user", where: { email } })
+        : Promise.resolve(null),
+      phone
+        ? db.findOne({ model: "user", where: { phone } })
+        : Promise.resolve(null),
       db.findOne({ model: "currency", where: { id: currency_id } }),
       db.findFirst({ model: "role", where: { name: "teacher" } }),
       db.findFirst({ model: "settings" }),
@@ -84,6 +92,9 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
 
   if (!getrole)
     return errorResponse({ req, message: "ROLE_NOT_FOUND", next, status: 404 });
+
+  if (checkUserByPhone)
+    return errorResponse({ req, message: "PHONE_EXISTS", next, status: 400 });
 
   if (checkUserByEmail)
     return errorResponse({ req, message: "EMAIL_EXISTS", next, status: 400 });
@@ -148,7 +159,9 @@ export const createTeacher = asyncHandler(async (req, res, next) => {
 
   if (result.teacher?.user) {
     if (result.teacher.user.password) {
-      result.teacher.user.password = await decryptText({ text: result.teacher.user.password });
+      result.teacher.user.password = await decryptText({
+        text: result.teacher.user.password,
+      });
     }
   }
 
@@ -170,7 +183,7 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
       hour_price: true,
       createdAt: true,
       updatedAt: true,
-  
+
       user: {
         select: {
           id: true,
@@ -183,9 +196,8 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
           age: true,
           createdAt: true,
           password: true,
-              wallet:true,
+          wallet: true,
         },
-
       },
       currency: {
         select: {
@@ -211,7 +223,7 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
   if (teacher.user && teacher.user.password) {
     teacher.user.password = await decryptText({ text: teacher.user.password });
   }
-  const [sessionCount, uniqueStudentGroups,totalsessions] = await Promise.all([
+  const [sessionCount, uniqueStudentGroups, totalsessions] = await Promise.all([
     db.count({
       model: "schedule",
       where: { status: "completed", teacherId: teacher.id },
@@ -228,9 +240,7 @@ export const getTeacher = asyncHandler(async (req, res, next) => {
   ]);
 
   const teacherStudents = uniqueStudentGroups.length;
-  const result = { ...teacher, sessionCount, teacherStudents,totalsessions };
-
-
+  const result = { ...teacher, sessionCount, teacherStudents, totalsessions };
 
   return successResponse({
     res,
@@ -262,7 +272,11 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
     include: { user: true },
   });
 
-  if (password && req.user.role.name !== "admin" && req.user.role.name !== "super_admin") {
+  if (
+    password &&
+    req.user.role.name !== "admin" &&
+    req.user.role.name !== "super_admin"
+  ) {
     return errorResponse({
       req,
       next,
@@ -277,6 +291,17 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
   }
 
   // Handle unique constraints
+  if (phone && phone !== teacher.user.phone) {
+    const existing = await db.findOne({ model: "user", where: { phone } });
+    if (existing)
+      return errorResponse({
+        req,
+        message: "PHONE_EXISTS",
+        next,
+        status: 400,
+      });
+  }
+
   if (email && email !== teacher.user.email) {
     const existing = await db.findOne({ model: "user", where: { email } });
     if (existing)
@@ -289,7 +314,16 @@ export const updateTeacher = asyncHandler(async (req, res, next) => {
   }
 
   // Update user data first if needed
-  if (name || email || hashedPassword || phone || code_country || gender || age || status) {
+  if (
+    name ||
+    email ||
+    hashedPassword ||
+    phone ||
+    code_country ||
+    gender ||
+    age ||
+    status
+  ) {
     await db.updateOne({
       model: "user",
       where: { id: teacher.user_id },

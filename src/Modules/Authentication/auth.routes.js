@@ -15,7 +15,10 @@ import {
   resetPasswordSchema,
   verifiyCodeSchema,
 } from "./auth.validation.js";
-import { fileValidation, localMulterUpload } from "../../Utils/Multer/local.multer.js";
+import {
+  fileValidation,
+  localMulterUpload,
+} from "../../Utils/Multer/local.multer.js";
 
 const router = Router();
 
@@ -24,9 +27,11 @@ router.post(
   authRateLimiter,
   localMulterUpload({
     customPath: (req) =>
-      req.body?.email
-        ? `users/${req.body.email.toLowerCase().replaceAll("@", "_").replaceAll(".", "_")}`
-        : "users/subscriptions",
+      req.body?.phone
+        ? `users/${req.body.phone}`
+        : req.body?.email
+          ? `users/${req.body.email.toLowerCase().replaceAll("@", "_").replaceAll(".", "_")}`
+          : "users/subscriptions",
     fileValidation: fileValidation.image,
   }).single("image"),
   validation(registeritonSchema),
@@ -36,15 +41,6 @@ router.post(
 router.post("/sign-in", authRateLimiter, validation(loginSchema), auth.login);
 
 router.post("/refresh", authRateLimiter, cookieParser(), auth.refresh);
-
-/* router.post(
-  "/google-signup",
-  validation(googleSignupSchema),
-  auth.googleSignUp,
-);
-
-router.post("/google-login", validation(googleLoginSchema), auth.googlelogin);
- */
 
 router.post(
   "/verify-account",

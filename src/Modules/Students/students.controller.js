@@ -81,6 +81,7 @@ export const getAllStudents = asyncHandler(async (req, res, next) => {
         OR: [
           { name: { contains: search, mode: "insensitive" } },
           { email: { contains: search, mode: "insensitive" } },
+          { phone: { contains: search, mode: "insensitive" } },
         ],
       }),
       ...(status && { status }),
@@ -240,10 +241,13 @@ export const createStudent = asyncHandler(async (req, res, next) => {
 
   const studentAge = resolveStudentAge({ age, birthDate: birth_date });
 
-  const [checkUserByEmail, checkPlan, studentRole, settings] =
+  const [checkUserByEmail, checkUserByPhone, checkPlan, studentRole, settings] =
     await Promise.all([
       email
         ? db.findOne({ model: "user", where: { email } })
+        : Promise.resolve(null),
+      phone
+        ? db.findOne({ model: "user", where: { phone } })
         : Promise.resolve(null),
       db.findOne({ model: "plan", where: { id: planId } }),
       db.findFirst({
@@ -252,6 +256,14 @@ export const createStudent = asyncHandler(async (req, res, next) => {
       }),
       db.findFirst({ model: "settings" }),
     ]);
+
+  if (checkUserByPhone)
+    return errorResponse({
+      req,
+      next,
+      message: "PHONE_EXISTS",
+      status: 400,
+    });
 
   if (checkUserByEmail)
     return errorResponse({

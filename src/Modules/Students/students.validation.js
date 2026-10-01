@@ -4,7 +4,7 @@ import { generalFields } from "../../Utils/GeneralFields/index.js";
 export const createStudentSchema = {
   body: Joi.object().keys({
     name: generalFields.name.required(),
-    email: generalFields.email.required(),
+    email: generalFields.email.optional(),
     password: generalFields.password.required(),
     phone: generalFields.phone.required(),
     phone_code: generalFields.codeCountry.required(),

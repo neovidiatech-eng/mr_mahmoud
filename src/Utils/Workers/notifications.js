@@ -1,7 +1,7 @@
 import { connection, notificationQueue } from "../Radis/Connection.js";
 import { Worker } from "bullmq";
 import * as db from "../../database/dbService.js";
-import { sendEmail } from "../Mailer/SendEmail.js";
+import { sendSMS } from "../SMS/SendSMS.js";
 import { createNotification } from "../../Modules/Notifications/notifications.service.js";
 
 export const addNotificationJob = async ({
@@ -58,26 +58,25 @@ const worker = new Worker(
       }
 
       const title = schedule.title || "Session";
-      const studentEmail = schedule.student?.user?.email;
+      const studentPhone = schedule.student?.user?.phone;
+      const studentCountry = schedule.student?.user?.code_country || "20";
       const studentName = schedule.student?.user?.name || "Student";
       const studentUserId = schedule.student?.user_id;
 
-      const teacherEmail = schedule.teacher?.user?.email;
+      const teacherPhone = schedule.teacher?.user?.phone;
+      const teacherCountry = schedule.teacher?.user?.code_country || "20";
       const teacherName = schedule.teacher?.user?.name || "Teacher";
       const teacherUserId = schedule.teacher?.user_id;
 
-      const subject = `Reminder: Upcoming Session - ${title}`;
-      const text = `This is a reminder that your session "${title}" is starting ${type}. Please be ready.`;
+      const smsText = `تذكير من منصة الأستاذ محمود: جلستك "${title}" تبدأ ${type}. يرجى الاستعداد.`;
 
-      if (studentEmail) {
-        await sendEmail({
-          email: studentEmail,
-          subject,
-          text,
-          username: studentName,
-          variant: "reminder",
+      if (studentPhone) {
+        await sendSMS({
+          phone: studentPhone,
+          codeCountry: studentCountry,
+          text: smsText,
         });
-        console.log(`Email sent to student ${studentEmail}`);
+        console.log(`SMS sent to student ${studentPhone}`);
       }
 
       if (studentUserId) {
@@ -91,15 +90,13 @@ const worker = new Worker(
         });
       }
 
-      if (teacherEmail) {
-        await sendEmail({
-          email: teacherEmail,
-          subject,
-          text,
-          username: teacherName,
-          variant: "reminder",
+      if (teacherPhone) {
+        await sendSMS({
+          phone: teacherPhone,
+          codeCountry: teacherCountry,
+          text: smsText,
         });
-        console.log(`Email sent to teacher ${teacherEmail}`);
+        console.log(`SMS sent to teacher ${teacherPhone}`);
       }
 
       if (teacherUserId) {
@@ -113,7 +110,7 @@ const worker = new Worker(
         });
       }
     } catch (error) {
-      console.error("Failed to send notification email:", error);
+      console.error("Failed to send notification:", error);
     }
   },
   { connection },

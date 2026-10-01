@@ -21,11 +21,11 @@ export const coursePurchaseRequestsPaths = {
           "multipart/form-data": {
             schema: {
               type: "object",
-              required: ["name", "phone", "email"],
+              required: ["name", "phone"],
               properties: {
                 name: { type: "string", example: "Ahmed Ali", description: "Purchaser name" },
                 phone: { type: "string", example: "01000000000", description: "Purchaser phone number" },
-                email: { type: "string", format: "email", example: "ahmed@example.com", description: "Purchaser email address" },
+                email: { type: "string", format: "email", example: "ahmed@example.com", description: "Purchaser email address (optional)" },
                 courseId: { type: "string", format: "uuid", description: "Single course ID" },
                 courseIds: { type: "array", items: { type: "string", format: "uuid" }, description: "Array of course IDs for cart purchases" },
                 parentPhone: { type: "string", example: "01100000000", description: "Parent phone number (optional)" },
@@ -37,11 +37,11 @@ export const coursePurchaseRequestsPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name", "phone", "email"],
+              required: ["name", "phone"],
               properties: {
                 name: { type: "string", example: "Ahmed Ali", description: "Purchaser name" },
                 phone: { type: "string", example: "01000000000", description: "Purchaser phone number" },
-                email: { type: "string", format: "email", example: "ahmed@example.com", description: "Purchaser email address" },
+                email: { type: "string", format: "email", example: "ahmed@example.com", description: "Purchaser email address (optional)" },
                 courseId: { type: "string", format: "uuid" },
                 courseIds: { type: "array", items: { type: "string", format: "uuid" } },
                 parentPhone: { type: "string", example: "01100000000" },

@@ -15,7 +15,7 @@ export const createTeacherSchema = {
   body: joi
     .object({
       name: generalFields.name.required(),
-      email: generalFields.email.required(),
+      email: generalFields.email.optional(),
       password: generalFields.password.required(),
       phone: generalFields.phone.required(),
       code_country: generalFields.codeCountry.required(),
