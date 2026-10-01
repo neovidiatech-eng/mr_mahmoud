@@ -119,6 +119,8 @@ services:
       FIREBASE_CLIENT_X509_CERT_URL: ${FIREBASE_CLIENT_X509_CERT_URL}
       FIREBASE_UNIVERSE_DOMAIN: ${FIREBASE_UNIVERSE_DOMAIN}
       QR_URL: ${QR_URL}
+      MOCEAN_API_TOKEN: ${MOCEAN_API_TOKEN}
+      MOCEAN_SENDER: ${MOCEAN_SENDER}
     depends_on:
       postgres:
         condition: service_healthy
