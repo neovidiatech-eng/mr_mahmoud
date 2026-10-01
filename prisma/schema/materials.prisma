@@ -96,6 +96,7 @@ model course_purchase_request {
 
   @@index([studentId])
   @@index([courseId])
+  @@index([phone])
 }
 
 model CoursePurchase {

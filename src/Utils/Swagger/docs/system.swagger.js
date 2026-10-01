@@ -157,12 +157,13 @@ export const systemPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["fullName", "email", "password", "roleId"],
+              required: ["fullName", "phone", "password", "roleId"],
               properties: {
-                fullName: { type: "string" },
-                email: { type: "string", format: "email" },
-                password: { type: "string" },
-                roleId: { type: "string" }
+                fullName: { type: "string", example: "Admin User" },
+                phone: { type: "string", example: "01000000000" },
+                email: { type: "string", format: "email", example: "admin@example.com", description: "Optional email" },
+                password: { type: "string", format: "password", example: "Password123!" },
+                roleId: { type: "string", format: "uuid" }
               }
             }
           }

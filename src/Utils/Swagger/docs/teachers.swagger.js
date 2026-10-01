@@ -33,13 +33,13 @@ export const teachersPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["name", "email", "password", "phone", "code_country", "currency_id", "gender", "age", "hour_price"],
+              required: ["name", "password", "phone", "code_country", "currency_id", "gender", "age", "hour_price"],
               properties: {
                 name: { type: "string", example: "Mahmoud Hassan" },
-                email: { type: "string", format: "email", example: "teacher@example.com" },
-                password: { type: "string", format: "password", example: "Password123!" },
                 phone: { type: "string", example: "01000000002", description: "Raw unencrypted phone number" },
                 code_country: { type: "string", example: "+20" },
+                email: { type: "string", format: "email", example: "teacher@example.com", description: "Email address (optional)" },
+                password: { type: "string", format: "password", example: "Password123!" },
                 currency_id: { type: "string", example: "EGP" },
                 gender: { type: "string", enum: ["MALE", "FEMALE"], example: "MALE" },
                 age: { type: "number", example: 35 },

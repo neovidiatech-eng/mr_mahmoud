@@ -3,7 +3,7 @@ export const authPaths = {
     post: {
       tags: ["Authentication"],
       summary: "Register a new student account",
-      description: "Registers a student account with required plan and sends an OTP verification email.",
+      description: "Registers a student account with required plan and sends an OTP verification SMS to phone.",
       requestBody: {
         required: true,
         content: {
@@ -13,12 +13,12 @@ export const authPaths = {
               required: ["name", "password", "codeCountry", "phone", "parentNumber", "gender", "country", "plan_id", "stageId", "rankId"],
               properties: {
                 name: { type: "string", example: "Ahmed Ali" },
+                phone: { type: "string", example: "01000000000", description: "Raw unencrypted phone number" },
+                codeCountry: { type: "string", example: "+20" },
                 email: { type: "string", format: "email", example: "ahmed@example.com", description: "Email address (optional)" },
                 password: { type: "string", format: "password", example: "Password123!" },
                 stageId: { type: "string", format: "uuid", example: "45f94b32-9c16-43b3-8d07-c5ef547781b1", description: "Educational Stage ID" },
                 rankId: { type: "string", format: "uuid", example: "3fa85f64-5717-4562-b3fc-2c963f66afa6", description: "Educational Rank ID" },
-                codeCountry: { type: "string", example: "+20" },
-                phone: { type: "string", example: "01000000000", description: "Raw unencrypted phone number" },
                 parentNumber: { type: "string", example: "01000000002", description: "Parent unencrypted phone number" },
                 gender: { type: "string", enum: ["male", "female"], example: "male" },
                 country: { type: "string", example: "Egypt" },
@@ -36,12 +36,12 @@ export const authPaths = {
               required: ["name", "password", "codeCountry", "phone", "parentNumber", "gender", "country", "plan_id", "stageId", "rankId"],
               properties: {
                 name: { type: "string", example: "Ahmed Ali" },
+                phone: { type: "string", example: "01000000000", description: "Raw unencrypted phone number" },
+                codeCountry: { type: "string", example: "+20" },
                 email: { type: "string", format: "email", example: "ahmed@example.com", description: "Email address (optional)" },
                 password: { type: "string", format: "password", example: "Password123!" },
                 stageId: { type: "string", format: "uuid", example: "45f94b32-9c16-43b3-8d07-c5ef547781b1", description: "Educational Stage ID" },
                 rankId: { type: "string", format: "uuid", example: "3fa85f64-5717-4562-b3fc-2c963f66afa6", description: "Educational Rank ID" },
-                codeCountry: { type: "string", example: "+20" },
-                phone: { type: "string", example: "01000000000", description: "Raw unencrypted phone number" },
                 parentNumber: { type: "string", example: "01000000002", description: "Parent unencrypted phone number" },
                 gender: { type: "string", enum: ["male", "female"], example: "male" },
                 country: { type: "string", example: "Egypt" },
@@ -55,15 +55,15 @@ export const authPaths = {
         }
       },
       responses: {
-        201: { description: "User registered successfully." },
-        400: { description: "Validation error, EMAIL_EXISTS, or PHONE_ALREADY_EXISTS." }
+        201: { description: "User registered successfully, OTP sent via SMS." },
+        400: { description: "Validation error, PHONE_EXISTS, or EMAIL_EXISTS." }
       }
     }
   },
   "/auth/sign-in": {
     post: {
       tags: ["Authentication"],
-      summary: "Sign in with email/phone and password",
+      summary: "Sign in with phone/username and password",
       description: "Authenticates a user and returns a JWT Access Token.",
       requestBody: {
         required: true,
@@ -73,7 +73,7 @@ export const authPaths = {
               type: "object",
               required: ["username", "password"],
               properties: {
-                username: { type: "string", example: "ahmed@example.com", description: "Email address or phone number" },
+                username: { type: "string", example: "01000000000", description: "Phone number, username, or email" },
                 password: { type: "string", format: "password", example: "Password123!" }
               }
             }
@@ -121,9 +121,10 @@ export const authPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["email", "otp"],
+              required: ["phone", "otp"],
               properties: {
-                email: { type: "string", format: "email", example: "ahmed@example.com" },
+                phone: { type: "string", example: "01000000000" },
+                codeCountry: { type: "string", example: "+20" },
                 otp: { type: "string", example: "123456" }
               }
             }
@@ -146,16 +147,17 @@ export const authPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["email"],
+              required: ["phone"],
               properties: {
-                email: { type: "string", format: "email", example: "ahmed@example.com" }
+                phone: { type: "string", example: "01000000000" },
+                codeCountry: { type: "string", example: "+20" }
               }
             }
           }
         }
       },
       responses: {
-        200: { description: "Verification OTP code sent to email." }
+        200: { description: "Verification OTP code sent to phone via SMS." }
       }
     }
   },
@@ -169,16 +171,17 @@ export const authPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["email"],
+              required: ["phone"],
               properties: {
-                email: { type: "string", format: "email", example: "ahmed@example.com" }
+                phone: { type: "string", example: "01000000000" },
+                codeCountry: { type: "string", example: "+20" }
               }
             }
           }
         }
       },
       responses: {
-        200: { description: "Password reset OTP code sent to email." }
+        200: { description: "Password reset OTP code sent to phone via SMS." }
       }
     }
   },
@@ -192,9 +195,10 @@ export const authPaths = {
           "application/json": {
             schema: {
               type: "object",
-              required: ["email", "otp", "password", "confirm"],
+              required: ["phone", "otp", "password", "confirm"],
               properties: {
-                email: { type: "string", format: "email", example: "ahmed@example.com" },
+                phone: { type: "string", example: "01000000000" },
+                codeCountry: { type: "string", example: "+20" },
                 otp: { type: "string", example: "123456" },
                 password: { type: "string", format: "password", example: "NewPassword123!" },
                 confirm: { type: "string", format: "password", example: "NewPassword123!" }
