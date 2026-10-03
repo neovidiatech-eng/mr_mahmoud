@@ -234,6 +234,7 @@ export const changeStatus = asyncHandler(async (req, res, next) => {
         where: { id: subscriptionRequest.user_id },
         data: {
           status: status === "approved" ? "active" : "rejected",
+          ...(status === "approved" && { confirmAt: new Date() }),
           ...(status === "approved" &&
             studentAge !== null && { age: studentAge }),
           ...(status === "approved" &&

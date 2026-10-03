@@ -116,30 +116,29 @@ export const register = asyncHandler(async (req, res, next) => {
     birthDate: birth_date,
   });
 
-  // 2. Preparation (Hashing, OTP)
+  // 2. Preparation (Password encryption)
   const hashedPassword = encryptText({ text: password });
-  const otp = generateOtp();
-  const hashedOtp = await hash({ password: otp });
 
-  // 3. Redis OTP Setup
-  await redis.set(`${phone}_otp_register`, hashedOtp);
-  await redis.expire(`${phone}_otp_register`, 60 * 10);
-  await redis.set(`${phone}_otp_attempts`, 0, { EX: 60 * 10 });
+  // OTP cycle commented out - account is confirmed upon admin approval from dashboard
+  // const otp = generateOtp();
+  // const hashedOtp = await hash({ password: otp });
+  // await redis.set(`${phone}_otp_register`, hashedOtp);
+  // await redis.expire(`${phone}_otp_register`, 60 * 10);
+  // await redis.set(`${phone}_otp_attempts`, 0, { EX: 60 * 10 });
 
-  // 4. Send Verification SMS
-  const smsResult = await sendSMS({
-    phone,
-    codeCountry,
-    otp,
-  });
+  // const smsResult = await sendSMS({
+  //   phone,
+  //   codeCountry,
+  //   otp,
+  // });
 
-  if (!smsResult.success) {
-    const errorMsg =
-      smsResult.code === "ETIMEDOUT"
-        ? "SMS_SERVICE_TIMEOUT"
-        : "SMS_SEND_FAILED";
-    return errorResponse({ req, next, message: errorMsg, status: 500 });
-  }
+  // if (!smsResult.success) {
+  //   const errorMsg =
+  //     smsResult.code === "ETIMEDOUT"
+  //       ? "SMS_SERVICE_TIMEOUT"
+  //       : "SMS_SEND_FAILED";
+  //   return errorResponse({ req, next, message: errorMsg, status: 500 });
+  // }
 
   // 5. Transactional Database Operations
   await db.transaction(async (tx) => {
@@ -213,7 +212,7 @@ export const register = asyncHandler(async (req, res, next) => {
     req,
     status: 201,
     userRole,
-    message: "REGISTER_SUCCESS_CHECK_PHONE",
+    message: "USER_CREATED_SUCCESS",
   });
 });
 
@@ -324,7 +323,15 @@ export const login = asyncHandler(async (req, res, next) => {
 /*                RESEND OTP         And VERIFY ACCOUNT                         */
 /* -------------------------------------------------------------------------- */
 
+// OTP cycle commented out - account is confirmed upon admin approval from dashboard
 export const resendOtp = asyncHandler(async (req, res, next) => {
+  return successResponse({
+    res,
+    req,
+    status: 200,
+    message: "OTP_SENT_SUCCESS",
+  });
+  /*
   const { phone, email, codeCountry } = req.body;
   const targetPhone = phone;
 
@@ -395,9 +402,17 @@ export const resendOtp = asyncHandler(async (req, res, next) => {
     status: 200,
     message: "OTP_SENT_SUCCESS",
   });
+  */
 });
 
 export const verifyAccount = asyncHandler(async (req, res, next) => {
+  return successResponse({
+    res,
+    req,
+    status: 200,
+    message: "USER_VERIFIED_SUCCESS",
+  });
+  /*
   const { phone, otp } = req.body;
   const targetPhone = phone;
 
@@ -451,6 +466,7 @@ export const verifyAccount = asyncHandler(async (req, res, next) => {
     status: 200,
     message: "USER_VERIFIED_SUCCESS",
   });
+  */
 });
 
 export const forgetPassword = asyncHandler(async (req, res, next) => {
