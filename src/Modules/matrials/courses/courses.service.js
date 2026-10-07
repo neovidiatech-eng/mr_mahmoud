@@ -490,7 +490,6 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
   // 3. Process Section Gating Progression
   let prevSectionPassed = true;
 
-  const sortedCourseLectures = [...(course.lectures || [])].sort((a, b) => a.order - b.order);
   const userLecturesMap = new Map(userLectures.map((ul) => [ul.lectureId, ul]));
 
   const sectionsWithStatus = populatedSections.map((sec, secIdx) => {
@@ -515,19 +514,7 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
         const isCompleted = userLect?.status === "completed";
         if (!isCompleted) sectionAllLecturesCompleted = false;
 
-        const targetLect = (course.lectures || []).find((l) => l.id === item.item_id);
-        let prevLecturesCompleted = true;
-        if (targetLect) {
-          const prevLectures = sortedCourseLectures.filter((l) => l.order < targetLect.order);
-          if (prevLectures.length > 0) {
-            prevLecturesCompleted = prevLectures.every((pl) => {
-              const ul = userLecturesMap.get(pl.id);
-              return ul && ul.status === "completed";
-            });
-          }
-        }
-
-        const isItemLocked = isLocked || !prevLecturesCompleted;
+        const isItemLocked = isLocked;
         let itemStatus = "Locked";
         if (!isItemLocked) {
           itemStatus = isCompleted ? "Completed" : "Pending";
@@ -599,7 +586,6 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
   });
 
   // Flat lectures fallback for backward compatibility
-  let foundFirstNonCompleted = false;
   const lecturesWithStatus = course.lectures.map((lecture, index) => {
     const userLecture = userLectures.find((ul) => ul.lectureId === lecture.id);
     let status = "Locked";
@@ -611,12 +597,7 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
         status = userLecture?.status === "completed" ? "Completed" : "Pending";
       }
     } else {
-      if (userLecture && userLecture.status === "completed") {
-        status = "Completed";
-      } else if (!foundFirstNonCompleted) {
-        status = "Pending";
-        foundFirstNonCompleted = true;
-      }
+      status = userLecture?.status === "completed" ? "Completed" : "Pending";
     }
 
     return {
