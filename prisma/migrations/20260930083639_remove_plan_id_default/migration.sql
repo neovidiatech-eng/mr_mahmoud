@@ -1,2 +1,3 @@
--- AlterTable
-ALTER TABLE "student" ALTER COLUMN "planId" DROP DEFAULT;
+ly NOT_KEYED_COMMAND: true;
+        readonly IS_READ_ONLY: true;
+       

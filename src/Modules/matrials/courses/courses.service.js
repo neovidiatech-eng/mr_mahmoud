@@ -142,7 +142,6 @@ export const getCourses = async (query = {}, user = null) => {
   const { sortBy = "createdAt" } = query;
   const sortDirection = query.sort || "desc";
 
-
   const where = {};
 
   if (rankId) {
@@ -363,8 +362,6 @@ export const updateCourse = async ({ req, res, next }) => {
   });
 };
 
-
-
 /* -----------------------------
    DELETE COURSE
 ----------------------------- */
@@ -465,43 +462,11 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     }
   }
 
-  let isFreeTrial = false;
-  let bookedSchedule = null;
-
-  if (student) {
-    isFreeTrial =
-      student.sessions === 1 ||
-      student.plan?.price === "0" ||
-      student.plan?.name?.toLowerCase().includes("free") ||
-      student.plan?.name?.toLowerCase().includes("trial") ||
-      student.plan?.sessionsCount === 1;
-
-    if (isFreeTrial) {
-      bookedSchedule = await db.findFirst({
-        model: "schedule",
-        where: {
-          studentId: student.id,
-          courseId: id,
-        },
-      });
-    }
-  }
-
-  // 3. Process Section Gating Progression
-  let prevSectionPassed = true;
-
+  // 3. Process Section Progression
   const userLecturesMap = new Map(userLectures.map((ul) => [ul.lectureId, ul]));
 
   const sectionsWithStatus = populatedSections.map((sec, secIdx) => {
-    let isLocked = false;
-
-    if (!hasCourseAccess) {
-      isLocked = true;
-    } else if (isFreeTrial) {
-      isLocked = secIdx > 0 || !bookedSchedule;
-    } else {
-      isLocked = secIdx > 0 && !prevSectionPassed;
-    }
+    let isLocked = !hasCourseAccess;
 
     let sectionAllLecturesCompleted = true;
     let sectionAllQuizzesPassed = true;
@@ -575,7 +540,6 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     });
 
     const secCompleted = sectionAllLecturesCompleted && sectionAllQuizzesPassed;
-    prevSectionPassed = secCompleted;
 
     return {
       ...sec,
@@ -592,10 +556,6 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
 
     if (!hasCourseAccess) {
       status = "Locked";
-    } else if (isFreeTrial) {
-      if (bookedSchedule && index === 0) {
-        status = userLecture?.status === "completed" ? "Completed" : "Pending";
-      }
     } else {
       status = userLecture?.status === "completed" ? "Completed" : "Pending";
     }
