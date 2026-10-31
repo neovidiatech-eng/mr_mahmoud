@@ -142,7 +142,6 @@ export const getCourses = async (query = {}, user = null) => {
   const { sortBy = "createdAt" } = query;
   const sortDirection = query.sort || "desc";
 
-
   const where = {};
 
   if (rankId) {
@@ -363,8 +362,6 @@ export const updateCourse = async ({ req, res, next }) => {
   });
 };
 
-
-
 /* -----------------------------
    DELETE COURSE
 ----------------------------- */
@@ -465,44 +462,11 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     }
   }
 
-  let isFreeTrial = false;
-  let bookedSchedule = null;
-
-  if (student) {
-    isFreeTrial =
-      student.sessions === 1 ||
-      student.plan?.price === "0" ||
-      student.plan?.name?.toLowerCase().includes("free") ||
-      student.plan?.name?.toLowerCase().includes("trial") ||
-      student.plan?.sessionsCount === 1;
-
-    if (isFreeTrial) {
-      bookedSchedule = await db.findFirst({
-        model: "schedule",
-        where: {
-          studentId: student.id,
-          courseId: id,
-        },
-      });
-    }
-  }
-
-  // 3. Process Section Gating Progression
-  let prevSectionPassed = true;
-
-  const sortedCourseLectures = [...(course.lectures || [])].sort((a, b) => a.order - b.order);
+  // 3. Process Section Progression
   const userLecturesMap = new Map(userLectures.map((ul) => [ul.lectureId, ul]));
 
   const sectionsWithStatus = populatedSections.map((sec, secIdx) => {
-    let isLocked = false;
-
-    if (!hasCourseAccess) {
-      isLocked = true;
-    } else if (isFreeTrial) {
-      isLocked = secIdx > 0 || !bookedSchedule;
-    } else {
-      isLocked = secIdx > 0 && !prevSectionPassed;
-    }
+    let isLocked = !hasCourseAccess;
 
     let sectionAllLecturesCompleted = true;
     let sectionAllQuizzesPassed = true;
@@ -515,19 +479,7 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
         const isCompleted = userLect?.status === "completed";
         if (!isCompleted) sectionAllLecturesCompleted = false;
 
-        const targetLect = (course.lectures || []).find((l) => l.id === item.item_id);
-        let prevLecturesCompleted = true;
-        if (targetLect) {
-          const prevLectures = sortedCourseLectures.filter((l) => l.order < targetLect.order);
-          if (prevLectures.length > 0) {
-            prevLecturesCompleted = prevLectures.every((pl) => {
-              const ul = userLecturesMap.get(pl.id);
-              return ul && ul.status === "completed";
-            });
-          }
-        }
-
-        const isItemLocked = isLocked || !prevLecturesCompleted;
+        const isItemLocked = isLocked;
         let itemStatus = "Locked";
         if (!isItemLocked) {
           itemStatus = isCompleted ? "Completed" : "Pending";
@@ -588,7 +540,6 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
     });
 
     const secCompleted = sectionAllLecturesCompleted && sectionAllQuizzesPassed;
-    prevSectionPassed = secCompleted;
 
     return {
       ...sec,
@@ -599,24 +550,14 @@ export const getCourseLecturesForStudent = async ({ req, res, next }) => {
   });
 
   // Flat lectures fallback for backward compatibility
-  let foundFirstNonCompleted = false;
   const lecturesWithStatus = course.lectures.map((lecture, index) => {
     const userLecture = userLectures.find((ul) => ul.lectureId === lecture.id);
     let status = "Locked";
 
     if (!hasCourseAccess) {
       status = "Locked";
-    } else if (isFreeTrial) {
-      if (bookedSchedule && index === 0) {
-        status = userLecture?.status === "completed" ? "Completed" : "Pending";
-      }
     } else {
-      if (userLecture && userLecture.status === "completed") {
-        status = "Completed";
-      } else if (!foundFirstNonCompleted) {
-        status = "Pending";
-        foundFirstNonCompleted = true;
-      }
+      status = userLecture?.status === "completed" ? "Completed" : "Pending";
     }
 
     return {

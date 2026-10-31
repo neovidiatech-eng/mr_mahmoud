@@ -28,7 +28,7 @@ export const generalFields = {
     "any.only": "PLATFORM_INVALID",
     "any.required": "PLATFORM_REQUIRED",
   }),
-  permission_name: Joi.string().min(3).max(32).messages({
+  permission_name: Joi.string().min(3).messages({
     "string.base": "PERMISSION_NAME_STRING",
     "string.empty": "PERMISSION_NAME_EMPTY",
     "string.min": "PERMISSION_NAME_MIN",
@@ -37,7 +37,6 @@ export const generalFields = {
   }),
   permission_code: Joi.string()
     .min(3)
-    .max(32)
     .pattern(new RegExp("^[A-Z]+_[A-Z]+$"))
     .messages({
       "string.base": "PERMISSION_CODE_STRING",
@@ -47,7 +46,7 @@ export const generalFields = {
       "string.max": "PERMISSION_CODE_MAX",
       "any.required": "PERMISSION_CODE_REQUIRED",
     }),
-  name: Joi.string().min(3).max(32).messages({
+  name: Joi.string().min(3).messages({
     "string.base": "NAME_STRING",
     "string.empty": "NAME_EMPTY",
     "string.min": "NAME_MIN",
@@ -101,15 +100,12 @@ export const generalFields = {
     "string.empty": "COUNTRY_EMPTY",
     "any.required": "COUNTRY_REQUIRED",
   }),
-  phone: Joi.string()
-    .trim()
-    .pattern(globalPhonePattern)
-    .messages({
-      "string.base": "PHONE_STRING",
-      "string.empty": "PHONE_EMPTY",
-      "string.pattern.base": "VALID_PHONE",
-      "any.required": "PHONE_REQUIRED",
-    }),
+  phone: Joi.string().trim().pattern(globalPhonePattern).messages({
+    "string.base": "PHONE_STRING",
+    "string.empty": "PHONE_EMPTY",
+    "string.pattern.base": "VALID_PHONE",
+    "any.required": "PHONE_REQUIRED",
+  }),
   idToken: Joi.string().messages({
     "string.base": "ID_TOKEN_STRING",
     "string.empty": "ID_TOKEN_EMPTY",
@@ -132,13 +128,13 @@ export const generalFields = {
       "string.pattern.base": "OTP_DIGITS_ONLY",
       "any.required": "OTP_REQUIRED",
     }),
-  search: Joi.string().max(32).messages({
+  search: Joi.string().messages({
     "string.base": "SEARCH_STRING",
     "string.empty": "SEARCH_EMPTY",
     "string.max": "SEARCH_MAX",
     "any.required": "SEARCH_EMPTY",
   }),
-  search_Currency: Joi.string().max(32).messages({
+  search_Currency: Joi.string().messages({
     "string.base": "SEARCH_STRING",
     "string.empty": "SEARCH_EMPTY",
     "string.max": "SEARCH_MAX",
@@ -191,15 +187,12 @@ export const generalFields = {
       "any.required": "FILE_SIZE_REQUIRED",
     }),
   },
-  codeCountry: Joi.string()
-    .trim()
-    .pattern(countryCallingCodePattern)
-    .messages({
-      "string.base": "COUNTRY_CODE_STRING",
-      "string.empty": "COUNTRY_CODE_EMPTY",
-      "string.pattern.base": "VALID_COUNTRY_CALLING_CODE",
-      "any.required": "COUNTRY_CODE_REQUIRED",
-    }),
+  codeCountry: Joi.string().trim().pattern(countryCallingCodePattern).messages({
+    "string.base": "COUNTRY_CODE_STRING",
+    "string.empty": "COUNTRY_CODE_EMPTY",
+    "string.pattern.base": "VALID_COUNTRY_CALLING_CODE",
+    "any.required": "COUNTRY_CODE_REQUIRED",
+  }),
   name_en: Joi.string().messages({
     "string.base": "NAME_STRING",
     "string.empty": "NAME_EMPTY",
@@ -275,12 +268,14 @@ export const generalFields = {
     "any.required": "TYPE_REQUIRED",
     "any.only": "TYPE_INVALID",
   }),
-  studentType: Joi.string().valid(...Object.values(studentTypes)).messages({
-    "string.base": "STUDENT_TYPE_STRING",
-    "string.empty": "STUDENT_TYPE_EMPTY",
-    "any.required": "STUDENT_TYPE_REQUIRED",
-    "any.only": "STUDENT_TYPE_INVALID",
-  }),
+  studentType: Joi.string()
+    .valid(...Object.values(studentTypes))
+    .messages({
+      "string.base": "STUDENT_TYPE_STRING",
+      "string.empty": "STUDENT_TYPE_EMPTY",
+      "any.required": "STUDENT_TYPE_REQUIRED",
+      "any.only": "STUDENT_TYPE_INVALID",
+    }),
   features: Joi.object().messages({
     "object.base": "FEATURES_OBJECT",
     "object.empty": "FEATURES_EMPTY",

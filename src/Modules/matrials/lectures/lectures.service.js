@@ -216,22 +216,6 @@ export const getLectures = async ({ req, res, next }) => {
 
   const userLecturesMap = new Map(userLectures.map((ul) => [ul.lectureId, ul]));
 
-  const courseIds = [...new Set(lecturesResult.items.map((l) => l.courseId))];
-  const allCourseLectures = await db.findMany({
-    model: "lectures",
-    where: { courseId: { in: courseIds } },
-    select: { id: true, courseId: true, order: true },
-    orderBy: { order: "asc" },
-  });
-
-  const lecturesByCourse = new Map();
-  for (const l of allCourseLectures) {
-    if (!lecturesByCourse.has(l.courseId)) {
-      lecturesByCourse.set(l.courseId, []);
-    }
-    lecturesByCourse.get(l.courseId).push(l);
-  }
-
   const purchasedCourses = student
     ? await db.findMany({
         model: "CoursePurchase",
@@ -259,33 +243,6 @@ export const getLectures = async ({ req, res, next }) => {
         hasAccess: false,
         isLocked: true,
         lockReason: "NO_COURSE_ACCESS",
-        myProgress,
-      };
-    }
-
-    const courseLecturesList = lecturesByCourse.get(lecture.courseId) || [];
-    const prevLectures = courseLecturesList.filter((l) => l.order < lecture.order);
-
-    let isLocked = false;
-    if (prevLectures.length > 0) {
-      const allPrevCompleted = prevLectures.every((pl) => {
-        const item = userLecturesMap.get(pl.id);
-        return item && item.status === "completed";
-      });
-      if (!allPrevCompleted) {
-        isLocked = true;
-      }
-    }
-
-    if (isLocked) {
-      return {
-        ...lecture,
-        video_path: null,
-        pdf_path: null,
-        slides_path: null,
-        hasAccess: false,
-        isLocked: true,
-        lockReason: "PREVIOUS_LECTURE_NOT_COMPLETED",
         myProgress,
       };
     }
@@ -393,40 +350,6 @@ export const resolveLectureAccess = async (lecture, requestingUser) => {
       lockReason: "NO_COURSE_ACCESS",
       myProgress,
     };
-  }
-
-  // Prerequisite check: student must have completed all previous lectures in this course
-  if (lecture.courseId && lecture.order > 1) {
-    const previousLectures = await db.findMany({
-      model: "lectures",
-      where: {
-        courseId: lecture.courseId,
-        order: { lt: lecture.order },
-      },
-      select: { id: true, order: true },
-      orderBy: { order: "asc" },
-    });
-
-    if (previousLectures.length > 0) {
-      const prevIds = previousLectures.map((l) => l.id);
-      const completedCount = await db.count({
-        model: "user_lectures",
-        where: {
-          userId: requestingUser.id,
-          lectureId: { in: prevIds },
-          status: "completed",
-        },
-      });
-
-      if (completedCount < previousLectures.length) {
-        return {
-          hasAccess: false,
-          isLocked: true,
-          lockReason: "PREVIOUS_LECTURE_NOT_COMPLETED",
-          myProgress,
-        };
-      }
-    }
   }
 
   return { hasAccess: true, isLocked: false, myProgress };
@@ -586,11 +509,10 @@ export const updateLectureProgress = async ({ req, res, next }) => {
     throw error;
   }
 
-  // Check prerequisite lecture lock
   const access = await resolveLectureAccess(lecture, req.user);
   if (!access.hasAccess || access.isLocked) {
     const error = createError({
-      message: access.lockReason || "PREVIOUS_LECTURE_NOT_COMPLETED",
+      message: access.lockReason || "LECTURE_LOCKED",
       status: 403,
       next,
     });
@@ -740,58 +662,11 @@ export const completeLecture = async ({ req, res, next }) => {
   const access = await resolveLectureAccess(lecture, req.user);
   if (!access.hasAccess || access.isLocked) {
     const error = createError({
-      message: access.lockReason || "PREVIOUS_LECTURE_NOT_COMPLETED",
+      message: access.lockReason || "LECTURE_LOCKED",
       status: 403,
       next,
     });
     throw error;
-  }
-
-  // Check if student has a free trial / 1 session plan
-  const student = await db.findFirst({
-    model: "student",
-    where: { user_id: userId },
-    include: { plan: true },
-  });
-
-  if (student) {
-    const isFreeTrial = student.sessions === 1 || 
-                        student.plan?.price === "0" || 
-                        student.plan?.name?.toLowerCase().includes("free") ||
-                        student.plan?.name?.toLowerCase().includes("trial") ||
-                        student.plan?.sessionsCount === 1;
-
-    if (isFreeTrial) {
-      // 1. Check if they have a booked schedule in this course
-      const bookedSchedule = await db.findFirst({
-        model: "schedule",
-        where: {
-          studentId: student.id,
-          courseId: lecture.courseId,
-        },
-      });
-
-      if (!bookedSchedule) {
-        const error = createError({
-          message: "LECTURE_LOCKED",
-          status: 403,
-          next,
-        });
-        throw error;
-      }
-
-      // 2. Allow completing ONLY the lecture linked to the booked schedule
-      //    (if the schedule has a specific lectureId) — or any lecture in the course
-      //    if the schedule is a general course booking
-      if (bookedSchedule.lectureId && bookedSchedule.lectureId !== id) {
-        const error = createError({
-          message: "LECTURE_LOCKED",
-          status: 403,
-          next,
-        });
-        throw error;
-      }
-    }
   }
 
   // 2. Upsert user_lectures
@@ -882,5 +757,4 @@ export const getUserLecturesHistory = async ({ req, res, next }) => {
     },
   };
 };
-
 
