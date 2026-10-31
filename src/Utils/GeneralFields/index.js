@@ -1,6 +1,6 @@
 import Joi from "joi";
-import { VALID_TIMEZONE_VALUES } from "./Date/timezones.js";
-import { studentTypes } from "./Enums/studentTypes.js";
+import { VALID_TIMEZONE_VALUES } from "../Date/timezones.js";
+import { studentTypes } from "../Enums/studentTypes.js";
 
 const globalPhonePattern = /^(?:\+[1-9]\d{5,14}|0?\d{5,14})$/;
 const countryCallingCodePattern = /^\+[1-9]\d{0,3}$/;
@@ -14,7 +14,7 @@ export const generalFields = {
     "any.required": "ROLE_NAME_REQUIRED",
   }),
   timezone: Joi.string()
-    .valid(..VALID_TIMEZONE_VALUES)
+    .valid(...VALID_TIMEZONE_VALUES)
     .messages({
       "string.base": "TIMEZONE_STRING",
       "string.empty": "TIMEZONE_EMPTY",
@@ -37,7 +37,6 @@ export const generalFields = {
   }),
   permission_code: Joi.string()
     .min(3)
-    .
     .pattern(new RegExp("^[A-Z]+_[A-Z]+$"))
     .messages({
       "string.base": "PERMISSION_CODE_STRING",
@@ -270,7 +269,7 @@ export const generalFields = {
     "any.only": "TYPE_INVALID",
   }),
   studentType: Joi.string()
-    .valid(..Object.values(studentTypes))
+    .valid(...Object.values(studentTypes))
     .messages({
       "string.base": "STUDENT_TYPE_STRING",
       "string.empty": "STUDENT_TYPE_EMPTY",
