@@ -1,84 +1,98 @@
-     readonly parseCommand: (this: void, parser: import("../..").CommandParser) => void;
-        readonly transformReply: () => import("../RESP/types").NumberReply<number>;
-    };
-    lastSave: {
-        readonly NOT_KEYED_COMMAND: true;
-        readonly IS_READ_ONLY: true;
-        readonly parseCommand: (this: void, parser: import("../..").CommandParser) => void;
-        readonly transformReply: () => import("../RESP/types").NumberReply<number>;
-    };
-    LATENCY_DOCTOR: {
-        readonly NOT_KEYED_COMMAND: true;
-        readonly IS_READ_ONLY: true;
-        readonly parseCommand: (this: void, parser: import("../..").CommandParser) => void;
-        readonly transformReply: () => import("../RESP/types").BlobStringReply<string>;
-    };
-    latencyDoctor: {
-        readonly NOT_KEYED_COMMAND: true;
-        readonly IS_READ_ONLY: true;
-        readonly parseCommand: (this: void, parser: import("../..").CommandParser) => void;
-        readonly transformReply: () => import("../RESP/types").BlobStringReply<string>;
-    };
-    LATENCY_GRAPH: {
-        readonly NOT_KEYED_COMMAND: true;
-        readonly IS_READ_ONLY: true;
-        readonly parseCommand: (this: void, parser: import("../..").CommandParser, event: import("./LATENCY_GRAPH").LatencyEvent) => void;
-        readonly transformReply: () => import("../RESP/types").BlobStringReply<string>;
-    };
-    latencyGraph: {
-        readonly NOT_KEYED_COMMAND: true;
-        readonly IS_READ_ONLY: true;
-        readonly parseCommand: (this: void, parser: import("../..").CommandParser, event: import("./LATENCY_GRAPH").LatencyEvent) => void;
-        readonly transformReply: () => import("../RESP/types").BlobStringReply<string>;
-    };
-    LATENCY_HISTORY: {
-        readonly NOT_KEYED_COMMAND: true;
-        readonly IS_READ_ONLY: true;
-        readonly parseCommand: (this: void, parser: import("../..").CommandParser, event: import("./LATENCY_HISTORY").LatencyEventType) => void;
-        readonly transformReply: () => import("../RESP/types").ArrayReply<import("../RESP/types").TuplesReply<[timestamp: import("../RESP/types").NumberReply<number>, latency: import("../RESP/types").NumberReply<number>]>>;
-    };
-    latencyHistory: {
-        readonly NOT_KEYED_COMMAND: true;
-        readonly IS_READ_ONLY: true;
-        readonly parseCommand: (this: void, parser: import("../..").CommandParser, event: import("./LATENCY_HISTORY").LatencyEventType) => void;
-        readonly transformReply: () => import("../RESP/types").ArrayReply<import("../RESP/types").TuplesReply<[timestamp: import("../RESP/types").NumberReply<number>, latency: import("../RESP/types").NumberReply<number>]>>;
-    };
-    LATENCY_HISTOGRAM: {
-        readonly CACHEABLE: false;
-        readonly IS_READ_ONLY: true;
-        readonly parseCommand: (this: void, parser: import("../..").CommandParser, ...commands: string[]) => void;
-        readonly transformReply: {
-            readonly 2: (reply: (string | [string, number, string, number[]])[]) => {
-                [x: string]: {
-                    calls: number;
-                    histogram_usec: Record<string, number>;
-                };
-            };
-            readonly 3: () => {
-                [x: string]: {
-                    calls: number;
-                    histogram_usec: Record<string, number>;
-                };
-            };
-        };
-    };
-    latencyHistogram: {
-        readonly CACHEABLE: false;
-        readonly IS_READ_ONLY: true;
-        readonly parseCommand: (this: void, parser: import("../..").CommandParser, ...commands: string[]) => void;
-        readonly transformReply: {
-            readonly 2: (reply: (string | [string, number, string, number[]])[]) => {
-                [x: string]: {
-                    calls: number;
-                    histogram_usec: Record<string, number>;
-                };
-            };
-            readonly 3: () => {
-                [x: string]: {
-                    calls: number;
-                    histogram_usec: Record<string, number>;
-                };
-            };
-        };
-    };
-    LATENCY_LATEST:
+model teacher {
+  id               String     @id @default(uuid())
+  user_id          String     @unique
+  currencyId       String
+  hour_price       Float
+  group_hour_price Float?     @default(0)
+  roleId           String?
+  createdAt        DateTime   @default(now())
+  updatedAt        DateTime   @updatedAt
+  avgRating        Float      @default(0)
+  totalReviews     Int        @default(0)
+  exams            exam[]
+  schedules        schedule[]
+  currency         currency   @relation(fields: [currencyId], references: [id])
+  role             role?      @relation(fields: [roleId], references: [id])
+  user             user       @relation(fields: [user_id], references: [id], onDelete: Cascade)
+
+  conversations   Conversation[]
+  weeklyReports   weekly_report[]
+  teacherSubjects TeacherSubject[]
+}
+
+model student {
+  id                     String                    @id @default(uuid())
+  user_id                String                    @unique
+  birth_date             DateTime?
+  qrToken                String?                   @unique
+  qrActive               Boolean                   @default(true)
+  type                   String?                   @default("online")
+  planId                 String?
+  country                String
+  createdAt              DateTime                  @default(now())
+  updatedAt              DateTime                  @updatedAt
+  sessions               Float                     @default(0)
+  sessions_attended      Float                     @default(0)
+  sessions_remaining     Float                     @default(0)
+  avgRating              Float                     @default(0)
+  totalReviews           Int                       @default(0)
+  liveSessionsCount      Int                       @default(0)
+  attendedLiveSessions   Int                       @default(0)
+  liveSessionsRemaining  Int                       @default(0)
+  parentNumber           String?
+  rankId                 String?
+  stageId                String?
+  offlineGroupId         String?
+  stage                  stage?                    @relation(fields: [stageId], references: [id])
+  offlineGroup           offlineGroup?             @relation(fields: [offlineGroupId], references: [id])
+  rank                   ranks?                    @relation(fields: [rankId], references: [id])
+  exams                  exam[]
+  homeworks              homework[]
+  schedules              schedule[]
+  plan                   plan?                     @relation(fields: [planId], references: [id])
+  user                   user                      @relation(fields: [user_id], references: [id], onDelete: Cascade)
+  conversations          Conversation[]
+  userRankHistories      user_rank_history[]
+  groupSchedules         GroupScheduleStudent[]
+  coursePurchaseRequests course_purchase_request[]
+  coursePurchases        CoursePurchase[]
+  studentQuizzes         studentQuiz[]
+
+  attendances Attendance[]
+
+  liveSessionAttendances liveSessionAttendances[]
+}
+
+model weekly_report {
+  id                 String   @id @default(uuid())
+  teacherId          String
+  weekStarting       DateTime
+  weekEnding         DateTime
+  totalClasses       Int      @default(0)
+  studentsTaught     Int      @default(0)
+  avgSessionDuration Float    @default(0)
+  materialsUploaded  Int      @default(0)
+  teachingSummary    String?
+  studentProgress    String?
+  challenges         String?
+  overallRating      Float?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  teacher            teacher  @relation(fields: [teacherId], references: [id], onDelete: Cascade)
+
+  @@index([teacherId])
+  @@index([weekStarting])
+}
+
+model user_rank_history {
+  id         String   @id @default(uuid())
+  studentId  String
+  rankId     String
+  status     String   @default("locked") // locked, unlocked, completed
+  achievedAt DateTime @default(now())
+
+  student student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+  rank    ranks   @relation(fields: [rankId], references: [id], onDelete: Cascade)
+
+  @@index([studentId])
+}
